@@ -1,0 +1,30 @@
+{
+    "name": "wpfluent/caldav",
+    "description": "A caldav client for wpfluent framework.",
+    "keywords": [
+        "wpfluent",
+        "wp"
+    ],
+    "license": "GPLv2 or later",
+    "authors": [
+        {
+            "name": "Sheikh Heera",
+            "email": "heera.sheikh77@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.3|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FluentBooking\\Package\\CalDav\\": "src/"
+        }
+    },
+    "extra": {
+        "wpfluent": {
+            "type": "wpfluent-package"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

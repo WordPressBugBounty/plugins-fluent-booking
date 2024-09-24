@@ -1,0 +1,59 @@
+{
+    "name": "wpfluent/wpfluent",
+    "type": "project",
+    "description": "WPFluent - The best framework to build WordPress plugins.",
+    "keywords": [
+        "WordPress",
+        "framework",
+        "WPFluent"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sheikh Heera",
+            "email": "heera.sheikh77@gmail.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/wpfluent/framework"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/wpfluent/caldav"
+        }
+    ],
+    "require": {
+        "wpfluent/framework": "^2.0",
+        "woocommerce/action-scheduler": "3.7.0",
+        "wpfluent/caldav": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "FluentBooking\\App\\": "app/",
+            "FluentBooking\\Framework\\": "vendor/wpfluent/framework/src/WPFluent"
+        },
+        "classmap": [
+            "database/"
+        ],
+        "files": []
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0.x-dev"
+        },
+        "wpfluent": {
+            "namespace": {
+                "current": "FluentBooking"
+            }
+        }
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "FluentBooking\\App\\ComposerScript::postUpdate"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
