@@ -445,10 +445,10 @@ class TimeSlotService
             $nextDay = $items[$days[$nextDayIndex]];
 
             if ($nextDay && $nextDay[0]['start'] == '00:00') {
-                $nextDayEnd = strtotime($nextDay[0]['end']);
+                $nextDayEndTime = strtotime($nextDay[0]['end']) - strtotime($nextDay[0]['start']);
                 $reserveTime = $end - $start;
 
-                while ($period - $reserveTime <= $nextDayEnd) {
+                while ($period - $reserveTime <= $nextDayEndTime) {
                     $startTime = gmdate('H:i', $start); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
                     $nextDayStart = gmdate('H:i', $interval - $reserveTime); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
                     $daySlots[] = $startTime;
@@ -524,10 +524,10 @@ class TimeSlotService
             $nextDay = $overrideSlots[$nextDayIndex];
 
             if ($nextDay && $nextDay[0]['start'] == '00:00') {
-                $nextDayEnd = strtotime($nextDay[0]['end']);
+                $nextDayEndTime = strtotime($nextDay[0]['end']) - strtotime($nextDay[0]['start']);
                 $reserveTime = $end - $start;
 
-                while ($period - $reserveTime <= $nextDayEnd) {
+                while ($period - $reserveTime <= $nextDayEndTime) {
                     $startTime = gmdate('H:i', $start); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
                     $nextDayStart = gmdate('H:i', $interval - $reserveTime); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
                     $formattedSlots[] = $startTime;

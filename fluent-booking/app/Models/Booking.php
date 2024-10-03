@@ -143,10 +143,10 @@ class Booking extends Model
         return $lastEvent ? $lastEvent->group_id + 1 : 1;
     }
 
-    public function getCustomFormData($isFormatted = true)
+    public function getCustomFormData($isFormatted = true, $isPublic = false)
     {
         if ($isFormatted) {
-            return BookingFieldService::getFormattedCustomBookingData($this);
+            return BookingFieldService::getFormattedCustomBookingData($this, true, $isPublic);
         }
 
         return $this->getMeta('custom_fields_data', []);
@@ -1043,7 +1043,7 @@ class Booking extends Model
 
     public function getAdditionalData($isHtml = false)
     {
-        $customData = BookingFieldService::getFormattedCustomBookingData($this);
+        $customData = BookingFieldService::getFormattedCustomBookingData($this, $isHtml, true);
 
         if (!$customData) {
             return '';

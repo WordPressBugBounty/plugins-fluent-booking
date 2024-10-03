@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.3
-Stable tag: 1.5.21
+Stable tag: 1.5.22
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,18 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 1.5.22 (Date: 03 Oct 2024) =
+- Elementor Integration Available for Free Version
+- Added File Input Field in Booking Question
+- Added Hidden Input Field in Booking Question
+- Updated Checkbox Field Value to yes/no
+- Updated Heading h1, h2 to h3, h4 for Fluentform
+- Fixed About Field Always Showing in Manual Booking
+- Fixed Empty Title Rendering in Booking Lists
+- Fixed Slot Overlap Issue When using Custom Duration
+- Fixed Integration Not Checking Event Trigger Issue
+- Fixed Expired Calendar Showing Issue in Elementor
 
 = 1.5.21 (Date: 04 Sep 2024) =
 - Multi-Month Support In Multiple Bookings

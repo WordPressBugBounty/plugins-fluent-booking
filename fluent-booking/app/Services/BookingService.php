@@ -333,10 +333,10 @@ class BookingService
             ];
         }
 
-        $customFieldsData = $booking->getCustomFormData(true);
+        $customFieldsData = $booking->getCustomFormData(true, true);
 
         foreach ($customFieldsData as $dataKey => $data) {
-            if (!empty($data['value'])) {   
+            if (!empty($data['value'])) {
                 $sections[$dataKey] = [
                     'title'   => $data['label'],
                     'content' => $data['value']

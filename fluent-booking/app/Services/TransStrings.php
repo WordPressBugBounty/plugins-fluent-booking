@@ -530,6 +530,7 @@ class TransStrings
             'Access Permissions for this user'                                                 => __('Access Permissions for this user', 'fluent-booking'),
             '(Required Permission)'                                                            => __('(Required Permission)', 'fluent-booking'),
             'Update Access Permissions'                                                        => __('Update Access Permissions', 'fluent-booking'),
+            'Permission Denied Message'                                                        => __('Permission Denied Message', 'fluent-booking'),
             'Add Team Member'                                                                  => __('Add Team Member', 'fluent-booking'),
             'Add Host'                                                                         => __('Add Host', 'fluent-booking'),
             'Add Team'                                                                         => __('Add Team', 'fluent-booking'),
@@ -846,6 +847,14 @@ class TransStrings
             'Which slots are you available?'                                                   => __('Which slots are you available?', 'fluent-booking'),
             'Select All'                                                                       => __('Select All', 'fluent-booking'),
             'Reset All'                                                                        => __('Reset All', 'fluent-booking'),
+            'Max Files Count'                                                                  => __('Max Files Count', 'fluent-booking'),
+            'Max File Size'                                                                    => __('Max File Size', 'fluent-booking'),
+            'Zip'                                                                              => __('Zip', 'fluent-booking'),
+            'Doc'                                                                              => __('Doc', 'fluent-booking'),
+            'PDF'                                                                              => __('PDF', 'fluent-booking'),
+            'Name Attribute'                                                                   => __('Name Attribute', 'fluent-booking'),
+            'Default Value'                                                                    => __('Default Value', 'fluent-booking'),
+            'File Type'                                                                        => __('File Type', 'fluent-booking'),
             'Sort By Calendar Type'                                                            => __('Sort By Calendar Type', 'fluent-booking'),
             'Sort'                                                                             => __('Sort', 'fluent-booking'),
             'Host'                                                                             => __('Host', 'fluent-booking'),
@@ -854,6 +863,8 @@ class TransStrings
             'more'                                                                             => __('more', 'fluent-booking'),
             'Select Page'                                                                      => __('Select Page', 'fluent-booking'),
             'about this feature'                                                               => __('about this feature', 'fluent-booking'),
+            'The value must be unique.'                                                        => __('The value must be unique.', 'fluent-booking'),
+            'This label will only be visible for admin.'                                       => __('This label will only be visible for admin.', 'fluent-booking'),
             'This portal can be accessed from'                                                 => __('This portal can be accessed from', 'fluent-booking'),
             'Add your FluentBooking to WordPress frontend / any Page via Shortcode.'           => __('Add your FluentBooking to WordPress frontend / any Page via Shortcode.', 'fluent-booking'),
             'Please add this shortcode to your selected page:'                                 => __('Please add this shortcode to your selected page:', 'fluent-booking'),
@@ -895,7 +906,7 @@ class TransStrings
             'Other Page'                                                                       => __('Other Page', 'fluent-booking'),
             'Generate Link'                                                                    => __('Generate Link', 'fluent-booking'),
             'Generated Link'                                                                   => __('Generated Link', 'fluent-booking'),
-            'Generate booking link with URL parameters'                                        => __('Generate booking link with URL parameters', 'fluent-booking'),
+            'Generate booking link with URL parameters'                                        => __('Generate booking link with URL parameters', 'fluent-booking')
         );
     }
 }

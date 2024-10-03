@@ -52,7 +52,6 @@ class GlobalNotificationHandler
 
     public function maybeHandleGlobalIntegration($booking, $calendarSlot)
     {
-
         $status = $booking->status;
 
         $maps = [
@@ -100,7 +99,7 @@ class GlobalNotificationHandler
 
             $enabledTriggers = Arr::get($feed, 'settings.event_trigger', []);
 
-            if (!$enabledTriggers && !in_array($targetHook, $enabledTriggers)) {
+            if (!$enabledTriggers || !in_array($targetHook, $enabledTriggers)) {
                 continue;
             }
 

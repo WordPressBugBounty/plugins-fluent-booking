@@ -2,9 +2,11 @@
 
 <div class="fcal_container">
     <div class="fcal_booking_header">
-        <h2><?php echo esc_html($attributes['title']) ?></h2>
-        <div class="fcal_booking_header_actions">
-            <?php if ($attributes['filter'] == 'show') : ?>
+        <?php if ($attributes['title']) : ?>
+            <h2><?php echo esc_html($attributes['title']) ?></h2>
+        <?php endif; ?>
+        <?php if ($attributes['filter'] == 'show') : ?>
+            <div class="fcal_booking_header_actions">
                 <form action="" method="GET">
                     <?php foreach ($period_options as $value => $label): ?>
                         <div class="fcal_radio_btn">
@@ -15,8 +17,8 @@
                         </div>
                     <?php endforeach; ?>
                 </form>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
     </div>
     <div class="fcal_all_bookings">
         <div class="fcal_bookings">

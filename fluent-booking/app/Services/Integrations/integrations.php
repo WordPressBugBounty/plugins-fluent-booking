@@ -20,3 +20,12 @@ add_action('fluentcrm_loaded', function () {
 add_action('fluent_boards_loaded', function () {
     (new \FluentBooking\App\Services\Integrations\FluentBoards\Bootstrap());
 });
+
+if (defined('ELEMENTOR_VERSION')) {
+    /*
+     * We will keep it for then time being for backward compatibility of Old Fluent Booking Pro
+     */
+    if (!class_exists('\FluentBookingPro\App\Services\Integrations\Elementor\ElementorIntegration')) {
+        (new \FluentBooking\App\Services\Integrations\Elementor\ElementorIntegration())->register();
+    }
+}

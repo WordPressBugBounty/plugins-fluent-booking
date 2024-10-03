@@ -789,11 +789,20 @@ class CalendarController extends Controller
 
     public function getEventBookingFields(Request $request, $calendarId, $slotId)
     {
-        $slot = CalendarSlot::where('calendar_id', $calendarId)->findOrFail($slotId);
+        $calendarEvent = CalendarSlot::where('calendar_id', $calendarId)->findOrFail($slotId);
 
-        return [
-            'fields' => $slot->getBookingFields()
+        $data = [
+            'fields' => $calendarEvent->getBookingFields()
         ];
+
+        if (in_array('smart_codes', $request->get('with', []))) {
+            $data['smart_codes'] = [
+                'texts' => Helper::getEditorShortCodes($calendarEvent),
+                'html'  => Helper::getEditorShortCodes($calendarEvent, true)
+            ];
+        }
+
+        return $data;
     }
 
     public function saveEventBookingFields(Request $request, $calendarId, $eventId)
@@ -812,6 +821,8 @@ class CalendarController extends Controller
         foreach ($bookingFields as $value) {
             if (empty($value['name'])) {
                 $value['name'] = BookingFieldService::generateFieldName($calendarEvent, $value['label']);
+            } else {
+                $value['name'] = BookingFieldService::maybeGenerateFieldName($calendarEvent, $value);
             }
 
             $textValues = array_map('sanitize_text_field', Arr::only($value, $textFields));
@@ -823,13 +834,23 @@ class CalendarController extends Controller
             $formattedField = array_merge($textValues, $booleanValues);
 
             $formattedField['index'] = (int)Arr::get($value, 'index');
+            if (in_array(Arr::get($value, 'type'), $optionRequiredFields)) {
+                $sanitizedOptions = array_map('sanitize_text_field', Arr::get($value, 'options'));
+                $formattedField['options'] = $sanitizedOptions;
+            }
             if ($value['type'] == 'payment' && $calendarEvent->type === 'paid') {
                 $formattedField['payment_items'] = Arr::get($value, 'payment_items');
                 $formattedField['currency_sign'] = CurrenciesHelper::getGlobalCurrencySign();
             }
-            if (in_array(Arr::get($value, 'type'), $optionRequiredFields)) {
-                $sanitizedOptions = array_map('sanitize_text_field', Arr::get($value, 'options'));
-                $formattedField['options'] = $sanitizedOptions;
+            if ($value['type'] == 'file') {
+                $formattedField['max_file_allow'] = intval(Arr::get($value, 'max_file_allow'));
+                $formattedField['allow_file_types'] = array_map('sanitize_text_field', Arr::get($value, 'allow_file_types'));
+                $formattedField['file_size_value'] = intval(Arr::get($value, 'file_size_value'));
+                $formattedField['file_size_unit'] = SanitizeService::checkCollection(Arr::get($value, 'file_size_unit'), ['kb','mb']);
+            }
+
+            if ($value['type'] == 'hidden') {
+                $formattedField['default_value'] = sanitize_text_field(Arr::get($value, 'default_value'));
             }
 
             $formattedFields[] = $formattedField;

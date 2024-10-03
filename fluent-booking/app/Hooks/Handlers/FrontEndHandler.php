@@ -358,7 +358,7 @@ class FrontEndHandler
             $booking->payment_status_text = $booking->getPaymentStatus();
 
             $booking->booking_date = DateTimeHelper::formatToLocale($booking->getAttendeeStartTime(), 'date');
-            $booking->booking_time = DateTimeHelper::formatToLocale($booking->getAttendeeEndTime(), 'time') . ' - ' . DateTimeHelper::formatToLocale($booking->getAttendeeEndTime(), 'time');
+            $booking->booking_time = DateTimeHelper::formatToLocale($booking->getAttendeeStartTime(), 'time') . ' - ' . DateTimeHelper::formatToLocale($booking->getAttendeeEndTime(), 'time');
         }
 
         $currentPage = $bookings->currentPage();

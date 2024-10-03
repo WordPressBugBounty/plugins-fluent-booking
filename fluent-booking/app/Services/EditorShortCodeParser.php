@@ -188,6 +188,12 @@ class EditorShortCodeParser
                 return gmdate($matches[1], strtotime($value)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             }
 
+            $customField = BookingFieldService::getBookingFieldByName($booking->calendar_event, $key);
+
+            if (Arr::get($customField, 'type') == 'file') {
+                return self::getUploadedFileUrl(Arr::get(self::$store['custom_booking_data'], $key));
+            }
+
             return Arr::get(self::$store['custom_booking_data'], $key);
         }
 
@@ -380,6 +386,19 @@ class EditorShortCodeParser
         }
 
         return $key;
+    }
+
+    protected static function getUploadedFileUrl($fieldValue)
+    {
+        if (empty($fieldValue)) {
+            return '';
+        }
+
+        $files = array_map(function($file) {
+            return '<a href="' . esc_url($file) . '" style="color:#222;font-size:15px;" target="_blank" download="' . esc_attr(basename($file)) . '">' . esc_html(basename($file)) . '</a>';
+        }, $fieldValue);
+    
+        return '<ul><li>' . implode('</li><li>', $files) . '</li></ul>';
     }
 
     protected static function parseShortCodes($parsable)
