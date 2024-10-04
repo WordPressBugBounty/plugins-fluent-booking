@@ -696,7 +696,7 @@ class Helper
 
     public static function getUpgradeUrl()
     {
-        return 'https://fluentbooking.com/pricing/?utm_source=plugin&utm_medium=wp_install&utm_campaign=fcal_upgrade';
+        return 'https://fluentbooking.com/pricing/?utm_source=plugin&utm_medium=wp_install&utm_campaign=fcal_upgrade&theme=' . self::getActiveThemeName();
     }
 
     public static function getNextBookingGroup()
@@ -1213,7 +1213,8 @@ class Helper
         return $durationLookup;
     }
 
-    public static function formatDuration($totalMinutes) {
+    public static function formatDuration($totalMinutes)
+    {
         $days = floor($totalMinutes / 1440); // 1440 minutes in a day
         $hours = floor(($totalMinutes % 1440) / 60);
         $minutes = $totalMinutes % 60;
@@ -2125,5 +2126,16 @@ class Helper
         $pref = $settings;
 
         return $settings;
+    }
+
+    public static function getActiveThemeName()
+    {
+        $ins = get_option('_fb_ins_by');
+
+        if ($ins) {
+            return sanitize_text_field($ins);
+        }
+        
+        return get_option('template');
     }
 }
