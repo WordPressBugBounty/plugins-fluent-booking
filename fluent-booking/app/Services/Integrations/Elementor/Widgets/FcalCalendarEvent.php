@@ -83,6 +83,14 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         );
 
         $this->add_control(
+            'event_hash',
+            [
+                'type' => \Elementor\Controls_Manager::HIDDEN,
+                'default' => '',
+            ]
+        );
+
+        $this->add_control(
             'show_host_info',
             [
                 'label'        => __('Show Host Info', 'fluent-booking-pro'),
@@ -283,17 +291,19 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         return $formattedData;
     }
 
-    private function getCurrentCalendar($eventId)
+    private function getCalendarEvent($eventId, $eventHash)
     {
-        if (empty($eventId)) {
-            return [];
+        $event = CalendarSlot::find($eventId);
+        if (!$event) {
+            $event = CalendarSlot::where('hash', $eventHash)->first();
         }
-        $event    = CalendarSlot::query()->findOrFail($eventId);
-        if (empty($event)) {
+
+        if (!$event || !$event->calendar) {
             return [];
         }
 
         $data = [
+            'id'                 => $event->id,
             'title'              => $event->title,
             'description'        => $event->description,
             'user_profile'       => $event->calendar->getAuthorProfile(),
@@ -312,84 +322,85 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
     {
         $settings = $this->get_settings_for_display();
 
-        if (!empty($settings['selected_event'])) :
+        if (empty($settings['selected_event']) && empty($settings['event_hash'])) {
+            echo __('Please select an event', 'fluent-booking-pro');
+            return;
+        }
 
-            $selectedEvent = $this->getCurrentCalendar($settings['selected_event']);
+        $selectedEventId = $settings['selected_event'] ?? null;
 
-            $hideHost = ($settings['show_host_info'] == 'yes') ? 'no' : 'yes';
+        $eventHash = $settings['event_hash'] ?? '';
 
-            $shortcode = sprintf(
-                '[fluent_booking id="%s" theme="%s" disable_author="%s"]',
-                $settings['selected_event'],
-                $settings['select_theme'],
-                $hideHost
-            );
+        $selectedEvent = $this->getCalendarEvent($selectedEventId, $eventHash);
 
-            $shortcode_output = $shortcode;
+        if (empty($selectedEvent['id'])) {
+            echo __('Calendar event not found', 'fluent-booking-pro');
+            return;
+        }
 
-            if (\Elementor\Plugin::$instance->editor->is_edit_mode()) : ?>
-                <!-- Output for editor -->
-                <style>
-                    .fcal_calendar_inner .fcal_side {
-                        width: 300px;
-                        min-width: 300px;
-                    }
-                    .fcal_calendar_inner .fcal_date_wrapper .calendar-container > img {
-                        max-width: 370px;
-                        width: 100%;
-                        display: block;
-                    }
-                </style>
-                <div class="fcal_wrap">
-                    <?php if (!empty($settings['selected_event'])) : ?>
-                        <div class="fcal_calendar_inner">
-                            <?php if ($hideHost == 'no') : ?>
-                                <div class="fcal_side">
-                                    <div class="fcal_slot_wrapper">
-                                        <div class="fcal_author">
-                                            <div class="fcal_author_avatar">
-                                                <img src="<?php echo esc_url($selectedEvent['user_profile']['avatar']); ?>" alt="<?php echo esc_attr($selectedEvent['user_profile']['name']) ?>">
-                                            </div>
-                                            <div class="fcal_author_name"><?php echo esc_html($selectedEvent['user_profile']['name']); ?></div>
-                                        </div>
-                                        <div class="fcal_slot_info">
-                                            <h1 class="fcal_slot_heading"><?php echo esc_html($selectedEvent['title']); ?></h1>
-                                            <div class="slot_timing fcal_icon_item">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M16.5 9C16.5 13.14 13.14 16.5 9 16.5C4.86 16.5 1.5 13.14 1.5 9C1.5 4.86 4.86 1.5 9 1.5C13.14 1.5 16.5 4.86 16.5 9Z" stroke="#445164" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11.7825 11.3849L9.45753 9.99745C9.05253 9.75745 8.72253 9.17995 8.72253 8.70745V5.63245" stroke="#445164" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                                <div class="fcal_multi_duration">
-                                                    <?php foreach ($selectedEvent['durations'] as $duration) { ?>
-                                                        <span class="fcal_duration"><?php echo esc_html($duration); ?> </span>
-                                                    <?php } ?>
-                                                </div>
-                                            </div>
-                                            <?php echo wp_kses_post($selectedEvent['location_icon_html']); ?>
-                                        </div>
-                                        <div class="fcal_slot_description"><p><?php echo esc_html($selectedEvent['description']); ?></p></div>
+        $hideHost = ($settings['show_host_info'] == 'yes') ? 'no' : 'yes';
+
+        $shortcode = sprintf(
+            '[fluent_booking id="%s" theme="%s" disable_author="%s" hash="%s"]',
+            $selectedEvent['id'],
+            $settings['select_theme'],
+            $hideHost,
+            $eventHash
+        );
+
+        $shortcode_output = $shortcode;
+
+        if (\Elementor\Plugin::$instance->editor->is_edit_mode()) : ?>
+            <style>
+                .fcal_calendar_inner .fcal_side {
+                    width: 300px;
+                    min-width: 300px;
+                }
+                .fcal_calendar_inner .fcal_date_wrapper .calendar-container > img {
+                    max-width: 370px;
+                    width: 100%;
+                    display: block;
+                }
+            </style>
+            <div class="fcal_wrap">
+                <div class="fcal_calendar_inner">
+                    <?php if ($hideHost == 'no') : ?>
+                        <div class="fcal_side">
+                            <div class="fcal_slot_wrapper">
+                                <div class="fcal_author">
+                                    <div class="fcal_author_avatar">
+                                        <img src="<?php echo esc_url($selectedEvent['user_profile']['avatar']); ?>" alt="<?php echo esc_attr($selectedEvent['user_profile']['name']) ?>">
                                     </div>
+                                    <div class="fcal_author_name"><?php echo esc_html($selectedEvent['user_profile']['name']); ?></div>
                                 </div>
-                            <?php endif; ?>
-
-                            <div class="fcal_date_wrapper">
-                                <div class="fcal_day_picker_wrap">
-                                    <div class="calendar-container">
-                                        <img src="<?php echo FLUENT_BOOKING_URL .'/assets/images/fcal-calendar.png' ?>" alt="calendar">
+                                <div class="fcal_slot_info">
+                                    <h1 class="fcal_slot_heading"><?php echo esc_html($selectedEvent['title']); ?></h1>
+                                    <div class="slot_timing fcal_icon_item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M16.5 9C16.5 13.14 13.14 16.5 9 16.5C4.86 16.5 1.5 13.14 1.5 9C1.5 4.86 4.86 1.5 9 1.5C13.14 1.5 16.5 4.86 16.5 9Z" stroke="#445164" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11.7825 11.3849L9.45753 9.99745C9.05253 9.75745 8.72253 9.17995 8.72253 8.70745V5.63245" stroke="#445164" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                        <div class="fcal_multi_duration">
+                                            <?php foreach ($selectedEvent['durations'] as $duration) { ?>
+                                                <span class="fcal_duration"><?php echo esc_html($duration); ?> </span>
+                                            <?php } ?>
+                                        </div>
                                     </div>
+                                    <?php echo wp_kses_post($selectedEvent['location_icon_html']); ?>
                                 </div>
+                                <div class="fcal_slot_description"><p><?php echo esc_html($selectedEvent['description']); ?></p></div>
                             </div>
                         </div>
-                    <?php
-                    else:
-                        ?>
-                        <div class="fcal_empty"><?php esc_html_e('Please Select the Event', 'fluent-booking-pro'); ?></div>
-                    <?php
-                    endif; ?>
-                </div>
-            <?php else :
-                echo $shortcode_output;
-            endif;
+                    <?php endif; ?>
 
-        else :
-            echo __('Please select an event', 'fluent-booking-pro');
+                    <div class="fcal_date_wrapper">
+                        <div class="fcal_day_picker_wrap">
+                            <div class="calendar-container">
+                                <img src="<?php echo FLUENT_BOOKING_URL .'/assets/images/fcal-calendar.png' ?>" alt="calendar">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php else :
+            echo $shortcode_output;
         endif;
 
     }

@@ -351,25 +351,21 @@ class BlockEditorHandler
         $slotId = (int) $attributes['slotId'];
         $disableHost = $attributes['hideHostInfo'];
         $theme = Arr::get($attributes, 'theme', 'light');
+        $eventHash = Arr::get($attributes, 'eventHash');
 
         $slot = CalendarSlot::find($slotId);
 
         if (!$slot) {
-            $eventHash = Arr::get($attributes, 'eventHash');
-            if ($eventHash) {
-                $slot = CalendarSlot::where('hash', $eventHash)->first();
-            }
+            $slot = CalendarSlot::where('hash', $eventHash)->first();
             if (!$slot) {
                 return '';
             }
-
             $slotId = $slot->id;
         }
 
-
         $output .= '<div class="fluent-booking-calendar-block align' . Arr::get($attributes, 'align') . '">';
 
-        $output .= do_shortcode("[fluent_booking id=$slotId disable_author=$disableHost theme=$theme]");
+        $output .= do_shortcode("[fluent_booking id=$slotId disable_author=$disableHost theme=$theme hash=$eventHash]");
 
         $output .= '</div>';
         return $output;

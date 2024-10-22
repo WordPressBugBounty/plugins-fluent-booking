@@ -264,7 +264,7 @@ class EditorShortCodeParser
 
         $fillables = (new CalendarSlot())->getFillable();
 
-        if (in_array($key, $fillables)) {
+        if (in_array($key, $fillables) || isset($bookingEvent->{$key})) {
             return $bookingEvent->{$key};
         }
 
@@ -281,7 +281,7 @@ class EditorShortCodeParser
 
         $fillables = (new Calendar())->getFillable();
 
-        if (in_array($key, $fillables)) {
+        if (in_array($key, $fillables) || isset($calendar->{$key})) {
             return $calendar->{$key};
         }
 

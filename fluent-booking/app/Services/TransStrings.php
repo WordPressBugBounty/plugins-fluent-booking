@@ -174,6 +174,8 @@ class TransStrings
             'All Data'                                                                         => __('All Data', 'fluent-booking'),
             'Selected Fields'                                                                  => __('Selected Fields', 'fluent-booking'),
             'Request Fields'                                                                   => __('Request Fields', 'fluent-booking'),
+            'Value'                                                                            => __('Value', 'fluent-booking'),
+            'Field'                                                                            => __('Field', 'fluent-booking'),
             'Field Name'                                                                       => __('Field Name', 'fluent-booking'),
             'Field Value'                                                                      => __('Field Value', 'fluent-booking'),
             'Enter Name'                                                                       => __('Enter Name', 'fluent-booking'),
@@ -775,6 +777,7 @@ class TransStrings
             'No Data match'                                                                    => __('No Data match', 'fluent-booking'),
             'No Data'                                                                          => __('No Data', 'fluent-booking'),
             'System Enabled'                                                                   => __('System Enabled', 'fluent-booking'),
+            'Enable'                                                                           => __('Enable', 'fluent-booking'),
             'Enabled'                                                                          => __('Enabled', 'fluent-booking'),
             'Install'                                                                          => __('Install', 'fluent-booking'),
             'This only applies to your public landing pages'                                   => __('This only applies to your public landing pages', 'fluent-booking'),
@@ -906,7 +909,8 @@ class TransStrings
             'Other Page'                                                                       => __('Other Page', 'fluent-booking'),
             'Generate Link'                                                                    => __('Generate Link', 'fluent-booking'),
             'Generated Link'                                                                   => __('Generated Link', 'fluent-booking'),
-            'Generate booking link with URL parameters'                                        => __('Generate booking link with URL parameters', 'fluent-booking')
+            'Generate booking link with URL parameters'                                        => __('Generate booking link with URL parameters', 'fluent-booking'),
+            'Frontend Portal Settings'                                                         => __('Frontend Portal Settings', 'fluent-booking')
         );
     }
 }

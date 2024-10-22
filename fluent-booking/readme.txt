@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.3
-Stable tag: 1.5.24
+Stable tag: 1.5.25
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,15 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 1.5.25 (Date: 22 Oct 2024)
+- Added Italian and German Language
+- Added Missing Translations
+- Resolved Response Not Valid Error
+- Fixed Reply To Email Not Pulling Issue
+- Fixed Manual Booking Issue with Number Field
+- Fixed Selected Events Not Displaying in Elementor Settings
+- Fixed Calendar Block Not Scrolling to Event
 
 = 1.5.24 (Date: 04 Oct 2024) =
 - Hotfix: Resolved Issue with Multiple Bookings Across Different Months

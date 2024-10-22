@@ -4,6 +4,7 @@ namespace FluentBooking\App\Services\Integrations\Elementor;
 
 
 use FluentBooking\App\Models\Calendar;
+use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\App;
 
 class ElementorIntegration
@@ -20,6 +21,9 @@ class ElementorIntegration
 
         add_action('wp_ajax_get_calendar_events', [$this, 'ajaxGetCalendarEvents']);
         add_action('wp_ajax_nopriv_get_calendar_events', [$this, 'ajaxGetCalendarEvents']);
+
+        add_action('wp_ajax_get_event_hash', [$this, 'ajaxGetEventHash']);
+        add_action('wp_ajax_nopriv_get_event_hash', [$this, 'ajaxGetEventHash']);
     }
 
     public function editorScripts()
@@ -109,6 +113,26 @@ class ElementorIntegration
         $events = $this->getCalendarEvents($calId);
 
         wp_send_json_success($events);
+    }
+
+    public function ajaxGetEventHash() {
+        if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'calendar_events_nonce')) {
+            wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking-pro')]);
+            exit;
+        }
+
+        $eventId = intval($_POST['event_id']);
+
+        $event = CalendarSlot::find($eventId);
+
+        if (!$event) {
+            wp_send_json_error(['message' => __('Event not found', 'fluent-booking-pro')]);
+            exit;
+        }
+
+        $eventHash = $event->hash;
+
+        wp_send_json_success(['hash' => $eventHash]);
     }
 
     public function registerWidgets()

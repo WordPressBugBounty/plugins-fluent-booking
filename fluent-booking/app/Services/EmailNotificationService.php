@@ -22,8 +22,8 @@ class EmailNotificationService
         $emailBody = EditorShortCodeParser::parse($email['body'], $booking);
 
         $globalSettings = Helper::getGlobalSettings();
-        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'yes');
-        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'yes');
+        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'no');
+        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'no');
         $attachIcsFile = Arr::get($globalSettings, 'emailing.attach_ics_on_confirmation', 'no');
         $settingsFromName = Arr::get($globalSettings, 'emailing.from_name', '');
         $settingsFromEmail = Arr::get($globalSettings, 'emailing.from_email', '');
@@ -43,48 +43,52 @@ class EmailNotificationService
             $authors = [$authors[0]];
         }
 
+        $to = [];
+        $from = '';
+        $replyTo = '';
         $result = false;
-        foreach ($authors as $author)
-        {
-            $hostName = '';
+
+        foreach ($authors as $author) {
+            $hostName = $author['name'] ?? '';
             $hostAddress = $author['email'];
-            if ($author['name']) {
-                $hostName = $author['name'];
-                $hostAddress = sprintf('%1s <%2s>', $author['name'], $author['email']);
-            }
 
             $settingsFromEmail = $settingsFromEmail ?: $author['email'];
             $settingsReplyToEmail = $settingsReplyToEmail ?: $author['email'];
 
-            $to = $hostAddress;
+            if ('guest' == $emailTo) {
+                $to[] = $guestAddress;
+                $replyName = $useHostName == 'yes' ? $hostName : $settingsReplyToName;
+                $fromName = $useHostName == 'yes' ? $hostName : $settingsFromName;
+
+                $replyToEmail = $useHostEmailOnReply == 'yes' ? $author['email'] : $settingsReplyToEmail;
+                $replyFromEmail = $useHostEmailOnReply == 'yes' ? $replyToEmail : $settingsFromEmail;
+
+                $replyTo = sprintf('%1s <%2s>', $replyName, $replyToEmail);
+                $from = sprintf('%1s <%2s>', $fromName, $replyFromEmail);
+            } else {
+                $to[] = $hostName ? sprintf('%1$s <%2$s>', $hostName, $hostAddress) : $hostAddress;
+            }
+        }
+
+        $to = implode(', ', array_unique($to));
+
+        if ('guest' != $emailTo) {
             $replyTo = sprintf('%1s <%2s>', $settingsReplyToName, $settingsReplyToEmail ?: $settingsFromEmail);
             $from = sprintf('%1s <%2s>', $settingsFromName, $settingsFromEmail);
-
-            if ('guest' == $emailTo) {
-                $to = $guestAddress;
-                $replyName = $useHostName == 'no' ? $settingsReplyToName : $hostName;
-                $fromName = $useHostName == 'no' ? $settingsFromName : $hostName;
-
-                $replayToEmail = $useHostEmailOnReply == 'no' ? $settingsReplyToEmail : $author['email'];
-                $replyFromEmail = $useHostEmailOnReply == 'no' ? $settingsFromEmail : $replayToEmail;
-    
-                $replyTo = sprintf('%1s <%2s>', $replyName, $replayToEmail);
-                $from = sprintf('%1s <%2s>', $fromName, $replyFromEmail);
-            }
-
-            $headers = self::prepareEmailHeaders($replyTo, $from, $email);
-    
-            $body = (string)App::make('view')->make('emails.template', [
-                'email_body'   => $emailBody,
-                'email_footer' => self::getGlobalEmailFooter(),
-            ]);
-    
-            $emogrifier = new Emogrifier($body);
-            $emogrifier->disableInvisibleNodeRemoval();
-            $body = (string)$emogrifier->emogrify();
-    
-            $result = Mailer::send($to, $emailSubject, $body, $headers, $attachments);
         }
+
+        $headers = self::prepareEmailHeaders($replyTo, $from, $email);
+
+        $body = (string)App::make('view')->make('emails.template', [
+            'email_body'   => $emailBody,
+            'email_footer' => self::getGlobalEmailFooter(),
+        ]);
+
+        $emogrifier = new Emogrifier($body);
+        $emogrifier->disableInvisibleNodeRemoval();
+        $body = (string)$emogrifier->emogrify();
+
+        $result = Mailer::send($to, $emailSubject, $body, $headers, $attachments);
 
         if ($attachments) {
             wp_delete_file($attachments[0]);
@@ -112,8 +116,8 @@ class EmailNotificationService
     public static function reminderEmail(Booking $booking, $email, $emailTo)
     {
         $globalSettings = Helper::getGlobalSettings();
-        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'yes');
-        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'yes');
+        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'no');
+        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'no');
         $settingsFromName = Arr::get($globalSettings, 'emailing.from_name', '');
         $settingsFromEmail = Arr::get($globalSettings, 'emailing.from_email', '');
         $settingsReplyToName = Arr::get($globalSettings, 'emailing.reply_to_name', '');
@@ -127,50 +131,55 @@ class EmailNotificationService
             $authors = [$authors[0]];
         }
 
+        $to = [];
+        $from = '';
+        $replyTo = '';
         $result = false;
+
         foreach ($authors as $author) {
             $hostAddress = $author['email'];
-            $hostName = '';
-            if ($author['name']) {
-                $hostName = $author['name'];
-                $hostAddress = sprintf('%1s <%2s>', $author['name'], $author['email']);
-            }
+            $hostName = $author['name'] ?? '';
 
             $settingsFromEmail = $settingsFromEmail ?: $author['email'];
             $settingsReplyToEmail = $settingsReplyToEmail ?: $author['email'];
 
-            $to = $hostAddress;
+            if ('guest' == $emailTo) {
+                $to[] = $guestAddress;
+                $replyName = $useHostName == 'yes' ? $hostName : $settingsReplyToName;
+                $fromName = $useHostName == 'yes' ? $hostName : $settingsFromName;
+
+                $replyToEmail = $useHostEmailOnReply == 'yes' ? $author['email'] : $settingsReplyToEmail;
+                $fromEmail = $useHostEmailOnReply == 'yes' ? $replyToEmail : $settingsFromEmail;
+
+                $replyTo = sprintf('%1$s <%2$s>', $replyName, $replyToEmail);
+                $from = sprintf('%1$s <%2$s>', $fromName, $fromEmail);
+            } else {
+                $to[] = $hostName ? sprintf('%1$s <%2$s>', $hostName, $hostAddress) : $hostAddress;
+            }
+        }
+
+        $to = implode(', ', array_unique($to));
+
+        if ('guest' != $emailTo) {
             $replyTo = sprintf('%1s <%2s>', $settingsReplyToName, $settingsReplyToEmail ?: $settingsFromEmail);
             $from = sprintf('%1s <%2s>', $settingsFromName, $settingsFromEmail);
-
-            if ('guest' == $emailTo) {
-                $to = $guestAddress;
-                $replyName = $useHostName == 'no' ? $settingsReplyToName : $hostName;
-                $formName = $useHostName == 'no' ? $settingsFromName : $hostName;
-    
-                $replayToEmail = $useHostEmailOnReply == 'no' ? $settingsReplyToEmail : $author['email'];
-                $replyFromEmail = $useHostEmailOnReply == 'no' ? $settingsFromEmail : $replayToEmail;
-    
-                $replyTo = sprintf('%1s <%2s>', $replyName, $replayToEmail);
-                $from = sprintf('%1s <%2s>', $formName, $replyFromEmail);
-            }
-    
-            $headers = self::prepareEmailHeaders($replyTo, $from, $email);
-    
-            $subject = EditorShortCodeParser::parse($email['subject'], $booking);
-            $html = EditorShortCodeParser::parse($email['body'], $booking);
-    
-            $body = (string)App::make('view')->make('emails.template', [
-                'email_body'   => $html,
-                'email_footer' => self::getGlobalEmailFooter()
-            ]);
-    
-            $emogrifier = new Emogrifier($body);
-            $emogrifier->disableInvisibleNodeRemoval();
-            $body = (string)$emogrifier->emogrify();
-    
-            $result = Mailer::send($to, $subject, $body, $headers);
         }
+
+        $headers = self::prepareEmailHeaders($replyTo, $from, $email);
+
+        $subject = EditorShortCodeParser::parse($email['subject'], $booking);
+        $html = EditorShortCodeParser::parse($email['body'], $booking);
+
+        $body = (string)App::make('view')->make('emails.template', [
+            'email_body'   => $html,
+            'email_footer' => self::getGlobalEmailFooter()
+        ]);
+
+        $emogrifier = new Emogrifier($body);
+        $emogrifier->disableInvisibleNodeRemoval();
+        $body = (string)$emogrifier->emogrify();
+
+        $result = Mailer::send($to, $subject, $body, $headers);
 
         if (!$result) {
             return false;
@@ -193,8 +202,8 @@ class EmailNotificationService
     public static function bookingCancelOrRejectEmail(Booking $booking, $email, $emailTo, $actionType = 'cancel')
     {
         $globalSettings = Helper::getGlobalSettings();
-        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'yes');
-        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'yes');
+        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'no');
+        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'no');
         $settingsFromName = Arr::get($globalSettings, 'emailing.from_name', '');
         $settingsFromEmail = Arr::get($globalSettings, 'emailing.from_email', '');
         $settingsReplyToName = Arr::get($globalSettings, 'emailing.reply_to_name', '');
@@ -208,50 +217,55 @@ class EmailNotificationService
             $authors = [$authors[0]];
         }
 
+        $to = [];
+        $from = '';
+        $replyTo = '';
         $result = false;
+
         foreach ($authors as $author) {
             $hostAddress = $author['email'];
-            $hostName = '';
-            if ($author['name']) {
-                $hostName = $author['name'];
-                $hostAddress = sprintf('%1s <%2s>', $author['name'], $author['email']);
-            }
-
+            $hostName = $author['name'] ?? '';
+            
             $settingsFromEmail = $settingsFromEmail ?: $author['email'];
             $settingsReplyToEmail = $settingsReplyToEmail ?: $author['email'];
 
-            $to = $hostAddress;
+            if ('guest' == $emailTo) {
+                $to[] = $guestAddress;
+                $replyName = $useHostName == 'yes' ? $hostName : $settingsReplyToName;
+                $fromName = $useHostName == 'yes' ? $hostName : $settingsFromName;
+
+                $replyToEmail = $useHostEmailOnReply == 'yes' ? $author['email'] : $settingsReplyToEmail;
+                $replyFromEmail = $useHostEmailOnReply == 'yes' ? $replyToEmail : $settingsFromEmail;
+
+                $replyTo = sprintf('%1s <%2s>', $replyName, $replyToEmail);
+                $from = sprintf('%1s <%2s>', $fromName, $replyFromEmail);
+            } else {
+                $to[] = $hostName ? sprintf('%1s <%2s>', $hostName, $hostAddress) : $hostAddress;
+            }
+        }
+
+        $to = implode(', ', array_unique($to));
+
+        if ('guest' != $emailTo) {
             $replyTo = sprintf('%1s <%2s>', $settingsReplyToName, $settingsReplyToEmail ?: $settingsFromEmail);
             $from = sprintf('%1s <%2s>', $settingsFromName, $settingsFromEmail);
-
-            if ('guest' == $emailTo) {
-                $to = $guestAddress;
-                $replyName = $useHostName == 'no' ? $settingsReplyToName : $hostName;
-                $formName = $useHostName == 'no' ? $settingsFromName : $hostName;
-
-                $replayToEmail = $useHostEmailOnReply == 'no' ? $settingsReplyToEmail : $author['email'];
-                $replyFromEmail = $useHostEmailOnReply == 'no' ? $settingsFromEmail : $replayToEmail;
-
-                $replyTo = sprintf('%1s <%2s>', $replyName, $replayToEmail);
-                $from = sprintf('%1s <%2s>', $formName, $replyFromEmail);
-            }
-    
-            $headers = self::prepareEmailHeaders($replyTo, $from, $email);
-    
-            $subject = EditorShortCodeParser::parse($email['subject'], $booking);
-            $html = EditorShortCodeParser::parse($email['body'], $booking);
-    
-            $body = (string)App::make('view')->make('emails.template', [
-                'email_body'   => $html,
-                'email_footer' => self::getGlobalEmailFooter()
-            ]);
-    
-            $emogrifier = new Emogrifier($body);
-            $emogrifier->disableInvisibleNodeRemoval();
-            $body = (string)$emogrifier->emogrify();
-    
-            $result = Mailer::send($to, $subject, $body, $headers);
         }
+
+        $headers = self::prepareEmailHeaders($replyTo, $from, $email);
+
+        $subject = EditorShortCodeParser::parse($email['subject'], $booking);
+        $html = EditorShortCodeParser::parse($email['body'], $booking);
+
+        $body = (string)App::make('view')->make('emails.template', [
+            'email_body'   => $html,
+            'email_footer' => self::getGlobalEmailFooter()
+        ]);
+
+        $emogrifier = new Emogrifier($body);
+        $emogrifier->disableInvisibleNodeRemoval();
+        $body = (string)$emogrifier->emogrify();
+
+        $result = Mailer::send($to, $subject, $body, $headers);
 
         $actionType = $actionType == 'reject' ? __('Rejection', 'fluent-booking') : __('Cancellation', 'fluent-booking');
 
@@ -277,8 +291,8 @@ class EmailNotificationService
     public static function bookingRescheduledEmail(Booking $booking, $email, $emailTo)
     {
         $globalSettings = Helper::getGlobalSettings();
-        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'yes');
-        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'yes');
+        $useHostName = Arr::get($globalSettings, 'emailing.use_host_name', 'no');
+        $useHostEmailOnReply = Arr::get($globalSettings, 'emailing.use_host_email_on_reply', 'no');
         $attachIcsFile = Arr::get($globalSettings, 'emailing.attach_ics_on_confirmation', 'no');
         $settingsFromName = Arr::get($globalSettings, 'emailing.from_name', '');
         $settingsFromEmail = Arr::get($globalSettings, 'emailing.from_email', '');
@@ -289,7 +303,7 @@ class EmailNotificationService
         if ($attachIcsFile == 'yes') {
             $attachments = self::prepareAttachments($booking);
         }
-        
+
         $guestAddress = self::getGuestAddress($booking);
 
         $authors = $booking->getHostsDetails(false);
@@ -298,50 +312,55 @@ class EmailNotificationService
             $authors = [$authors[0]];
         }
 
+        $to = [];
+        $from = '';
+        $replyTo = '';
         $result = false;
+
         foreach ($authors as $author) {
             $hostAddress = $author['email'];
-            $hostName = '';
-            if ($author['name']) {
-                $hostName = $author['name'];
-                $hostAddress = sprintf('%1s <%2s>', $author['name'], $author['email']);
-            }
+            $hostName = $author['name'] ?? '';
 
             $settingsFromEmail = $settingsFromEmail ?: $author['email'];
             $settingsReplyToEmail = $settingsReplyToEmail ?: $author['email'];
 
-            $to = $hostAddress;
+            if ('guest' == $emailTo) {
+                $to[] = $guestAddress;
+                $replyName = $useHostName == 'yes' ? $hostName : $settingsReplyToName;
+                $fromName = $useHostName == 'yes' ? $hostName : $settingsFromName;
+    
+                $replyToEmail = $useHostEmailOnReply == 'yes' ? $author['email'] : $settingsReplyToEmail;
+                $replyFromEmail = $useHostEmailOnReply == 'yes' ? $replyToEmail : $settingsFromEmail;
+    
+                $replyTo = sprintf('%1s <%2s>', $replyName, $replyToEmail);
+                $from = sprintf('%1s <%2s>', $fromName, $replyFromEmail);
+            } else {
+                $to[] = $hostName ? sprintf('%1$s <%2$s>', $hostName, $hostAddress) : $hostAddress;
+            }
+        }
+
+        $to = implode(', ', array_unique($to));
+
+        if ('guest' != $emailTo) {
             $replyTo = sprintf('%1s <%2s>', $settingsReplyToName, $settingsReplyToEmail ?: $settingsFromEmail);
             $from = sprintf('%1s <%2s>', $settingsFromName, $settingsFromEmail);
-
-            if ('guest' == $emailTo) {
-                $to = $guestAddress;
-                $replyName = $useHostName == 'no' ? $settingsReplyToName : $hostName;
-                $formName = $useHostName == 'no' ? $settingsFromName : $hostName;
-    
-                $replayToEmail = $useHostEmailOnReply == 'no' ? $settingsReplyToEmail : $author['email'];
-                $replyFromEmail = $useHostEmailOnReply == 'no' ? $settingsFromEmail : $replayToEmail;
-    
-                $replyTo = sprintf('%1s <%2s>', $replyName, $replayToEmail);
-                $from = sprintf('%1s <%2s>', $formName, $replyFromEmail);
-            }
-    
-            $headers = self::prepareEmailHeaders($replyTo, $from, $email);
-    
-            $subject = EditorShortCodeParser::parse($email['subject'], $booking);
-            $html = EditorShortCodeParser::parse($email['body'], $booking);
-    
-            $body = (string)App::make('view')->make('emails.template', [
-                'email_body'   => $html,
-                'email_footer' => self::getGlobalEmailFooter()
-            ]);
-    
-            $emogrifier = new Emogrifier($body);
-            $emogrifier->disableInvisibleNodeRemoval();
-            $body = (string)$emogrifier->emogrify();
-
-            $result = Mailer::send($to, $subject, $body, $headers, $attachments);
         }
+
+        $headers = self::prepareEmailHeaders($replyTo, $from, $email);
+
+        $subject = EditorShortCodeParser::parse($email['subject'], $booking);
+        $html = EditorShortCodeParser::parse($email['body'], $booking);
+
+        $body = (string)App::make('view')->make('emails.template', [
+            'email_body'   => $html,
+            'email_footer' => self::getGlobalEmailFooter()
+        ]);
+
+        $emogrifier = new Emogrifier($body);
+        $emogrifier->disableInvisibleNodeRemoval();
+        $body = (string)$emogrifier->emogrify();
+
+        $result = Mailer::send($to, $subject, $body, $headers, $attachments);
 
         if ($attachments) {
             wp_delete_file($attachments[0]);
