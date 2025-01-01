@@ -211,7 +211,7 @@ class BookingService
     private static function attachHosts($booking, $calendarSlot)
     {
         $hosts = [$booking->host_user_id];
-        if ($calendarSlot->isOneOffEvent()) {
+        if ($calendarSlot->isMultiHostsEvent()) {
             $hosts = $calendarSlot->getHostIds();
         }
 

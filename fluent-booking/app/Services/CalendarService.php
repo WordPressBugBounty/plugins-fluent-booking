@@ -181,7 +181,7 @@ class CalendarService
         $preparedEventData = [
             'title'             => sanitize_text_field(Arr::get($eventData, 'title')),
             'duration'          => (int)Arr::get($eventData, 'duration', 30),
-            'description'       => sanitize_textarea_field(Arr::get($eventData, 'description')),
+            'description'       => wp_kses_post(Arr::get($eventData, 'description')),
             'type'              => sanitize_text_field(Arr::get($eventData, 'type')),
             'status'            => sanitize_text_field(Arr::get($eventData, 'status', 'active')),
             'color_schema'      => sanitize_text_field(Arr::get($eventData, 'color_schema', '#0099ff')),
@@ -356,7 +356,7 @@ class CalendarService
 
     public static function getCalendarOptionsByTitle($condition = '')
     {
-        $calendarsQuery = Calendar::select(['id', 'title'])
+        $calendarsQuery = Calendar::select(['id', 'title', 'user_id'])
             ->where('status', '!=', 'expired')
             ->with(['slots' => function ($query) {
                 $query->where('status', '!=', 'expired');

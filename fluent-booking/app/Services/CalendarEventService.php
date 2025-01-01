@@ -16,8 +16,6 @@ class CalendarEventService
 
         $calendarEvent->description = $calendarEvent->getDescription();
 
-        $calendarEvent->short_description = Helper::excerpt($calendarEvent->description);
-
         $calendarEvent->locations = $calendarEvent->defaultLocationHtml();
 
         do_action_ref_array('fluent_booking/processed_event', [&$calendarEvent]);

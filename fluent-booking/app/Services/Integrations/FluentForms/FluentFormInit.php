@@ -105,7 +105,7 @@ class FluentFormInit
         $timeSlotService = TimeSlotServiceHandler::initService($calendarEvent->calendar, $calendarEvent);
 
         if (is_wp_error($timeSlotService)) {
-            return TimeSlotServiceHandler::sendError($timeSlotService, $calendarEvent, $timezone);
+            return TimeSlotServiceHandler::sendError($timeSlotService, $calendarEvent, $timeZone);
         }
 
         $availableSpot = $timeSlotService->isSpotAvailable($startDateTime, $endDateTime, $duration);
@@ -115,7 +115,7 @@ class FluentFormInit
             wp_send_json(['errors' => [$message]], 422);
         }
 
-        if ($calendarEvent->isTeamEvent()) {
+        if ($calendarEvent->isRoundRobin()) {
             $this->hostId = $timeSlotService->hostUserId;
         }
 

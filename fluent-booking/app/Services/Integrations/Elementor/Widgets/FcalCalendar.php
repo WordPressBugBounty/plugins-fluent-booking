@@ -342,7 +342,7 @@ class FcalCalendar extends \Elementor\Widget_Base
             $formattedEvents[] = [
                 'title'             => $event->title,
                 'color_schema'      => $event->color_schema,
-                'short_description' => Helper::excerpt($event->description),
+                'short_description' => $event->short_description,
                 'durations'         => $event->getAvailableDurations(),
             ];
         }
@@ -476,6 +476,7 @@ class FcalCalendar extends \Elementor\Widget_Base
                 .fcal_slot .book_now {
                     border: 1px solid #d6dae1;
                     color: #1b2533;
+                    min-width: fit-content;
                     font-size: 14px;
                     font-weight: 500;
                     line-height: 20px;

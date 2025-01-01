@@ -5,7 +5,6 @@ namespace FluentBooking\App\Services;
 use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
-use FluentBooking\App\Models\Availability;
 use FluentBooking\Framework\Support\Arr;
 use FluentBooking\Framework\Support\DateTime;
 
@@ -394,7 +393,7 @@ class TimeSlotService
         $interval = $this->calendarSlot->getSlotInterval($duration) * 60;
 
         $weeklySlots = $this->calendarSlot->getWeeklySlots($hostId);
-        
+
         $items = $this->getEnabledSlots($weeklySlots);
 
         // create range of each day slots from $items array above with $period minutes interval
@@ -567,7 +566,6 @@ class TimeSlotService
         $this->hostId = $hostId;
 
         $event    = $this->calendarSlot;
-        $calendar = $this->calendar;
         $duration = $event->getDuration($duration);
 
         $startDate = $this->adjustStartDate($startDate, $timeZone);

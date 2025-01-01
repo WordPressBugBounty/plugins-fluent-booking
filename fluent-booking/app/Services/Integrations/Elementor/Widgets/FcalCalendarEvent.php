@@ -385,7 +385,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
                                     </div>
                                     <?php echo wp_kses_post($selectedEvent['location_icon_html']); ?>
                                 </div>
-                                <div class="fcal_slot_description"><p><?php echo esc_html($selectedEvent['description']); ?></p></div>
+                                <div class="fcal_slot_description"><p><?php echo wp_kses_post($selectedEvent['description']); ?></p></div>
                             </div>
                         </div>
                     <?php endif; ?>

@@ -74,7 +74,7 @@ class BlockEditorHandler
                         'locations'    => $event->defaultLocationHtml(),
                         'payment_html' => $event->getPaymentHtml(),
                         'loc_settings' => $event->location_settings,
-                        'description'  => Helper::excerpt($event->getDescription())
+                        'description'  => $event->short_description
                     ];
                 }
 

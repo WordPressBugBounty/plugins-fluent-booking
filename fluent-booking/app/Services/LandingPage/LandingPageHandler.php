@@ -179,12 +179,14 @@ class LandingPageHandler
         exit(200);
     }
 
-    private function renderBookingView($calendar, $calendarEvent, $existingBooking = null)
+    private function renderBookingView($calendar, $calendarEvent, $existingBooking = null, $isReschedule = false)
     {
-        $settings = LandingPageHelper::getSettings($calendar, 'public');
-        if ($settings['show_type'] != 'all') {
-            if (!in_array($calendarEvent->id, $settings['enabled_slots'])) {
-                return '';
+        if (!$isReschedule) {
+            $settings = LandingPageHelper::getSettings($calendar, 'public');
+            if ($settings['show_type'] != 'all') {
+                if (!in_array($calendarEvent->id, $settings['enabled_slots'])) {
+                    return '';
+                }
             }
         }
 
@@ -269,7 +271,6 @@ class LandingPageHandler
     private function showBookingConfimationPage($booking, $actionType = 'confirmation')
     {
         $validActions = ['confirmation'];
-        $isRtl = Helper::fluentbooking_is_rtl();
 
         if (in_array($booking->status, ['scheduled', 'pending', 'rescheduled'])) {
             $validActions = array_merge($validActions, ['reschedule', 'cancel']);
@@ -292,16 +293,19 @@ class LandingPageHandler
             die();
         }
 
-        $calendarEvent = $booking->calendar_event;
         global $wp;
+
+        $calendarEvent = $booking->calendar_event;
+
         $responseHtml = BookingService::getBookingConfirmationHtml($booking, $actionType);
 
         $authorProfile = $calendarEvent->getAuthorProfile(true);
 
         $publicCss = 'public/saas_public.css';
-        if ($isRtl) {
+        if (Helper::fluentbooking_is_rtl()) {
             $publicCss = 'public/saas_public-rtl.css';
         }
+
         $data = [
             'title'       => __('Confirmation: ', 'fluent-booking') . $calendarEvent->title . ' ' . __('with', 'fluent-booking') . ' ' . $authorProfile['name'],
             'body'        => $responseHtml,
@@ -315,12 +319,19 @@ class LandingPageHandler
             'slot'        => $calendarEvent,
             'url'         => home_url($wp->request),
             'action_type' => $actionType,
-            'theme'          => Arr::get(get_option('_fluent_booking_settings'), 'theme','system-default')
+            'theme'       => Arr::get(get_option('_fluent_booking_settings'), 'theme','system-default'),
+            'back_button' => [
+                'show' => true,
+                'text' => __('Back to home', 'fluent-booking'),
+                'url'  => site_url('/')
+            ]
         ];
 
         if ($actionType == 'cancel') {
             $data['js_files']['fluent-booking-public-manage-meeting-js'] = App::getInstance('url.assets') . 'public/js/public-manage-meeting.js';
         }
+
+        $data = apply_filters('fluent_booking/booking_confirmation_page_vars', $data, $booking, $calendarEvent);
 
         $app = App::getInstance();
         status_header(200);
@@ -331,18 +342,17 @@ class LandingPageHandler
     private function handleAfterBookingPage()
     {
         $bookingHash = sanitize_text_field(Arr::get($_REQUEST, 'meeting_hash')); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
         if (!$bookingHash) {
             return;
         }
 
         $booking = Booking::where('hash', $bookingHash)->first();
-
         if (!$booking) {
             return;
         }
 
         $type = Arr::get($_REQUEST, 'type', 'confirmation'); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
         $this->showBookingConfimationPage($booking, $type);
     }
 
@@ -412,7 +422,7 @@ class LandingPageHandler
             <?php
         });
 
-        $this->renderBookingView($booking->calendar, $booking->calendar_event, $booking);
+        $this->renderBookingView($booking->calendar, $booking->calendar_event, $booking, true);
     }
 
     public function getEventLandingExtraJsFiles($formFields, $calendarEvent)

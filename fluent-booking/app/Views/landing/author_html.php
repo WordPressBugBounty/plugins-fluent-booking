@@ -31,7 +31,7 @@
                                     <span class="fcal_slot_color_schema" style="background: <?php echo esc_attr($event->color_schema); ?>;"></span>
                                     <?php echo esc_html($event->title); ?>
                                 </h2>
-                                <p class="fcal_description"><?php echo wp_kses_post($event->short_description); ?></p>
+                                <p class="fcal_description"><?php echo esc_html($event->short_description); ?></p>
                                 <div class="fcal_slot_items_wrap">
                                     <span class="fcal_slot_duration">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">

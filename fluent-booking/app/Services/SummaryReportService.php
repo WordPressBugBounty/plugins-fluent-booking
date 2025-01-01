@@ -24,13 +24,18 @@ class SummaryReportService
         if ($status != 'yes' || ($frequency == 'weekly' && $sendingDay != $currentDay)) {
             return;
         }
+        $reportDays = $frequency == 'daily' ? 1 : 7;
 
-        $reportDays = $frequency == 'daily' ? 1 : 7; 
+        $reportDateFrom = gmdate('Y-m-d H:i:s', strtotime("-$reportDays days"));
 
-        $reportDateFrom = gmdate('Y-m-d', time() - $reportDays * 60 * 60 * 24);
+        $totalBooked = Booking::where('created_at', '>=', $reportDateFrom)
+            ->where('created_at', '<=', gmdate('Y-m-d H:i:s'))
+            ->count();
 
-        $totalBooked = Booking::where('end_time', '>', $reportDateFrom)->count();
-        $totalCompleted = Booking::where('created_at', '>', $reportDateFrom)->where('status', 'completed')->count();
+        $totalCompleted = Booking::where('end_time', '>=', $reportDateFrom)
+            ->where('end_time', '<=', gmdate('Y-m-d H:i:s'))
+            ->where('status', 'completed')
+            ->count();
 
         if (!$totalBooked && !$totalCompleted) {
             return;

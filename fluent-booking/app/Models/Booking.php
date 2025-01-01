@@ -263,6 +263,23 @@ class Booking extends Model
         return $query->where('status', $status);
     }
 
+    public function scopeApplyBookingOrderByStatus($query, $status)
+    {
+        if ($status == 'upcoming') {
+            return $query->orderBy('start_time', 'ASC');
+        }
+
+        if ($status == 'latest_bookings') {
+            return $query->orderBy('created_at', 'DESC');
+        }
+
+        if (in_array($status, ['completed', 'cancelled'])) {
+            return $query->orderBy('updated_at', 'DESC');
+        }
+
+        return $query->orderBy('start_time', 'DESC');
+    }
+
     public function getFullBookingDateTimeText($timeZone = 'UTC', $isHtml = false)
     {
         $startDateTime = DateTimeHelper::convertFromUtc($this->start_time, $timeZone, 'Y-m-d H:i:s');
@@ -281,10 +298,13 @@ class Booking extends Model
     public function getShortBookingDateTime($timeZone = 'UTC')
     {
         // date format for Fri Feb 10, 2023
-        $html = DateTimeHelper::convertFromUtc($this->start_time, $timeZone, 'D M d, Y');
-        $html .= ' ' . DateTimeHelper::convertFromUtc($this->start_time, $timeZone, 'h:ia');
+        $startDate = DateTimeHelper::convertFromUtc($this->start_time, $timeZone, 'D M d, Y');
+        $startTime = DateTimeHelper::convertFromUtc($this->start_time, $timeZone, 'h:ia');
 
-        return $html;
+        $localDate = date_i18n('D M d, Y', strtotime($startDate));
+        $localTime = date_i18n('h:ia', strtotime($startTime));
+
+        return $localDate . ' ' . $localTime;
     }
 
     public function getPreviousMeetingTime($timeZone = 'UTC')
@@ -901,7 +921,7 @@ class Booking extends Model
 
     public function isMultiHostBooking()
     {
-        return $this->event_type == 'single_event' || $this->event_type == 'group_event';
+        return in_array($this->event_type, ['single_event', 'group_event', 'collective']);
     }
 
     public function getHostProfiles($public = true)
@@ -923,7 +943,7 @@ class Booking extends Model
     {
         $customFormData = $this->getCustomFormData(false);
 
-        $customFields = BookingFieldService::getBookingFields($calendarEvent);
+        $customFields = BookingFieldService::getBookingFields($calendarEvent, true);
 
         foreach ($customFields as $field) {
             $fieldValue = Arr::get($customFormData, $field['name']);

@@ -14,6 +14,7 @@ class EmailNotificationService
      * @param $email
      * @param $emailTo
      * @param $actionType
+     * @param bool $resending
      * @return bool|mixed
      */
     public static function emailOnBooked(Booking $booking, $email, $emailTo, $actionType = 'scheduled', $resending = false)
@@ -90,8 +91,8 @@ class EmailNotificationService
 
         $result = Mailer::send($to, $emailSubject, $body, $headers, $attachments);
 
-        if ($attachments) {
-            wp_delete_file($attachments[0]);
+        foreach ($attachments as $attachment) {
+            wp_delete_file($attachment);
         }
 
         $status = $result ? 'sent' : 'sending failed';
@@ -368,7 +369,7 @@ class EmailNotificationService
 
         $status = $result ? 'sent' : 'sending failed';
 
-        $title = sprintf(__('Rescheduled booking email %s to $s', 'fluent-booking'), $status, $emailTo);
+        $title = sprintf(__('Rescheduled booking email %s to %s', 'fluent-booking'), $status, $emailTo);
 
         $description = sprintf(__('Rescheduling email %s to %s', 'fluent-booking'), $status, $emailTo);
 
@@ -415,6 +416,8 @@ class EmailNotificationService
 
     private static function prepareAttachments($booking)
     {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+
         if (!WP_Filesystem()) {
             return [];
         }
@@ -425,6 +428,7 @@ class EmailNotificationService
         
         global $wp_filesystem;
         $wp_filesystem->put_contents($filePath, $icsContent);
+
         return [$filePath];
     }
 

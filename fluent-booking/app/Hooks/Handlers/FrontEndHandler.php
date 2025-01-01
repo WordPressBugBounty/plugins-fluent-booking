@@ -14,7 +14,6 @@ use FluentBooking\App\Services\LandingPage\LandingPageHandler;
 use FluentBooking\App\Hooks\Handlers\TimeSlotServiceHandler;
 use FluentBooking\App\Services\CalendarEventService;
 use FluentBooking\App\Services\LocationService;
-use FluentBooking\App\Services\TimeSlotService;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\Framework\Support\Arr;
 
@@ -298,7 +297,8 @@ class FrontEndHandler
             'logo'          => Arr::get($headerConfig, 'logo', ''),
             'title'         => Arr::get($headerConfig, 'title', ''),
             'description'   => Arr::get($headerConfig, 'description', ''),
-            'wrapper_class' => Arr::get($headerConfig, 'wrapper_class', '')
+            'wrapper_class' => Arr::get($headerConfig, 'wrapper_class', ''),
+            'hide_info'     => Arr::isTrue($headerConfig, 'hide_info')
         ]);
     }
 
@@ -335,8 +335,8 @@ class FrontEndHandler
 
         $bookingQuery = Booking::query()->with('calendar_event')
             ->where('email', $userEmail)
-            ->orderBy('start_time', 'DESC')
-            ->applyComputedStatus($bookingPeriod);
+            ->applyComputedStatus($bookingPeriod)
+            ->applyBookingOrderByStatus($bookingPeriod);
 
         if ($atts['calendar_ids'] != 'all') {
             $atts['calendar_ids'] = array_map('intval', explode(',', $atts['calendar_ids']));
@@ -677,6 +677,7 @@ class FrontEndHandler
                 'Add guest'                            => __('Add guest', 'fluent-booking'),
                 'Add guests'                           => __('Add guests', 'fluent-booking'),
                 'Add another'                          => __('Add another', 'fluent-booking'),
+                'Choose File'                          => __('Choose File', 'fluent-booking'),
                 'This field is required.'              => __('This field is required.', 'fluent-booking'),
                 'No availability in'                   => __('No availability in', 'fluent-booking'),
                 'View next month'                      => __('View next month', 'fluent-booking'),
@@ -766,7 +767,7 @@ class FrontEndHandler
         }
 
         if ($additionalGuests = Arr::get($postedData, 'guests', [])) {
-            if (in_array($calendarEvent->event_type, ['group', 'group_event'])) {
+            if ($calendarEvent->isMultiGuestEvent()) {
                 $additionalGuests = $this->sanitize_mapped_data($additionalGuests);
                 $additionalGuests = array_values(array_filter($additionalGuests, function ($guest) {
                     return Arr::get($guest, 'name') && Arr::get($guest, 'email');
@@ -810,6 +811,15 @@ class FrontEndHandler
             wp_send_json([
                 'message' => $customFieldsData->get_error_message(),
                 'errors'  => $customFieldsData->get_error_data()
+            ], 422);
+            return;
+        }
+
+        $validateDateFields = BookingFieldService::validateDateFields($customFieldsData, $calendarEvent);
+
+        if (is_wp_error($validateDateFields)) {
+            wp_send_json([
+                'message' => $validateDateFields->get_error_message(),
             ], 422);
             return;
         }
@@ -894,7 +904,7 @@ class FrontEndHandler
             $bookingData['additional_guests'] = array_slice($additionalGuests, 0, $guestLimit);
         }
 
-        if ($calendarEvent->isTeamEvent()) {
+        if ($calendarEvent->isRoundRobin()) {
             $bookingData['host_user_id'] = $timeSlotService->hostUserId;
         }
 

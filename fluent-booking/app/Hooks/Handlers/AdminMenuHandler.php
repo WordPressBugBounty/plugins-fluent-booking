@@ -320,6 +320,11 @@ class AdminMenuHandler
         $assets = $app['url.assets'];
         $currentUser = get_user_by('ID', get_current_user_id());
 
+        $currentUsername = trim($currentUser->first_name . ' ' . $currentUser->last_name);
+        if (!$currentUsername) {
+            $currentUsername = $currentUser->display_name;
+        }
+
         $isNew = $this->isNew();
 
         $requireSlug = false;
@@ -356,6 +361,7 @@ class AdminMenuHandler
         $weekSelectTimes = Helper::getWeekSelectTimes();
         $overrideSelectTimes = Helper::getOverrideSelectTimes();
         $statusChangingTimes = Helper::getBookingStatusChangingTimes();
+        $defaultTermsAndConditions = Helper::getDefaultTermsAndConditions();
         $locationFields = (new CalendarSlot())->getLocationFields();
 
         return apply_filters('fluent_booking/admin_vars', [
@@ -377,10 +383,11 @@ class AdminMenuHandler
             'multi_duration_lookup'  => $multiDurationLookup,
             'override_select_times'  => $overrideSelectTimes,
             'status_changing_times'  => $statusChangingTimes,
+            'default_terms'          => $defaultTermsAndConditions,
             'me'                     => [
                 'id'          => $currentUser->ID,
                 'calendar_id' => $calendarId,
-                'full_name'   => trim($currentUser->first_name . ' ' . $currentUser->last_name),
+                'full_name'   => $currentUsername,
                 'email'       => $currentUser->user_email,
                 'is_admin'    => $hasAllAccess,
                 'permissions' => PermissionManager::getUserPermissions($currentUser, false),

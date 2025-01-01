@@ -62,17 +62,7 @@ class SchedulesController extends Controller
 
         $query->applyComputedStatus($period);
 
-        if ($period == 'upcoming') {
-            $query = $query->orderBy('start_time', 'ASC');
-        } else if ($period == 'latest_bookings') {
-            $query = $query->orderBy('created_at', 'DESC');
-        } else if ($period == 'no_show') {
-            $query = $query->orderBy('start_time', 'DESC');
-        } else if ($period == 'latest_bookings') {
-            $query = $query->orderBy('id', 'DESC');
-        } else {
-            $query = $query->orderBy('start_time', 'DESC');
-        }
+        $query->applyBookingOrderByStatus($period);
 
         $query->groupBy('group_id');
 
@@ -365,6 +355,10 @@ class SchedulesController extends Controller
         $activities = BookingActivity::where('booking_id', $booking->id)
             ->orderBy('id', 'DESC')
             ->get();
+        
+        $activities->each(function ($activity) {
+            $activity->description = wp_unslash($activity->description);
+        });
 
         $sidebarContents = [];
         $mainBodyContents = [];

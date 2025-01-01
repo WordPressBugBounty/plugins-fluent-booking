@@ -3,9 +3,9 @@ Contributors: techjewel, wpmanageninja
 Author URI: https://fluentbooking.com/
 Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 7.3
-Stable tag: 1.5.25
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,38 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 1.6.0 (Date: 01 Jan 2025)
+- Added New Field Terms and Conditions
+- Added HTML Support in Calendar Event Description
+- Added Collective Event Type for Many to One Meeting
+- Added Name and Email for Manual Booking Additional Guest
+- Added Hidden Field Type in Generate Link
+- Added Min and Max Date Option to Date Field
+- Added Event Time Translation in Email Notifications
+- Added Hook for Back Button Customization
+- Added Event Time Custom Format Short-code
+- Added Missing Translation String
+- Updated Booking Details All Times in Local Timezone
+- Updated Outlook Calendar Syncing Limit
+- Updated Booking Activity Description Rendering
+- Updated Manual Booking Interval to 5 Minutes
+- Sorted Completed and Cancelled Bookings by Most Recent
+- Resolved Issue with Rescheduling
+- Resolved Twilio Disconnection Error
+- Resolved NextCloud Calendar Event Creating Issue with Location
+- Resolved Summary Report Content Mismatching
+- Resolved Conversational Form Calendar Not Rendering in Mobile
+- Fixed Issue with Dublin DST Checking
+- Fixed Cancel Reason Not Formatting Issue
+- Fixed Checkbox Field Required Not Working Issue
+- Fixed Cloned Event Not Displaying in Gutenberg Block
+- Fixed Own Calendar Permission Issue with Manual Booking
+- Fixed Short-code Button Showing in Email Footer
+- Fixed Issue with ICS File Attachment
+- Fixed Round Robin Organizer Not Removing Issue
+- Fixed Issue with Time Format G\hi
+- Improved UI-UX
 
 = 1.5.25 (Date: 22 Oct 2024)
 - Added Italian and German Language

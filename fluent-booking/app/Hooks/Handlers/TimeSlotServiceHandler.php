@@ -13,8 +13,12 @@ class TimeSlotServiceHandler
                 return new \WP_Error('pro_plugin_required', __('Pro plugin is required for this event.', 'fluent-booking'));
             }
 
-            if ($calendarEvent->isTeamEvent()) {
-                return new \FluentBookingPro\App\Services\TeamTimeSlotService($calendar, $calendarEvent);
+            if ($calendarEvent->isRoundRobin()) {
+                return new \FluentBookingPro\App\Services\RoundRobinTimeSlotService($calendar, $calendarEvent);
+            }
+
+            if ($calendarEvent->isCollective()) {
+                return new \FluentBookingPro\App\Services\CollectiveTimeSlotService($calendar, $calendarEvent);
             }
 
             if ($calendarEvent->isOneOffEvent()) {

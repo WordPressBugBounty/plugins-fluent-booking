@@ -29,12 +29,14 @@
         <div class="fcal_conf_wrap">
             <?php echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         </div>
-        <div class="fcal_back_btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left h-5 w-5 rtl:rotate-180">
-                <path d="m15 18-6-6 6-6"></path>
-            </svg>
-            <a href="<?php echo esc_url(site_url('/')); ?>"><?php esc_html_e('Back to home', 'fluent-booking'); ?></a>
-        </div>
+        <?php if (!empty($back_button['show'])): ?>
+            <div class="fcal_back_btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left h-5 w-5 rtl:rotate-180">
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+                <a href="<?php echo esc_url($back_button['url']); ?>"><?php echo esc_html($back_button['text']); ?></a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <script>

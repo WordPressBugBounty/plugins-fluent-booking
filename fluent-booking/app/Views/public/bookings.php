@@ -16,6 +16,7 @@
                             <label for="fcal_period_<?php echo esc_attr($value) ?>"><?php echo esc_html($label) ?></label>
                         </div>
                     <?php endforeach; ?>
+                    <input type="hidden" name="booking_per_page" value="<?php echo esc_attr($per_page); ?>">
                 </form>
             </div>
         <?php endif; ?>
@@ -91,10 +92,11 @@
             <form action="" method="GET">
                 <select name="booking_per_page" id="fcal_booking_per_page" onchange="this.form.submit()">
                     <?php foreach ($page_options as $option): ?>
-                        <option value="<?php echo esc_attr($option); ?>" <?php $per_page == $option ? 'selected' : '' ?>>
+                        <option value="<?php echo esc_attr($option); ?>" <?php echo ($per_page == $option) ? 'selected' : ''; ?>>
                             <?php echo esc_html($option) . '/' . esc_html__('page', 'fluent-booking') ?>
                         </option>
                     <?php endforeach; ?>
+                    <input type="hidden" name="booking_period" value="<?php echo esc_attr($booking_period); ?>">
                 </select>
             </form>
 

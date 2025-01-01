@@ -1523,8 +1523,19 @@ class Helper
             [
                 'value' => 'hidden',
                 'label' => __('Hidden', 'fluent-booking')
+            ],
+            [
+                'value' => 'terms-and-conditions',
+                'label' => __('Terms & Conditions', 'fluent-booking')
             ]
         ]);
+    }
+
+    public static function getDefaultTermsAndConditions()
+    {
+        $termsAndConditions = __('I have read and agree to the <a href="#" target="_blank" rel="noopener">Terms and Conditions</a> and <a href="#" target="_blank" rel="noopener">Privacy Policy</a>.', 'fluent-booking');
+
+        return apply_filters('fluent_booking/default_terms_and_conditions', $termsAndConditions);
     }
 
     public static function getDefaultEmailNotificationSettings()
@@ -1688,25 +1699,27 @@ class Helper
                     'title'      => __('Booking Data', 'fluent-booking'),
                     'key'        => 'booking',
                     'shortcodes' => [
-                        '{{booking.event_name}}'                        => __('Event Name', 'fluent-booking'),
-                        '{{booking.description}}'                       => __('Event Description', 'fluent-booking'),
-                        '{{booking.booking_title}}'                     => __('Booking Title', 'fluent-booking'),
-                        '{{booking.additional_guests}}'                 => __('Additional Guests', 'fluent-booking'),
-                        '{{booking.full_start_end_guest_timezone}}'     => __('Full Start Date Time (with guest timezone)', 'fluent-booking'),
-                        '{{booking.full_start_end_host_timezone}}'      => __('Full Start Date Time (with host timezone)', 'fluent-booking'),
-                        '{{booking.full_start_and_end_guest_timezone}}' => __('Full Start & End Date Time (with guest timezone)', 'fluent-booking'),
-                        '{{booking.full_start_and_end_host_timezone}}'  => __('Full Start & End Date Time (with host timezone)', 'fluent-booking'),
-                        '{{booking.start_date_time}}'                   => __('Event Date Time (UTC)', 'fluent-booking'),
-                        '{{booking.start_date_time_for_attendee}}'      => __('Event Date Time (with attendee timezone)', 'fluent-booking'),
-                        '{{booking.start_date_time_for_host}}'          => __('Event Date Time (with host timezone)', 'fluent-booking'),
-                        '{{booking.location_details_text}}'             => __('Event Location Details', 'fluent-booking'),
-                        '{{booking.cancel_reason}}'                     => __('Event Cancel Reason', 'fluent-booking'),
-                        '{{booking.start_time_human_format}}'           => __('Event Start Time (ex: 2 hours from now)', 'fluent-booking'),
-                        '##booking.cancelation_url##'                   => __('Booking Cancellation URL', 'fluent-booking'),
-                        '##booking.reschedule_url##'                    => __('Booking Reschedule URL', 'fluent-booking'),
-                        '##booking.admin_booking_url##'                 => __('Booking Details Admin URL', 'fluent-booking'),
-                        '{{booking.booking_hash}}'                      => __('Unique Booking Hash', 'fluent-booking'),
-                        '{{booking.reschedule_reason}}'                 => __('Event Reschedule Reason', 'fluent-booking')
+                        '{{booking.event_name}}'                                => __('Event Name', 'fluent-booking'),
+                        '{{booking.description}}'                               => __('Event Description', 'fluent-booking'),
+                        '{{booking.booking_title}}'                             => __('Booking Title', 'fluent-booking'),
+                        '{{booking.additional_guests}}'                         => __('Additional Guests', 'fluent-booking'),
+                        '{{booking.full_start_end_guest_timezone}}'             => __('Full Start Date Time (with guest timezone)', 'fluent-booking'),
+                        '{{booking.full_start_end_host_timezone}}'              => __('Full Start Date Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.full_start_and_end_guest_timezone}}'         => __('Full Start & End Date Time (with guest timezone)', 'fluent-booking'),
+                        '{{booking.full_start_and_end_host_timezone}}'          => __('Full Start & End Date Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time}}'                           => __('Event Date Time (UTC)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_attendee}}'              => __('Event Date Time (with attendee timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_host}}'                  => __('Event Date Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_attendee.format.Y-m-d}}' => __('Event Date Time (with attendee timezone) (Ex: 2024-05-20)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_host.format.Y-m-d}}'     => __('Event Date Time (with host timezone) (Ex: 2024-05-20)', 'fluent-booking'),
+                        '{{booking.location_details_text}}'                     => __('Event Location Details', 'fluent-booking'),
+                        '{{booking.cancel_reason}}'                             => __('Event Cancel Reason', 'fluent-booking'),
+                        '{{booking.start_time_human_format}}'                   => __('Event Start Time (ex: 2 hours from now)', 'fluent-booking'),
+                        '##booking.cancelation_url##'                           => __('Booking Cancellation URL', 'fluent-booking'),
+                        '##booking.reschedule_url##'                            => __('Booking Reschedule URL', 'fluent-booking'),
+                        '##booking.admin_booking_url##'                         => __('Booking Details Admin URL', 'fluent-booking'),
+                        '{{booking.booking_hash}}'                              => __('Unique Booking Hash', 'fluent-booking'),
+                        '{{booking.reschedule_reason}}'                         => __('Event Reschedule Reason', 'fluent-booking')
                     ]
                 ],
                 'host'    => [
@@ -1751,25 +1764,27 @@ class Helper
                     'title'      => __('Booking Data', 'fluent-booking'),
                     'key'        => 'booking',
                     'shortcodes' => [
-                        '{{booking.event_name}}'                        => __('Event Name', 'fluent-booking'),
-                        '{{booking.description}}'                       => __('Event Description', 'fluent-booking'),
-                        '{{booking.booking_title}}'                     => __('Booking Title', 'fluent-booking'),
-                        '{{booking.additional_guests}}'                 => __('Additional Guests', 'fluent-booking'),
-                        '{{booking.full_start_end_guest_timezone}}'     => __('Full Start Date Time (with guest timezone)', 'fluent-booking'),
-                        '{{booking.full_start_end_host_timezone}}'      => __('Full Start Date Time (with host timezone)', 'fluent-booking'),
-                        '{{booking.full_start_and_end_guest_timezone}}' => __('Full Start & End Date Time (with guest timezone)', 'fluent-booking'),
-                        '{{booking.full_start_and_end_host_timezone}}'  => __('Full Start & End Date Time (with host timezone)', 'fluent-booking'),
-                        '{{booking.start_date_time}}'                   => __('Event Date Time (UTC)', 'fluent-booking'),
-                        '{{booking.start_date_time_for_attendee}}'      => __('Event Date time (with guest timezone)', 'fluent-booking'),
-                        '{{booking.start_date_time_for_host}}'          => __('Event Date time (with host timezone)', 'fluent-booking'),
-                        '{{booking.location_details_html}}'             => __('Event Location Details (HTML)', 'fluent-booking'),
-                        '{{booking.cancel_reason}}'                     => __('Event Cancel Reason', 'fluent-booking'),
-                        '{{booking.start_time_human_format}}'           => __('Event Start Time (ex: 2 hours from now)', 'fluent-booking'),
-                        '##booking.cancelation_url##'                   => __('Booking Cancellation URL', 'fluent-booking'),
-                        '##booking.reschedule_url##'                    => __('Booking Reschedule URL', 'fluent-booking'),
-                        '##booking.admin_booking_url##'                 => __('Booking Details Admin URL', 'fluent-booking'),
-                        '{{booking.booking_hash}}'                      => __('Unique Booking Hash', 'fluent-booking'),
-                        '{{booking.reschedule_reason}}'                 => __('Event Reschedule Reason', 'fluent-booking')
+                        '{{booking.event_name}}'                                => __('Event Name', 'fluent-booking'),
+                        '{{booking.description}}'                               => __('Event Description', 'fluent-booking'),
+                        '{{booking.booking_title}}'                             => __('Booking Title', 'fluent-booking'),
+                        '{{booking.additional_guests}}'                         => __('Additional Guests', 'fluent-booking'),
+                        '{{booking.full_start_end_guest_timezone}}'             => __('Full Start Date Time (with guest timezone)', 'fluent-booking'),
+                        '{{booking.full_start_end_host_timezone}}'              => __('Full Start Date Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.full_start_and_end_guest_timezone}}'         => __('Full Start & End Date Time (with guest timezone)', 'fluent-booking'),
+                        '{{booking.full_start_and_end_host_timezone}}'          => __('Full Start & End Date Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time}}'                           => __('Event Date Time (UTC)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_attendee}}'              => __('Event Date time (with guest timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_host}}'                  => __('Event Date time (with host timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_attendee.format.Y-m-d}}' => __('Event Date Time (with attendee timezone) (Ex: 2024-05-20)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_host.format.Y-m-d}}'     => __('Event Date Time (with host timezone) (Ex: 2024-05-20)', 'fluent-booking'),
+                        '{{booking.location_details_html}}'                     => __('Event Location Details (HTML)', 'fluent-booking'),
+                        '{{booking.cancel_reason}}'                             => __('Event Cancel Reason', 'fluent-booking'),
+                        '{{booking.start_time_human_format}}'                   => __('Event Start Time (ex: 2 hours from now)', 'fluent-booking'),
+                        '##booking.cancelation_url##'                           => __('Booking Cancellation URL', 'fluent-booking'),
+                        '##booking.reschedule_url##'                            => __('Booking Reschedule URL', 'fluent-booking'),
+                        '##booking.admin_booking_url##'                         => __('Booking Details Admin URL', 'fluent-booking'),
+                        '{{booking.booking_hash}}'                              => __('Unique Booking Hash', 'fluent-booking'),
+                        '{{booking.reschedule_reason}}'                         => __('Event Reschedule Reason', 'fluent-booking')
                     ]
                 ],
                 'host'    => [

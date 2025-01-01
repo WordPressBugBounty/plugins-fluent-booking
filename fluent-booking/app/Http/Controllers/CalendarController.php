@@ -2,10 +2,8 @@
 
 namespace FluentBooking\App\Http\Controllers;
 
-use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
-use FluentBooking\App\Models\Availability;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\App\Services\LandingPage\LandingPageHelper;
@@ -66,7 +64,6 @@ class CalendarController extends Controller
                 $slot->duration = $slot->getDefaultDuration();
                 $slot->price_total = $slot->getPricingTotal();
                 $slot->location_fields = $slot->getLocationFields();
-                $slot->short_description = Helper::excerpt($slot->getDescription());
                 $slot->author_profiles = $slot->isMultiHostEvent() ? $slot->getAuthorProfiles() : [];
                 do_action_ref_array('fluent_booking/calendar_slot', [&$slot]);
             }
@@ -239,7 +236,7 @@ class CalendarController extends Controller
             'calendar_id'       => $calendar->id,
             'user_id'           => $calendar->user_id,
             'duration'          => (int)$slot['duration'],
-            'description'       => sanitize_textarea_field(Arr::get($slot, 'description')),
+            'description'       => wp_kses_post(Arr::get($slot, 'description')),
             'settings'          => [
                 'team_members'     => !$isHostCalendar ? $teamMembers : [],
                 'schedule_type'    => sanitize_text_field($slot['schedule_type']),
@@ -378,6 +375,8 @@ class CalendarController extends Controller
 
         $eventSettings['location_fields'] = $calendarEvent->getLocationFields();
 
+        $eventSettings['hosts_schedules'] = $calendarEvent->getHostsSchedules();
+
         $calendarEvent->settings = apply_filters('fluent_booking/get_calendar_event_settings', $eventSettings, $calendarEvent, $calendarEvent->calendar);
 
         $data = [
@@ -474,7 +473,7 @@ class CalendarController extends Controller
             'calendar_id'       => $calendar->id,
             'user_id'           => $calendar->user_id,
             'duration'          => (int)$slot['duration'],
-            'description'       => sanitize_textarea_field(Arr::get($slot, 'description')),
+            'description'       => wp_kses_post(Arr::get($slot, 'description')),
             'settings'          => [
                 'schedule_type'       => sanitize_text_field($slot['settings']['schedule_type']),
                 'weekly_schedules'    => SanitizeService::weeklySchedules($slot['settings']['weekly_schedules'], $calendar->author_timezone, 'UTC'),
@@ -568,7 +567,7 @@ class CalendarController extends Controller
         $event->duration = (int)$data['duration'];
         $event->status = SanitizeService::checkCollection($data['status'], ['active', 'draft']);
         $event->color_schema = sanitize_text_field(Arr::get($data, 'color_schema', '#0099ff'));
-        $event->description = sanitize_textarea_field(Arr::get($data, 'description'));
+        $event->description = wp_kses_post(Arr::get($data, 'description'));
         $event->max_book_per_slot = (int)Arr::get($data, 'max_book_per_slot');
         $event->is_display_spots = (bool)Arr::get($data, 'is_display_spots');
         $event->location_settings = SanitizeService::locationSettings(Arr::get($data, 'location_settings', []));
@@ -597,7 +596,7 @@ class CalendarController extends Controller
 
         $event = CalendarSlot::where('calendar_id', $calendarId)->findOrFail($eventId);
 
-        $event->settings = [
+        $eventSettings = [
             'schedule_type'      => sanitize_text_field(Arr::get($data, 'schedule_type')),
             'weekly_schedules'   => SanitizeService::weeklySchedules(Arr::get($data, 'weekly_schedules'), $event->calendar->author_timezone, 'UTC'),
             'date_overrides'     => SanitizeService::slotDateOverrides(Arr::get($data, 'date_overrides', []), $event->calendar->author_timezone, 'UTC'),
@@ -606,6 +605,15 @@ class CalendarController extends Controller
             'range_date_between' => SanitizeService::rangeDateBetween(Arr::get($data, 'range_date_between', ['', ''])),
             'common_schedule'    => Arr::isTrue($data, 'common_schedule', false)
         ];
+
+        if ($event->isTeamEvent()) {
+            $eventSettings['hosts_schedules'] = array_map('intval', array_combine(
+                array_map('intval', array_keys(Arr::get($data, 'hosts_schedules', []))),
+                array_map('intval', Arr::get($data, 'hosts_schedules', []))
+            ));
+        }
+
+        $event->settings = $eventSettings;
 
         $event->availability_id = (int)Arr::get($data, 'availability_id');
         $event->availability_type = SanitizeService::checkCollection(Arr::get($data, 'availability_type'), ['existing_schedule', 'custom']);
@@ -677,6 +685,8 @@ class CalendarController extends Controller
         $originalEvent = CalendarSlot::with('event_metas')->where('calendar_id', $calendarId)->findOrFail($eventId);
 
         $clonedEvent = $originalEvent->replicate();
+
+        $clonedEvent->hash = null;
 
         $clonedEvent->calendar_id = $calendar->id;
 
@@ -815,7 +825,7 @@ class CalendarController extends Controller
 
         $formattedFields = [];
 
-        $textFields = ['type', 'name', 'label', 'placeholder', 'limit', 'help_text', 'date_format'];
+        $textFields = ['type', 'name', 'label', 'placeholder', 'limit', 'help_text', 'date_format', 'min_date', 'max_date'];
         $booleanFields = ['enabled', 'required', 'system_defined', 'disable_alter', 'is_sms_number'];
 
         foreach ($bookingFields as $value) {
@@ -848,9 +858,11 @@ class CalendarController extends Controller
                 $formattedField['file_size_value'] = intval(Arr::get($value, 'file_size_value'));
                 $formattedField['file_size_unit'] = SanitizeService::checkCollection(Arr::get($value, 'file_size_unit'), ['kb','mb']);
             }
-
             if ($value['type'] == 'hidden') {
                 $formattedField['default_value'] = sanitize_text_field(Arr::get($value, 'default_value'));
+            }
+            if ($value['type'] == 'terms-and-conditions') {
+                $formattedField['terms_and_conditions'] = wp_kses_post(Arr::get($value, 'terms_and_conditions'));
             }
 
             $formattedFields[] = $formattedField;
