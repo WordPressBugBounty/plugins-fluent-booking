@@ -2,7 +2,6 @@
 
 namespace FluentBooking\App\Http\Controllers;
 
-use FluentBooking\App\App;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\Framework\Support\Arr;

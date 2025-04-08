@@ -3,8 +3,6 @@
 namespace FluentBooking\App\Http\Controllers;
 
 use FluentBooking\App\Models\Calendar;
-use FluentBooking\App\Models\Meta;
-use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\App\Services\Helper;
 

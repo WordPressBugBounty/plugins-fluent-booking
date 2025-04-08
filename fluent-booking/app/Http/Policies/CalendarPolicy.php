@@ -32,6 +32,12 @@ class CalendarPolicy extends Policy
             return PermissionManager::canReadCalendar($calendarId);
         }
 
+        $eventId = $request->event_id;
+
+        if ($eventId) {
+            return PermissionManager::canUpdateCalendarEvent($eventId);
+        }
+
         return PermissionManager::canWriteCalendar($calendarId);
     }
 
@@ -61,6 +67,11 @@ class CalendarPolicy extends Policy
     public function checkSlug(Request $request)
     {
         return PermissionManager::userCan(['invite_team_members', 'manage_own_calendar']);
+    }
+
+    public function getEvent(Request $request, $calendarId, $eventId)
+    {
+        return PermissionManager::canUpdateCalendarEvent($eventId);
     }
 
     public function deleteCalendar(Request $request)

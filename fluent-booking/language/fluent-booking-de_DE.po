@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Fluent Booking\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-26 16:40+0000\n"
-"PO-Revision-Date: 2024-12-24 12:36+0000\n"
+"PO-Revision-Date: 2025-04-08 10:28+0000\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "Language: de_DE\n"
@@ -28,7 +28,7 @@ msgstr "(Telefonnummer des Organisators)"
 msgid " ago"
 msgstr "zuvor"
 
-#: app/Services/Helper.php:1834
+#: app/Services/Helper.php:1845
 msgid " Email"
 msgstr "E-Mail"
 
@@ -36,7 +36,7 @@ msgstr "E-Mail"
 msgid " from now"
 msgstr "von jetzt an"
 
-#: app/Services/Helper.php:1833
+#: app/Services/Helper.php:1844
 msgid " Name"
 msgstr "Name"
 
@@ -315,7 +315,7 @@ msgstr "Hinzufügen"
 msgid "Add a date override"
 msgstr "Einen Sondertag hinzufügen"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:678
+#: app/Hooks/Handlers/FrontEndHandler.php:679
 msgid "Add another"
 msgstr "Einen weiteren hinzufügen"
 
@@ -333,7 +333,7 @@ msgstr "Weitere Standortwahl hinzufügen"
 msgid "Add Available Times"
 msgstr ""
 
-#: app/Services/Helper.php:1732 app/Services/Helper.php:1797
+#: app/Services/Helper.php:1743 app/Services/Helper.php:1808
 msgid "Add Booking to Calendar"
 msgstr ""
 
@@ -351,11 +351,11 @@ msgstr ""
 "Fügen Sie Daten hinzu, wenn sich Ihre Verfügbarkeit gegenüber Ihren "
 "wöchentlichen Arbeitszeiten ändert"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:676
+#: app/Hooks/Handlers/FrontEndHandler.php:677
 msgid "Add guest"
 msgstr ""
 
-#: app/Services/TransStrings.php:671 app/Hooks/Handlers/FrontEndHandler.php:677
+#: app/Services/TransStrings.php:671 app/Hooks/Handlers/FrontEndHandler.php:678
 msgid "Add guests"
 msgstr "Gäste hinzufügen"
 
@@ -453,7 +453,7 @@ msgstr "Team-Mitglied hinzufügen"
 msgid "Add to Block"
 msgstr "Zu Block hinzufügen"
 
-#: app/Services/Helper.php:1656 app/Views/public/booking_confirmation.php:93
+#: app/Services/Helper.php:1667 app/Views/public/booking_confirmation.php:93
 msgid "Add to calendar"
 msgstr "Zu Kalender hinzufügen"
 
@@ -468,8 +468,8 @@ msgid "Add your FluentBooking to WordPress frontend / any Page via Shortcode."
 msgstr ""
 
 #: app/Services/TransStrings.php:215 app/Services/BookingFieldService.php:137
-#: app/Services/BookingService.php:304 app/Services/Helper.php:1694
-#: app/Services/Helper.php:1759
+#: app/Services/BookingService.php:304 app/Services/Helper.php:1705
+#: app/Services/Helper.php:1770
 msgid "Additional Guests"
 msgstr "Zusätzliche Gäste"
 
@@ -510,7 +510,7 @@ msgid "Advanced Operators"
 msgstr "Fortgeschrittene Operatoren"
 
 #: app/Services/TransStrings.php:838
-#: app/Hooks/Handlers/AdminMenuHandler.php:723
+#: app/Hooks/Handlers/AdminMenuHandler.php:725
 msgid "Advanced Settings"
 msgstr "Erweiterte Einstellungen"
 
@@ -587,7 +587,7 @@ msgstr "Bereits zugewiesen"
 msgid "Always"
 msgstr "Immer"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:671
+#: app/Hooks/Handlers/FrontEndHandler.php:672
 msgid "AM"
 msgstr ""
 
@@ -615,7 +615,7 @@ msgid "API Error:"
 msgstr "API-Fehler:"
 
 #: app/Services/TransStrings.php:901
-#: app/Hooks/Handlers/AdminMenuHandler.php:524
+#: app/Hooks/Handlers/AdminMenuHandler.php:526
 msgid "Apple Calendar"
 msgstr "Apple Calendar"
 
@@ -717,7 +717,7 @@ msgid "Assign Member"
 msgstr "Mitglied zuweisen"
 
 #: app/Services/TransStrings.php:529
-#: app/Hooks/Handlers/AdminMenuHandler.php:639
+#: app/Hooks/Handlers/AdminMenuHandler.php:641
 msgid "Assignment"
 msgstr "Zuweisung"
 
@@ -742,12 +742,12 @@ msgstr "Teilnehmer kann nicht stornieren"
 msgid "Attendee Cannot Reschedule"
 msgstr "Teilnehmer kann nicht verschieben"
 
-#: app/Services/Helper.php:1675 app/Services/Helper.php:1739
+#: app/Services/Helper.php:1686 app/Services/Helper.php:1750
 msgid "Attendee Data"
 msgstr "Teilnehmerdaten"
 
 #: app/Services/TransStrings.php:275 app/Services/LocationService.php:56
-#: app/Models/CalendarSlot.php:717 app/Hooks/Handlers/FrontEndHandler.php:663
+#: app/Models/CalendarSlot.php:724 app/Hooks/Handlers/FrontEndHandler.php:664
 msgid "Attendee Phone Number"
 msgstr "Telefonnummer des Teilnehmers"
 
@@ -775,14 +775,14 @@ msgstr "Aug."
 msgid "August"
 msgstr "August"
 
-#: app/Http/Controllers/CalendarController.php:126
+#: app/Http/Controllers/CalendarController.php:125
 msgid "Author timezone field is required"
 msgstr ""
 
 #: app/Services/TransStrings.php:67 app/Hooks/Handlers/AdminMenuHandler.php:76
 #: app/Hooks/Handlers/AdminMenuHandler.php:77
 #: app/Hooks/Handlers/AdminMenuHandler.php:134
-#: app/Hooks/Handlers/AdminMenuHandler.php:653
+#: app/Hooks/Handlers/AdminMenuHandler.php:655
 msgid "Availability"
 msgstr "Verfügbarkeit"
 
@@ -827,7 +827,7 @@ msgid "beta"
 msgstr "beta"
 
 #. %d is the duration of the meeting in minutes
-#: app/Models/CalendarSlot.php:473
+#: app/Models/CalendarSlot.php:480
 msgid "Book a meeting with me for %d minutes"
 msgstr "Buchen Sie einen Termin mit mir für %d Minuten"
 
@@ -863,7 +863,7 @@ msgstr "Buchung"
 msgid "Booking %s email %s to %s"
 msgstr ""
 
-#: app/Services/Helper.php:1626
+#: app/Services/Helper.php:1637
 msgid "Booking Approval Request to Host (email to Organizer)"
 msgstr ""
 
@@ -882,7 +882,7 @@ msgstr "Buchung abgesagt"
 msgid "Booking Cancellation"
 msgstr ""
 
-#: app/Services/Helper.php:1707 app/Services/Helper.php:1772
+#: app/Services/Helper.php:1718 app/Services/Helper.php:1783
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:97
 msgid "Booking Cancellation URL"
 msgstr "URL für Buchungsstornierung"
@@ -893,11 +893,11 @@ msgstr "URL für Buchungsstornierung"
 msgid "Booking Cancelled"
 msgstr "Termin abgesagt"
 
-#: app/Services/Helper.php:1590
+#: app/Services/Helper.php:1601
 msgid "Booking Cancelled by Attendee (email to Organizer)"
 msgstr "Termin abgesagt durch Teilnehmer (E-Mail an Organisator)"
 
-#: app/Services/Helper.php:1599
+#: app/Services/Helper.php:1610
 msgid "Booking Cancelled by Organizer (email to Attendee)"
 msgstr "Termin abgesagt durch Organisator (E-Mail an Teilnehmer)"
 
@@ -916,11 +916,11 @@ msgstr "Buchung abgeschlossen"
 msgid "Booking Completed Funnel"
 msgstr ""
 
-#: app/Services/Helper.php:1541
+#: app/Services/Helper.php:1552
 msgid "Booking Confirmation Email to Attendee"
 msgstr "Terminbestätigungs-E-Mail an Teilnehmer"
 
-#: app/Services/Helper.php:1550
+#: app/Services/Helper.php:1561
 msgid "Booking Confirmation Email to Organizer (You)"
 msgstr "Terminbestätigungs-E-Mail an Organisator (Sie)"
 
@@ -931,7 +931,7 @@ msgstr "Terminbestätigungs-E-Mail an Organisator (Sie)"
 msgid "Booking Confirmed"
 msgstr "Buchung bestätigt"
 
-#: app/Services/Helper.php:1688 app/Services/Helper.php:1753
+#: app/Services/Helper.php:1699 app/Services/Helper.php:1764
 msgid "Booking Data"
 msgstr "Buchungsdaten"
 
@@ -939,7 +939,7 @@ msgstr "Buchungsdaten"
 msgid "Booking Date"
 msgstr "Buchungsdatum"
 
-#: app/Services/Helper.php:1643
+#: app/Services/Helper.php:1654
 msgid "Booking Declined by Organizer (email to Attendee)"
 msgstr ""
 
@@ -947,12 +947,12 @@ msgstr ""
 msgid "Booking Deleted Successfully!"
 msgstr "Buchung erfolgreich gelöscht!"
 
-#: app/Services/Helper.php:1709 app/Services/Helper.php:1774
+#: app/Services/Helper.php:1720 app/Services/Helper.php:1785
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:99
 msgid "Booking Details Admin URL"
 msgstr "Buchungsdaten Admin-URL"
 
-#: app/Models/CalendarSlot.php:1060 app/Models/CalendarSlot.php:1067
+#: app/Models/CalendarSlot.php:1067 app/Models/CalendarSlot.php:1074
 msgid "Booking Fee"
 msgstr "Buchungsgebühr"
 
@@ -960,12 +960,12 @@ msgstr "Buchungsgebühr"
 msgid "Booking Field"
 msgstr "Buchungsfeld"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:656
+#: app/Hooks/Handlers/FrontEndHandler.php:657
 msgctxt "Booking form spot selection"
 msgid "Next"
 msgstr "Weiter"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:931
+#: app/Hooks/Handlers/FrontEndHandler.php:932
 msgid "Booking has been confirmed"
 msgstr "Die Buchung wurde bestätigt"
 
@@ -981,11 +981,11 @@ msgstr "Die Buchung wurde erstellt"
 msgid "Booking has been created on FluentBooking"
 msgstr "Die Buchung wurde in FluentBooking erstellt"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:510
+#: app/Hooks/Handlers/FrontEndHandler.php:511
 msgid "Booking has been rescheduled"
 msgstr "Die Buchung wurde verschoben"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:393
+#: app/Hooks/Handlers/FrontEndHandler.php:394
 msgid "Booking hash is missing!"
 msgstr "Die Buchungsraute fehlt!"
 
@@ -1011,7 +1011,7 @@ msgstr "Die Buchung wurde abgelehnt"
 msgid "Booking request has been rejected by %s"
 msgstr "Die Buchung wurde von %s abgelehnt"
 
-#: app/Services/Helper.php:1708 app/Services/Helper.php:1773
+#: app/Services/Helper.php:1719 app/Services/Helper.php:1784
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:98
 msgid "Booking Reschedule URL"
 msgstr "URL für Buchungsverschiebung"
@@ -1021,11 +1021,11 @@ msgstr "URL für Buchungsverschiebung"
 msgid "Booking Rescheduled"
 msgstr "Die Buchung wurde verschoben"
 
-#: app/Services/Helper.php:1608
+#: app/Services/Helper.php:1619
 msgid "Booking Rescheduled by Attendee (email to Organizer)"
 msgstr "Vom Teilnehmer verschobener Termin (E-Mail an den Organisator)"
 
-#: app/Services/Helper.php:1617
+#: app/Services/Helper.php:1628
 msgid "Booking Rescheduled by Organizer (email to Attendee)"
 msgstr "Vom Organisator verschobener Termin (E-Mail an den Teilnehmer)"
 
@@ -1037,12 +1037,12 @@ msgstr ""
 msgid "Booking Status"
 msgstr "Buchungsstatus"
 
-#: app/Services/Helper.php:1635
+#: app/Services/Helper.php:1646
 msgid "Booking Submission Confirmation (email to Attendee)"
 msgstr ""
 
-#: app/Services/TransStrings.php:835 app/Services/Helper.php:1693
-#: app/Services/Helper.php:1758
+#: app/Services/TransStrings.php:835 app/Services/Helper.php:1704
+#: app/Services/Helper.php:1769
 msgid "Booking Title"
 msgstr "Buchungs-Titel"
 
@@ -1085,92 +1085,92 @@ msgstr "Caching-Zeit"
 msgid "Calendar Avatar"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:224
+#: app/Http/Controllers/CalendarController.php:223
 msgid "Calendar could not be found. Please try again"
 msgstr ""
 "Der Kalender konnte nicht gefunden werden. Bitte versuchen Sie es erneut"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:609
+#: app/Hooks/Handlers/FrontEndHandler.php:610
 msgctxt "calendar day full"
 msgid "Friday"
 msgstr "Freitag"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:605
+#: app/Hooks/Handlers/FrontEndHandler.php:606
 msgctxt "calendar day full"
 msgid "Monday"
 msgstr "Montag"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:610
+#: app/Hooks/Handlers/FrontEndHandler.php:611
 msgctxt "calendar day full"
 msgid "Saturday"
 msgstr "Samstag"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:604
+#: app/Hooks/Handlers/FrontEndHandler.php:605
 msgctxt "calendar day full"
 msgid "Sunday"
 msgstr "Sonntag"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:608
+#: app/Hooks/Handlers/FrontEndHandler.php:609
 msgctxt "calendar day full"
 msgid "Thursday"
 msgstr "Donnerstag"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:606
+#: app/Hooks/Handlers/FrontEndHandler.php:607
 msgctxt "calendar day full"
 msgid "Tuesday"
 msgstr "Dienstag"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:607
+#: app/Hooks/Handlers/FrontEndHandler.php:608
 msgctxt "calendar day full"
 msgid "Wednesday"
 msgstr "Mittwoch"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:632
+#: app/Hooks/Handlers/FrontEndHandler.php:633
 msgctxt "calendar day short"
 msgid "Fri"
 msgstr "Fr"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:628
+#: app/Hooks/Handlers/FrontEndHandler.php:629
 msgctxt "calendar day short"
 msgid "Mon"
 msgstr "Mo"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:633
+#: app/Hooks/Handlers/FrontEndHandler.php:634
 msgctxt "calendar day short"
 msgid "Sat"
 msgstr "Sa"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:627
+#: app/Hooks/Handlers/FrontEndHandler.php:628
 msgctxt "calendar day short"
 msgid "Sun"
 msgstr "So"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:631
+#: app/Hooks/Handlers/FrontEndHandler.php:632
 msgctxt "calendar day short"
 msgid "Thu"
 msgstr "Do"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:629
+#: app/Hooks/Handlers/FrontEndHandler.php:630
 msgctxt "calendar day short"
 msgid "Tue"
 msgstr "Di"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:630
+#: app/Hooks/Handlers/FrontEndHandler.php:631
 msgctxt "calendar day short"
 msgid "Wed"
 msgstr "Mi"
 
-#: app/Http/Controllers/CalendarController.php:919
+#: app/Http/Controllers/CalendarController.php:921
 msgid "Calendar Deleted Successfully!"
 msgstr "Kalender erfolgreich gelöscht!"
 
-#: app/Services/TransStrings.php:656 app/Services/Helper.php:1731
-#: app/Services/Helper.php:1796
+#: app/Services/TransStrings.php:656 app/Services/Helper.php:1742
+#: app/Services/Helper.php:1807
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:108
 msgid "Calendar Description"
 msgstr "Beschreibung des Kalenders"
 
-#: app/Http/Controllers/CalendarController.php:891
+#: app/Http/Controllers/CalendarController.php:893
 msgid "Calendar Event has been deleted"
 msgstr "Kalenderereignis wurde gelöscht"
 
@@ -1186,11 +1186,11 @@ msgstr ""
 msgid "calendar events are using this schedule"
 msgstr "Kalenderereignisse werden nach diesem Zeitplan durchgeführt"
 
-#: app/Http/Controllers/CalendarController.php:357
+#: app/Http/Controllers/CalendarController.php:356
 msgid "Calendar has been updated successfully"
 msgstr "Der Kalender wurde erfolgreich aktualisiert"
 
-#: app/Services/Helper.php:1728 app/Services/Helper.php:1793
+#: app/Services/Helper.php:1739 app/Services/Helper.php:1804
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:106
 msgid "Calendar ID"
 msgstr "Kalender-ID"
@@ -1199,122 +1199,122 @@ msgstr "Kalender-ID"
 msgid "Calendar imported successfully"
 msgstr "Kalender erfolgreich importiert"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:616
+#: app/Hooks/Handlers/FrontEndHandler.php:617
 msgctxt "calendar month name full"
 msgid "April"
 msgstr "April"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:620
+#: app/Hooks/Handlers/FrontEndHandler.php:621
 msgctxt "calendar month name full"
 msgid "August"
 msgstr "August"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:624
+#: app/Hooks/Handlers/FrontEndHandler.php:625
 msgctxt "calendar month name full"
 msgid "December"
 msgstr "Dezember"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:614
+#: app/Hooks/Handlers/FrontEndHandler.php:615
 msgctxt "calendar month name full"
 msgid "February"
 msgstr "Februar"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:613
+#: app/Hooks/Handlers/FrontEndHandler.php:614
 msgctxt "calendar month name full"
 msgid "January"
 msgstr "Januar"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:619
+#: app/Hooks/Handlers/FrontEndHandler.php:620
 msgctxt "calendar month name full"
 msgid "July"
 msgstr "Juli"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:618
+#: app/Hooks/Handlers/FrontEndHandler.php:619
 msgctxt "calendar month name full"
 msgid "June"
 msgstr "Juni"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:615
+#: app/Hooks/Handlers/FrontEndHandler.php:616
 msgctxt "calendar month name full"
 msgid "March"
 msgstr "März"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:617
+#: app/Hooks/Handlers/FrontEndHandler.php:618
 msgctxt "calendar month name full"
 msgid "May"
 msgstr "Mai"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:623
+#: app/Hooks/Handlers/FrontEndHandler.php:624
 msgctxt "calendar month name full"
 msgid "November"
 msgstr "November"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:622
+#: app/Hooks/Handlers/FrontEndHandler.php:623
 msgctxt "calendar month name full"
 msgid "October"
 msgstr "Oktober"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:621
+#: app/Hooks/Handlers/FrontEndHandler.php:622
 msgctxt "calendar month name full"
 msgid "September"
 msgstr "September"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:639
+#: app/Hooks/Handlers/FrontEndHandler.php:640
 msgctxt "calendar month name short"
 msgid "Apr"
 msgstr "Apr."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:643
+#: app/Hooks/Handlers/FrontEndHandler.php:644
 msgctxt "calendar month name short"
 msgid "Aug"
 msgstr "Aug."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:647
+#: app/Hooks/Handlers/FrontEndHandler.php:648
 msgctxt "calendar month name short"
 msgid "Dec"
 msgstr "Dez."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:637
+#: app/Hooks/Handlers/FrontEndHandler.php:638
 msgctxt "calendar month name short"
 msgid "Feb"
 msgstr "Feb."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:636
+#: app/Hooks/Handlers/FrontEndHandler.php:637
 msgctxt "calendar month name short"
 msgid "Jan"
 msgstr "Jan."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:642
+#: app/Hooks/Handlers/FrontEndHandler.php:643
 msgctxt "calendar month name short"
 msgid "Jul"
 msgstr "Jul."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:641
+#: app/Hooks/Handlers/FrontEndHandler.php:642
 msgctxt "calendar month name short"
 msgid "Jun"
 msgstr "Jun."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:638
+#: app/Hooks/Handlers/FrontEndHandler.php:639
 msgctxt "calendar month name short"
 msgid "Mar"
 msgstr "Mär."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:640
+#: app/Hooks/Handlers/FrontEndHandler.php:641
 msgctxt "calendar month name short"
 msgid "May"
 msgstr "Mai"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:646
+#: app/Hooks/Handlers/FrontEndHandler.php:647
 msgctxt "calendar month name short"
 msgid "Nov"
 msgstr "Nov."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:645
+#: app/Hooks/Handlers/FrontEndHandler.php:646
 msgctxt "calendar month name short"
 msgid "Oct"
 msgstr "Okt."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:644
+#: app/Hooks/Handlers/FrontEndHandler.php:645
 msgctxt "calendar month name short"
 msgid "Sep"
 msgstr "Sep."
@@ -1325,13 +1325,13 @@ msgstr "Sep."
 msgid "Calendar not found"
 msgstr "Kalender nicht gefunden"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:649
+#: app/Hooks/Handlers/FrontEndHandler.php:650
 msgctxt "calendar numeric system - Sequence must need to maintained"
 msgid "0_1_2_3_4_5_6_7_8_9"
 msgstr ""
 
 #: app/Services/TransStrings.php:385 app/Hooks/filters.php:30
-#: app/Hooks/Handlers/AdminMenuHandler.php:784
+#: app/Hooks/Handlers/AdminMenuHandler.php:786
 msgid "Calendar Settings"
 msgstr "Kalender-Einstellungen"
 
@@ -1339,7 +1339,7 @@ msgstr "Kalender-Einstellungen"
 msgid "Calendar start from"
 msgstr "Der Kalender beginnt am"
 
-#: app/Services/Helper.php:1730 app/Services/Helper.php:1795
+#: app/Services/Helper.php:1741 app/Services/Helper.php:1806
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:107
 msgid "Calendar Title"
 msgstr "Kalender-Titel"
@@ -1361,9 +1361,9 @@ msgid "Can't delete: %s events depend on this schedule"
 msgstr ""
 "Kann nicht gelöscht werden: %s Ereignisse hängen von diesem Zeitplan ab"
 
-#: app/Services/TransStrings.php:24 app/Services/Helper.php:1544
-#: app/Services/Helper.php:1562 app/Services/Helper.php:1620
-#: app/Services/Helper.php:1638 app/Views/public/booking_confirmation.php:81
+#: app/Services/TransStrings.php:24 app/Services/Helper.php:1555
+#: app/Services/Helper.php:1573 app/Services/Helper.php:1631
+#: app/Services/Helper.php:1649 app/Views/public/booking_confirmation.php:81
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -1428,7 +1428,7 @@ msgstr "Chilenischer Peso"
 msgid "Choose a common schedule"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:679
+#: app/Hooks/Handlers/FrontEndHandler.php:680
 msgid "Choose File"
 msgstr ""
 
@@ -1436,7 +1436,7 @@ msgstr ""
 msgid "Choose Host Schedules"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:469
+#: app/Models/CalendarSlot.php:476
 msgid "Choose your duration and book a meeting with me"
 msgstr ""
 
@@ -1532,7 +1532,7 @@ msgstr "Abgeschlossene Buchungen"
 msgid "Conditional Logics is a Pro Feature"
 msgstr "Bedingte Logik ist ein Profi-Feature"
 
-#: app/Models/CalendarSlot.php:683
+#: app/Models/CalendarSlot.php:690
 msgid "Conferencing"
 msgstr "Konferenzen"
 
@@ -1552,11 +1552,11 @@ msgid "Configure Google Calendar/Meet to sync your events"
 msgstr ""
 "Konfigurieren Sie Google Calendar/Meet für die Synchronisierung Ihrer Termine"
 
-#: app/Services/Helper.php:1559
+#: app/Services/Helper.php:1570
 msgid "Configure Meeting Reminder to Attendee"
 msgstr "Terminerinnerung an Teilnehmer konfigurieren"
 
-#: app/Services/Helper.php:1574
+#: app/Services/Helper.php:1585
 msgid "Configure Meeting Reminder to Organizer (You)"
 msgstr "Terminerinnerung an Organisator (Sie) konfigurieren"
 
@@ -1589,7 +1589,7 @@ msgstr ""
 msgid "Configure your global payment settings for booking related payments"
 msgstr ""
 
-#: app/Services/TransStrings.php:26 app/Services/Helper.php:1665
+#: app/Services/TransStrings.php:26 app/Services/Helper.php:1676
 msgid "Confirm"
 msgstr "Bestätigen"
 
@@ -1601,7 +1601,7 @@ msgstr ""
 msgid "Confirm Disconnect"
 msgstr "Trennen der Verbindung bestätigen"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:1032
+#: app/Hooks/Handlers/FrontEndHandler.php:1033
 msgid "Confirm Payment"
 msgstr "Zahlung bestätigen"
 
@@ -1717,7 +1717,7 @@ msgstr "enthält"
 msgid "Continue"
 msgstr "Weiter"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:1031
+#: app/Hooks/Handlers/FrontEndHandler.php:1032
 msgid "Continue to Payments"
 msgstr "Weiter zu Zahlungen"
 
@@ -1737,7 +1737,7 @@ msgstr "Kopieren und verwenden Sie den Shortcode Page/Post Ihrer Website"
 msgid "Copy link"
 msgstr "Link kopieremn"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:651
+#: app/Hooks/Handlers/FrontEndHandler.php:652
 msgid "Country"
 msgstr "Land"
 
@@ -1778,7 +1778,7 @@ msgstr "Erstellen Sie Ihren ersten Buchungstermin"
 msgid "CRM Profile"
 msgstr ""
 
-#: app/Services/TransStrings.php:473 app/Services/Helper.php:1820
+#: app/Services/TransStrings.php:473 app/Services/Helper.php:1831
 msgid "Currency"
 msgstr "Währung"
 
@@ -1790,7 +1790,7 @@ msgstr "Aktuelle(s) Datum/Uhrzeit:"
 msgid "Currently FluentBooking has integration with FluentCRM. After install"
 msgstr ""
 
-#: app/Services/Helper.php:1141 app/Models/CalendarSlot.php:736
+#: app/Services/Helper.php:1141 app/Models/CalendarSlot.php:743
 msgid "Custom"
 msgstr "Benutzerdefiniert"
 
@@ -1840,14 +1840,14 @@ msgstr "Dunkel"
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: app/Http/Controllers/CalendarController.php:589
-#: app/Http/Controllers/CalendarController.php:625
-#: app/Http/Controllers/CalendarController.php:658
-#: app/Http/Controllers/CalendarController.php:675
+#: app/Http/Controllers/CalendarController.php:588
+#: app/Http/Controllers/CalendarController.php:624
+#: app/Http/Controllers/CalendarController.php:657
+#: app/Http/Controllers/CalendarController.php:674
 msgid "Data has been updated"
 msgstr "Die Daten wurden aktualisiert"
 
-#: app/Services/Helper.php:1517 app/Hooks/Handlers/FrontEndHandler.php:673
+#: app/Services/Helper.php:1517 app/Hooks/Handlers/FrontEndHandler.php:674
 msgid "Date"
 msgstr "Datum"
 
@@ -1859,12 +1859,12 @@ msgstr "Datum & Uhrzeit"
 msgid "Date Overrides"
 msgstr "Sondertage"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:652
+#: app/Hooks/Handlers/FrontEndHandler.php:653
 msgctxt "date time format switch"
 msgid "12h"
 msgstr "12 Std."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:653
+#: app/Hooks/Handlers/FrontEndHandler.php:654
 msgctxt "date time format switch"
 msgid "24h"
 msgstr "24 Std."
@@ -1873,12 +1873,12 @@ msgstr "24 Std."
 msgid "Date:"
 msgstr "Datum:"
 
-#: app/Services/Helper.php:1224 app/Hooks/Handlers/FrontEndHandler.php:589
+#: app/Services/Helper.php:1224 app/Hooks/Handlers/FrontEndHandler.php:590
 msgid "Day"
 msgstr "Tag"
 
 #: app/Services/TransStrings.php:234 app/Services/Helper.php:1224
-#: app/Hooks/Handlers/FrontEndHandler.php:590
+#: app/Hooks/Handlers/FrontEndHandler.php:591
 msgid "Days"
 msgstr "Tage"
 
@@ -2108,7 +2108,7 @@ msgid "eg: 4"
 msgstr "z.B.: 4"
 
 #: app/Services/TransStrings.php:469 app/Services/Helper.php:1477
-#: app/Hooks/Handlers/FrontEndHandler.php:672
+#: app/Hooks/Handlers/FrontEndHandler.php:673
 msgid "Email"
 msgstr "E-Mail"
 
@@ -2152,7 +2152,7 @@ msgstr ""
 "Für diesen Termin ist eine E-Mail erforderlich. Bitte geben Sie eine gültige "
 "E-Mail an"
 
-#: app/Hooks/Handlers/AdminMenuHandler.php:695
+#: app/Hooks/Handlers/AdminMenuHandler.php:697
 msgid "Email Notification"
 msgstr "E-Mail Benachrichtigung"
 
@@ -2318,7 +2318,7 @@ msgstr "Beschreibung für diese Person / diesen Kalender eingeben"
 msgid "Enter Description here"
 msgstr "Beschreibung hier eingeben"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:595
+#: app/Hooks/Handlers/FrontEndHandler.php:596
 msgid "Enter Details"
 msgstr "Details eingeben"
 
@@ -2406,11 +2406,11 @@ msgstr "Termin"
 msgid "event"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:129
+#: app/Http/Controllers/CalendarController.php:128
 msgid "Event availability type field is required"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:556
+#: app/Http/Controllers/CalendarController.php:555
 msgid "Event available durations is required"
 msgstr ""
 
@@ -2418,7 +2418,7 @@ msgstr ""
 msgid "Event Calendar Name"
 msgstr ""
 
-#: app/Services/Helper.php:1705 app/Services/Helper.php:1770
+#: app/Services/Helper.php:1716 app/Services/Helper.php:1781
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:95
 msgid "Event Cancel Reason"
 msgstr "Grund der Terminabsage"
@@ -2427,56 +2427,56 @@ msgstr "Grund der Terminabsage"
 msgid "Event Date"
 msgstr ""
 
-#: app/Services/Helper.php:1699 app/Services/Helper.php:1764
+#: app/Services/Helper.php:1710 app/Services/Helper.php:1775
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:91
 msgid "Event Date Time (UTC)"
 msgstr "Event Datum Uhrzeit (UTC)"
 
-#: app/Services/Helper.php:1700
+#: app/Services/Helper.php:1711
 #, fuzzy
 #| msgid "Event Date time (with attendee timezone)"
 msgid "Event Date Time (with attendee timezone)"
 msgstr "Veranstaltung Datum Uhrzeit (mit Zeitzone des Teilnehmers)"
 
-#: app/Services/Helper.php:1702 app/Services/Helper.php:1767
+#: app/Services/Helper.php:1713 app/Services/Helper.php:1778
 msgid "Event Date Time (with attendee timezone) (Ex: 2024-05-20)"
 msgstr ""
 
-#: app/Services/Helper.php:1765
+#: app/Services/Helper.php:1776
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:92
 msgid "Event Date time (with guest timezone)"
 msgstr "Veranstaltung Datum Uhrzeit (mit Zeitzone des Gastes)"
 
-#: app/Services/Helper.php:1701
+#: app/Services/Helper.php:1712
 msgid "Event Date Time (with host timezone)"
 msgstr ""
 
-#: app/Services/Helper.php:1766
+#: app/Services/Helper.php:1777
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:93
 msgid "Event Date time (with host timezone)"
 msgstr "Veranstaltung Datum Uhrzeit (mit Zeitzone des Organisators)"
 
-#: app/Services/Helper.php:1703 app/Services/Helper.php:1768
+#: app/Services/Helper.php:1714 app/Services/Helper.php:1779
 msgid "Event Date Time (with host timezone) (Ex: 2024-05-20)"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:555
+#: app/Http/Controllers/CalendarController.php:554
 msgid "Event default duration is required"
 msgstr ""
 
-#: app/Services/Helper.php:1692 app/Services/Helper.php:1757
+#: app/Services/Helper.php:1703 app/Services/Helper.php:1768
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:88
 msgid "Event Description"
 msgstr "Event-Beschreibung"
 
 #: app/Services/TransStrings.php:237
-#: app/Hooks/Handlers/AdminMenuHandler.php:625
+#: app/Hooks/Handlers/AdminMenuHandler.php:627
 msgid "Event Details"
 msgstr "Termin-Details"
 
-#: app/Http/Controllers/CalendarController.php:127
-#: app/Http/Controllers/CalendarController.php:453
-#: app/Http/Controllers/CalendarController.php:534
+#: app/Http/Controllers/CalendarController.php:126
+#: app/Http/Controllers/CalendarController.php:452
+#: app/Http/Controllers/CalendarController.php:533
 msgid "Event duration field is required"
 msgstr ""
 
@@ -2488,50 +2488,50 @@ msgstr "Termin-Gast"
 msgid "Event Hosts"
 msgstr ""
 
-#: app/Services/Helper.php:1727 app/Services/Helper.php:1792
+#: app/Services/Helper.php:1738 app/Services/Helper.php:1803
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:105
 msgid "Event ID"
 msgstr "Event-ID"
 
-#: app/Http/Controllers/CalendarController.php:547
+#: app/Http/Controllers/CalendarController.php:546
 msgid "Event is display spots field is required"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:458
+#: app/Http/Controllers/CalendarController.php:457
 msgid "Event location description field is required"
 msgstr ""
 
-#: app/Services/Helper.php:1704
+#: app/Services/Helper.php:1715
 msgid "Event Location Details"
 msgstr ""
 
-#: app/Services/Helper.php:1769
+#: app/Services/Helper.php:1780
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:94
 msgid "Event Location Details (HTML)"
 msgstr "Details zum Veranstaltungsort (HTML)"
 
-#: app/Http/Controllers/CalendarController.php:134
-#: app/Http/Controllers/CalendarController.php:459
-#: app/Http/Controllers/CalendarController.php:537
+#: app/Http/Controllers/CalendarController.php:133
+#: app/Http/Controllers/CalendarController.php:458
+#: app/Http/Controllers/CalendarController.php:536
 msgid "Event location host phone number field is required"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:457
-#: app/Http/Controllers/CalendarController.php:536
+#: app/Http/Controllers/CalendarController.php:456
+#: app/Http/Controllers/CalendarController.php:535
 msgid "Event location title field is required"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:133
-#: app/Http/Controllers/CalendarController.php:456
-#: app/Http/Controllers/CalendarController.php:535
+#: app/Http/Controllers/CalendarController.php:132
+#: app/Http/Controllers/CalendarController.php:455
+#: app/Http/Controllers/CalendarController.php:534
 msgid "Event location type field is required"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:546
+#: app/Http/Controllers/CalendarController.php:545
 msgid "Event max book per slot field is required"
 msgstr ""
 
-#: app/Services/Helper.php:1691 app/Services/Helper.php:1756
+#: app/Services/Helper.php:1702 app/Services/Helper.php:1767
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:87
 msgid "Event Name"
 msgstr "Event-Name"
@@ -2540,16 +2540,16 @@ msgstr "Event-Name"
 msgid "Event Name *"
 msgstr "Terminname *"
 
-#: app/Http/Controllers/CalendarController.php:728
+#: app/Http/Controllers/CalendarController.php:727
 msgid "Event order has been updated"
 msgstr ""
 
-#: app/Services/Helper.php:1711 app/Services/Helper.php:1776
+#: app/Services/Helper.php:1722 app/Services/Helper.php:1787
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:101
 msgid "Event Reschedule Reason"
 msgstr "Grund für die Terminverschiebung"
 
-#: app/Http/Controllers/CalendarController.php:130
+#: app/Http/Controllers/CalendarController.php:129
 msgid "Event schedule type field is required"
 msgstr ""
 
@@ -2557,22 +2557,22 @@ msgstr ""
 msgid "Event Settings"
 msgstr "Veranstaltungs-Einstellungen"
 
-#: app/Services/Helper.php:1706 app/Services/Helper.php:1771
+#: app/Services/Helper.php:1717 app/Services/Helper.php:1782
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:96
 msgid "Event Start Time (ex: 2 hours from now)"
 msgstr "Startzeit des Events (z.B.: in 2 Stunden ab jetzt)"
 
-#: app/Http/Controllers/CalendarController.php:454
+#: app/Http/Controllers/CalendarController.php:453
 msgid "Event status field is required"
 msgstr ""
 
-#: app/Services/Helper.php:1729 app/Services/Helper.php:1794
+#: app/Services/Helper.php:1740 app/Services/Helper.php:1805
 msgid "Event Title"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:131
-#: app/Http/Controllers/CalendarController.php:452
-#: app/Http/Controllers/CalendarController.php:533
+#: app/Http/Controllers/CalendarController.php:130
+#: app/Http/Controllers/CalendarController.php:451
+#: app/Http/Controllers/CalendarController.php:532
 msgid "Event title field is required"
 msgstr ""
 
@@ -2602,12 +2602,12 @@ msgstr "Ereignisauslöser"
 msgid "Event Type"
 msgstr "Termin-Typ"
 
-#: app/Http/Controllers/CalendarController.php:128
-#: app/Http/Controllers/CalendarController.php:455
+#: app/Http/Controllers/CalendarController.php:127
+#: app/Http/Controllers/CalendarController.php:454
 msgid "Event type field is required"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:132
+#: app/Http/Controllers/CalendarController.php:131
 msgid "Event weekly schedules field is required"
 msgstr ""
 
@@ -2686,7 +2686,7 @@ msgstr "Feldtyp"
 msgid "Field Value"
 msgstr "Feld-Wert"
 
-#: app/Http/Controllers/CalendarController.php:872
+#: app/Http/Controllers/CalendarController.php:874
 msgid "Fields has been updated"
 msgstr "Die Felder wurden aktualisiert"
 
@@ -2782,12 +2782,12 @@ msgstr "FluentCRM-Listen"
 msgid "for a scheduled event with"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:654
+#: app/Hooks/Handlers/FrontEndHandler.php:655
 msgctxt "for how many spots left for available booking"
 msgid "spots left"
 msgstr "Zeitfenster übrig"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:655
+#: app/Hooks/Handlers/FrontEndHandler.php:656
 msgctxt "for how many spots remaining for available booking"
 msgid "spots remaining"
 msgstr ""
@@ -2854,11 +2854,11 @@ msgstr ""
 msgid "Frontend Portal Settings"
 msgstr ""
 
-#: app/Services/Helper.php:1697 app/Services/Helper.php:1762
+#: app/Services/Helper.php:1708 app/Services/Helper.php:1773
 msgid "Full Start & End Date Time (with guest timezone)"
 msgstr ""
 
-#: app/Services/Helper.php:1698 app/Services/Helper.php:1763
+#: app/Services/Helper.php:1709 app/Services/Helper.php:1774
 msgid "Full Start & End Date Time (with host timezone)"
 msgstr ""
 
@@ -2870,11 +2870,11 @@ msgstr "Vollständige Start- und Endzeit (mit Zeitzone des Gastes)"
 msgid "Full Start & End Time (with host timezone)"
 msgstr "Vollständige Start- und Endzeit (mit Zeitzone des Organisators)"
 
-#: app/Services/Helper.php:1695 app/Services/Helper.php:1760
+#: app/Services/Helper.php:1706 app/Services/Helper.php:1771
 msgid "Full Start Date Time (with guest timezone)"
 msgstr ""
 
-#: app/Services/Helper.php:1696 app/Services/Helper.php:1761
+#: app/Services/Helper.php:1707 app/Services/Helper.php:1772
 msgid "Full Start Date Time (with host timezone)"
 msgstr ""
 
@@ -2887,7 +2887,7 @@ msgid "General Operators"
 msgstr "Allgemeine Operatoren"
 
 #: app/Services/TransStrings.php:564
-#: app/Hooks/Handlers/AdminMenuHandler.php:481
+#: app/Hooks/Handlers/AdminMenuHandler.php:483
 msgid "General Settings"
 msgstr "Allgemeine Einstellungen"
 
@@ -2944,16 +2944,16 @@ msgid "Google Calendar"
 msgstr "Google Kalender"
 
 #: app/Services/TransStrings.php:902
-#: app/Hooks/Handlers/AdminMenuHandler.php:501
+#: app/Hooks/Handlers/AdminMenuHandler.php:503
 msgid "Google Calendar / Meet"
 msgstr "Google Kalender / Google Meet"
 
 #: app/Services/TransStrings.php:278 app/Services/LocationService.php:23
-#: app/Models/Booking.php:405 app/Hooks/Handlers/FrontEndHandler.php:664
+#: app/Models/Booking.php:405 app/Hooks/Handlers/FrontEndHandler.php:665
 msgid "Google Meet"
 msgstr "Google Meet"
 
-#: app/Models/CalendarSlot.php:686
+#: app/Models/CalendarSlot.php:693
 msgid "Google Meet (Pro)"
 msgstr ""
 
@@ -2993,8 +2993,8 @@ msgstr ""
 msgid "Group of invitees"
 msgstr "einer Gruppe von Teilnehmern"
 
-#: app/Services/TransStrings.php:96 app/Services/Helper.php:1681
-#: app/Services/Helper.php:1745
+#: app/Services/TransStrings.php:96 app/Services/Helper.php:1692
+#: app/Services/Helper.php:1756
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:82
 msgid "Guest Email"
 msgstr "Gast-E-Mail"
@@ -3003,37 +3003,37 @@ msgstr "Gast-E-Mail"
 msgid "Guest Fields"
 msgstr "Gast-Felder"
 
-#: app/Services/Helper.php:1678 app/Services/Helper.php:1742
+#: app/Services/Helper.php:1689 app/Services/Helper.php:1753
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:79
 msgid "Guest First Name"
 msgstr "Gast Vorname"
 
-#: app/Services/Helper.php:1749
+#: app/Services/Helper.php:1760
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:86
 msgid "Guest Form Submitted Data (HTML)"
 msgstr "Gastformular übermittelte Daten (HTML)"
 
-#: app/Services/Helper.php:1680 app/Services/Helper.php:1744
+#: app/Services/Helper.php:1691 app/Services/Helper.php:1755
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:81
 msgid "Guest Full Name"
 msgstr "Gast Vollständiger Name"
 
-#: app/Services/Helper.php:1679 app/Services/Helper.php:1743
+#: app/Services/Helper.php:1690 app/Services/Helper.php:1754
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:80
 msgid "Guest Last Name"
 msgstr "Gast Nachname"
 
-#: app/Services/Helper.php:1683 app/Services/Helper.php:1746
+#: app/Services/Helper.php:1694 app/Services/Helper.php:1757
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:83
 msgid "Guest Main Phone Number (if provided)"
 msgstr "Haupttelefonnummer des Gastes (falls angegeben)"
 
-#: app/Services/Helper.php:1682 app/Services/Helper.php:1747
+#: app/Services/Helper.php:1693 app/Services/Helper.php:1758
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:84
 msgid "Guest Note"
 msgstr "Gast Notiz"
 
-#: app/Services/Helper.php:1684 app/Services/Helper.php:1748
+#: app/Services/Helper.php:1695 app/Services/Helper.php:1759
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:85
 msgid "Guest Timezone"
 msgstr "Gast Zeitzone"
@@ -3090,16 +3090,16 @@ msgstr ""
 msgid "Host"
 msgstr "Organisator"
 
-#: app/Services/Helper.php:1715 app/Services/Helper.php:1780
+#: app/Services/Helper.php:1726 app/Services/Helper.php:1791
 msgid "Host Data"
 msgstr "Organisator Daten"
 
-#: app/Services/Helper.php:1719 app/Services/Helper.php:1784
+#: app/Services/Helper.php:1730 app/Services/Helper.php:1795
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:103
 msgid "Host Email"
 msgstr "Organisator E-Mail"
 
-#: app/Services/Helper.php:1718 app/Services/Helper.php:1783
+#: app/Services/Helper.php:1729 app/Services/Helper.php:1794
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:102
 msgid "Host Name"
 msgstr "Organisator-Name"
@@ -3120,8 +3120,8 @@ msgstr "Organisator-Telefon (mit Ländervorwahl)"
 msgid "Host Settings"
 msgstr "Organisator-Einstellungen"
 
-#: app/Services/TransStrings.php:629 app/Services/Helper.php:1720
-#: app/Services/Helper.php:1785
+#: app/Services/TransStrings.php:629 app/Services/Helper.php:1731
+#: app/Services/Helper.php:1796
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:104
 msgid "Host Timezone"
 msgstr "Organisator-Zeitzone"
@@ -3130,12 +3130,12 @@ msgstr "Organisator-Zeitzone"
 msgid "hosts"
 msgstr ""
 
-#: app/Services/Helper.php:1229 app/Hooks/Handlers/FrontEndHandler.php:591
+#: app/Services/Helper.php:1229 app/Hooks/Handlers/FrontEndHandler.php:592
 msgid "Hour"
 msgstr "Stunde"
 
 #: app/Services/TransStrings.php:233 app/Services/Helper.php:1229
-#: app/Hooks/Handlers/FrontEndHandler.php:592
+#: app/Hooks/Handlers/FrontEndHandler.php:593
 msgid "Hours"
 msgstr "Stunden"
 
@@ -3168,6 +3168,13 @@ msgstr "https://fluentbooking.com"
 msgid "https://fluentbooking.com/pricing/"
 msgstr ""
 
+#: app/Services/Helper.php:1536
+msgid ""
+"I have read and agree to the <a href=\"#\" target=\"_blank\" "
+"rel=\"noopener\">Terms and Conditions</a> and <a href=\"#\" "
+"target=\"_blank\" rel=\"noopener\">Privacy Policy</a>."
+msgstr ""
+
 #: app/Services/Integrations/FluentCRM/FluentCrmInit.php:133
 msgid "ID"
 msgstr "ID"
@@ -3176,11 +3183,11 @@ msgstr "ID"
 msgid "if customer does not complete the payment for paid events."
 msgstr ""
 
-#: app/Services/TransStrings.php:924
+#: app/Services/TransStrings.php:925
 msgid "If no date is set, current date will be used as the maximum date."
 msgstr ""
 
-#: app/Services/TransStrings.php:923
+#: app/Services/TransStrings.php:924
 msgid ""
 "If no date is set, default date 1900-01-01 will be used as the minimum date."
 msgstr ""
@@ -3230,17 +3237,17 @@ msgid "Import your exported calendar JSON file"
 msgstr ""
 
 #: app/Services/LocationService.php:38 app/Services/LocationService.php:48
-#: app/Models/CalendarSlot.php:703
+#: app/Models/CalendarSlot.php:710
 msgid "In Person"
 msgstr "Persönlich"
 
 #: app/Services/TransStrings.php:273 app/Services/LocationService.php:39
-#: app/Models/CalendarSlot.php:706 app/Hooks/Handlers/FrontEndHandler.php:661
+#: app/Models/CalendarSlot.php:713 app/Hooks/Handlers/FrontEndHandler.php:662
 msgid "In Person (Attendee Address)"
 msgstr "Persönlich (Adresse des Teilnehmers)"
 
 #: app/Services/TransStrings.php:274 app/Services/LocationService.php:52
-#: app/Models/CalendarSlot.php:709 app/Hooks/Handlers/FrontEndHandler.php:662
+#: app/Models/CalendarSlot.php:716 app/Hooks/Handlers/FrontEndHandler.php:663
 msgid "In Person (Organizer Address)"
 msgstr "Persönlich (Adresse des Organisators)"
 
@@ -3277,7 +3284,7 @@ msgstr ""
 msgid "Integration successfully saved"
 msgstr "Integration erfolgreich gespeichert"
 
-#: app/Services/TransStrings.php:98 app/Hooks/Handlers/AdminMenuHandler.php:765
+#: app/Services/TransStrings.php:98 app/Hooks/Handlers/AdminMenuHandler.php:767
 msgid "Integrations"
 msgstr "Integrationen"
 
@@ -3318,7 +3325,7 @@ msgstr ""
 msgid "Invalid payment status"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:433
+#: app/Hooks/Handlers/FrontEndHandler.php:434
 msgid "Invalid rescheduling request"
 msgstr "Ungültige Umplanungsanfrage"
 
@@ -3326,7 +3333,7 @@ msgstr "Ungültige Umplanungsanfrage"
 msgid "Invalid status"
 msgstr "Ungültiger Status"
 
-#: app/Http/Controllers/CalendarController.php:187
+#: app/Http/Controllers/CalendarController.php:186
 msgid "Invalid Team Member"
 msgstr ""
 
@@ -3440,7 +3447,7 @@ msgstr "Die Feld-Bezeichnung ist erforderlich"
 msgid "Landing Page"
 msgstr "Landing Page"
 
-#: app/Http/Controllers/CalendarController.php:335
+#: app/Http/Controllers/CalendarController.php:334
 msgid "Landing Page settings has been updated"
 msgstr "Die Einstellungen der Landing Page wurden aktualisiert"
 
@@ -3511,7 +3518,7 @@ msgstr ""
 "Lasst uns sehen, wie viele Termine in den letzten %d Tagen gebucht wurden."
 
 #: app/Services/TransStrings.php:601
-#: app/Hooks/Handlers/AdminMenuHandler.php:599
+#: app/Hooks/Handlers/AdminMenuHandler.php:601
 msgid "License"
 msgstr "Lizenz"
 
@@ -3556,7 +3563,7 @@ msgid "Limit total booking duration"
 msgstr ""
 
 #: app/Services/TransStrings.php:292
-#: app/Hooks/Handlers/AdminMenuHandler.php:667
+#: app/Hooks/Handlers/AdminMenuHandler.php:669
 msgid "Limits"
 msgstr ""
 
@@ -3568,7 +3575,7 @@ msgstr "Zeile Gesamt"
 msgid "Load FluentBooking in the frontend of the website"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:669
+#: app/Hooks/Handlers/FrontEndHandler.php:670
 msgid "Loading Payment Processor..."
 msgstr ""
 
@@ -3601,7 +3608,7 @@ msgstr "Standort-Beschreibung*"
 msgid "Location Description is required"
 msgstr "Beschreibung des Standorts ist erforderlich"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:658
+#: app/Hooks/Handlers/FrontEndHandler.php:659
 msgid "location options"
 msgstr "Standort-Optionen"
 
@@ -3815,7 +3822,7 @@ msgstr "Termindauer"
 msgid "Meeting Duration *"
 msgstr "Termindauer*"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:1094
+#: app/Hooks/Handlers/FrontEndHandler.php:1095
 msgid "Meeting has been cancelled"
 msgstr "Der Termin wurde abgesagt"
 
@@ -3826,7 +3833,7 @@ msgid "Meeting has been cancelled by %s"
 msgstr "Der Termin wurde von %s abgesagt"
 
 #. %1$s is the user who rescheduled the meeting, %2$s is the previous date and time in UTC.
-#: app/Hooks/Handlers/FrontEndHandler.php:495
+#: app/Hooks/Handlers/FrontEndHandler.php:496
 #, php-format
 msgid ""
 "Meeting has been rescheduled by %1$s from Web UI. Previous date time: %2$s "
@@ -3846,7 +3853,7 @@ msgstr "Termin-Informationen"
 msgid "Meeting Link is required"
 msgstr "Termin-Link ist erforderlich"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:493
+#: app/Hooks/Handlers/FrontEndHandler.php:494
 msgid "Meeting Rescheduled"
 msgstr "Termin verschoben"
 
@@ -3870,12 +3877,12 @@ msgstr ""
 msgid "Minimum Notice"
 msgstr ""
 
-#: app/Services/Helper.php:1234 app/Hooks/Handlers/FrontEndHandler.php:593
+#: app/Services/Helper.php:1234 app/Hooks/Handlers/FrontEndHandler.php:594
 msgid "Minute"
 msgstr "Minute"
 
 #: app/Services/TransStrings.php:231 app/Services/Helper.php:1234
-#: app/Hooks/Handlers/FrontEndHandler.php:594
+#: app/Hooks/Handlers/FrontEndHandler.php:595
 msgid "Minutes"
 msgstr "Minuten"
 
@@ -3912,7 +3919,7 @@ msgstr "Mehr als im Vormonat"
 msgid "MS Teams"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:691
+#: app/Models/CalendarSlot.php:698
 msgid "MS Teams (Pro)"
 msgstr ""
 
@@ -3925,7 +3932,7 @@ msgid "Multiple Duration requires at least 1 option"
 msgstr ""
 
 #: app/Hooks/Handlers/BlockEditorHandler.php:200
-#: app/Hooks/Handlers/FrontEndHandler.php:307
+#: app/Hooks/Handlers/FrontEndHandler.php:308
 msgid "My Bookings"
 msgstr ""
 
@@ -3946,8 +3953,8 @@ msgstr "Name"
 msgid "Name Attribute"
 msgstr ""
 
-#: app/Services/Helper.php:1544 app/Services/Helper.php:1562
-#: app/Services/Helper.php:1620 app/Services/Helper.php:1638
+#: app/Services/Helper.php:1555 app/Services/Helper.php:1573
+#: app/Services/Helper.php:1631 app/Services/Helper.php:1649
 #: app/Views/public/booking_confirmation.php:79
 msgid "Need to make a change?"
 msgstr "Sie müssen etwas ändern?"
@@ -3974,7 +3981,7 @@ msgstr "Neuer Trichter zur Buchungsbestätigung"
 msgid "New Event Type"
 msgstr "Neuer Termin-Typ"
 
-#: app/Http/Controllers/CalendarController.php:513
+#: app/Http/Controllers/CalendarController.php:512
 msgid "New Event Type has been created successfully"
 msgstr "Neuer Termintyp wurde erfolgreich erstellt"
 
@@ -3987,7 +3994,7 @@ msgid "Next Meetings"
 msgstr "Anstehende Meetings"
 
 #: app/Services/TransStrings.php:900
-#: app/Hooks/Handlers/AdminMenuHandler.php:537
+#: app/Hooks/Handlers/AdminMenuHandler.php:539
 msgid "Nextcloud Calendar"
 msgstr "Nextcloud Kalender"
 
@@ -3995,7 +4002,7 @@ msgstr "Nextcloud Kalender"
 msgid "No"
 msgstr "Nein"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:684
+#: app/Hooks/Handlers/FrontEndHandler.php:685
 msgid ""
 "No activated payment method found. If you are an admin please check the "
 "event payment settings"
@@ -4009,12 +4016,12 @@ msgstr "Für diese Buchung sind keine Aktivitäten erfasst worden"
 msgid "No Availability found"
 msgstr "Keine Verfügbarkeit gefunden"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:681
+#: app/Hooks/Handlers/FrontEndHandler.php:682
 msgid "No availability in"
 msgstr "Keine Verfügbarkeit im"
 
 #: app/Hooks/Handlers/BlockEditorHandler.php:220
-#: app/Hooks/Handlers/FrontEndHandler.php:312
+#: app/Hooks/Handlers/FrontEndHandler.php:313
 msgid "No bookings found"
 msgstr "Keine Buchungen gefunden"
 
@@ -4134,7 +4141,7 @@ msgstr ""
 msgid "Notification Settings"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:797
+#: app/Http/Controllers/CalendarController.php:796
 msgid "Notifications has been saved"
 msgstr "Benachrichtigungen wurden gespeichert"
 
@@ -4190,13 +4197,13 @@ msgstr ""
 msgid "One-to-One"
 msgstr "Eins zu Eins"
 
-#: app/Models/CalendarSlot.php:725
+#: app/Models/CalendarSlot.php:732
 msgid "Online"
 msgstr "Online"
 
 #: app/Services/TransStrings.php:277 app/Services/LocationService.php:35
-#: app/Models/CalendarSlot.php:728 app/Models/Booking.php:406
-#: app/Hooks/Handlers/FrontEndHandler.php:666
+#: app/Models/CalendarSlot.php:735 app/Models/Booking.php:406
+#: app/Hooks/Handlers/FrontEndHandler.php:667
 msgid "Online Meeting"
 msgstr "Online-Meeting"
 
@@ -4241,13 +4248,13 @@ msgstr "Bestell-ID:"
 msgid "Organizer"
 msgstr ""
 
-#: app/Services/TransStrings.php:276 app/Models/CalendarSlot.php:720
-#: app/Hooks/Handlers/FrontEndHandler.php:660
+#: app/Services/TransStrings.php:276 app/Models/CalendarSlot.php:727
+#: app/Hooks/Handlers/FrontEndHandler.php:661
 msgid "Organizer Phone Number"
 msgstr "Telefonnummer des Organisators"
 
-#: app/Services/Helper.php:1724 app/Services/Helper.php:1789
-#: app/Models/CalendarSlot.php:733
+#: app/Services/Helper.php:1735 app/Services/Helper.php:1800
+#: app/Models/CalendarSlot.php:740
 msgid "Other"
 msgstr "Sonstige"
 
@@ -4276,7 +4283,7 @@ msgid "Outlook"
 msgstr "Outlook"
 
 #: app/Services/TransStrings.php:903
-#: app/Hooks/Handlers/AdminMenuHandler.php:511
+#: app/Hooks/Handlers/AdminMenuHandler.php:513
 msgid "Outlook Calendar / MS Teams"
 msgstr ""
 
@@ -4324,20 +4331,20 @@ msgstr ""
 msgid "Past"
 msgstr "Vergangenheit"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:600
+#: app/Hooks/Handlers/FrontEndHandler.php:601
 msgid "Pay Now"
 msgstr "Jetzt bezahlen"
 
-#: app/Services/Helper.php:1814
+#: app/Services/Helper.php:1825
 msgid "Payment Data"
 msgstr "Zahlungsdaten"
 
-#: app/Services/Helper.php:1821
+#: app/Services/Helper.php:1832
 msgid "Payment Date"
 msgstr "Zahlungsdatum"
 
 #: app/Views/public/booking_confirmation.php:38
-#: app/Hooks/Handlers/FrontEndHandler.php:597
+#: app/Hooks/Handlers/FrontEndHandler.php:598
 msgid "Payment Details"
 msgstr "Details zur Bezahlung"
 
@@ -4353,8 +4360,8 @@ msgstr ""
 msgid "Payment marked as pending by admin"
 msgstr ""
 
-#: app/Services/TransStrings.php:477 app/Services/Helper.php:1819
-#: app/Hooks/Handlers/FrontEndHandler.php:599
+#: app/Services/TransStrings.php:477 app/Services/Helper.php:1830
+#: app/Hooks/Handlers/FrontEndHandler.php:600
 msgid "Payment Method"
 msgstr "Zahlungsmethode"
 
@@ -4368,16 +4375,16 @@ msgid ""
 "and associated functions will be disabled"
 msgstr ""
 
-#: app/Services/Helper.php:1826
+#: app/Services/Helper.php:1837
 msgid "Payment Receipt (HTML)"
 msgstr "Zahlungsbeleg (HTML)"
 
 #: app/Services/TransStrings.php:145 app/Services/TransStrings.php:577
-#: app/Hooks/Handlers/AdminMenuHandler.php:737
+#: app/Hooks/Handlers/AdminMenuHandler.php:739
 msgid "Payment Settings"
 msgstr "Zahlungs-Einstellungen"
 
-#: app/Services/TransStrings.php:481 app/Services/Helper.php:1818
+#: app/Services/TransStrings.php:481 app/Services/Helper.php:1829
 msgid "Payment Status"
 msgstr "Zahlungsstatus"
 
@@ -4397,12 +4404,12 @@ msgstr ""
 msgid "Payment Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:480 app/Services/Helper.php:1817
+#: app/Services/TransStrings.php:480 app/Services/Helper.php:1828
 msgid "Payment Total"
 msgstr "Zahlung Gesamt"
 
 #: app/Services/TransStrings.php:376
-#: app/Hooks/Handlers/AdminMenuHandler.php:586
+#: app/Hooks/Handlers/AdminMenuHandler.php:588
 msgid "PayPal"
 msgstr ""
 
@@ -4423,7 +4430,7 @@ msgstr ""
 msgid "Per day"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:675
+#: app/Hooks/Handlers/FrontEndHandler.php:676
 msgid "per guest"
 msgstr ""
 
@@ -4440,12 +4447,12 @@ msgid "Permission Denied Message"
 msgstr ""
 
 #: app/Services/LocationService.php:55 app/Services/LocationService.php:58
-#: app/Services/Helper.php:1493 app/Models/CalendarSlot.php:714
+#: app/Services/Helper.php:1493 app/Models/CalendarSlot.php:721
 msgid "Phone"
 msgstr "Telefon"
 
 #: app/Services/LocationService.php:62
-#: app/Hooks/Handlers/FrontEndHandler.php:667
+#: app/Hooks/Handlers/FrontEndHandler.php:668
 msgid "Phone Call"
 msgstr "Telefonanruf"
 
@@ -4512,27 +4519,27 @@ msgstr ""
 msgid "Please enter attendee's name"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:733
+#: app/Hooks/Handlers/FrontEndHandler.php:734
 msgid "Please enter provide a valid email address"
 msgstr "Bitte geben Sie eine gültige E-Mail Adresse ein"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:732
+#: app/Hooks/Handlers/FrontEndHandler.php:733
 msgid "Please enter your email address"
 msgstr "Bitte geben Sie Ihre E-Mail Adresse ein"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:731
+#: app/Hooks/Handlers/FrontEndHandler.php:732
 msgid "Please enter your name"
 msgstr "Bitte geben Sie Ihren Namen ein"
 
 #: app/Services/BookingFieldService.php:51
 #: app/Http/Controllers/BookingController.php:132
-#: app/Hooks/Handlers/FrontEndHandler.php:685
-#: app/Hooks/Handlers/FrontEndHandler.php:800
+#: app/Hooks/Handlers/FrontEndHandler.php:686
+#: app/Hooks/Handlers/FrontEndHandler.php:801
 msgid "Please fill up the required data"
 msgstr "Bitte geben Sie die erforderlichen Daten ein"
 
 #: app/Http/Controllers/BookingController.php:327
-#: app/Hooks/Handlers/FrontEndHandler.php:326
+#: app/Hooks/Handlers/FrontEndHandler.php:327
 msgid "Please login to view your bookings"
 msgstr ""
 
@@ -4548,11 +4555,11 @@ msgstr "Bitte geben Sie einen Lizenzschlüssel für"
 msgid "Please provide a location first"
 msgstr "Bitte geben Sie zunächst einen Standort an"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:1075
+#: app/Hooks/Handlers/FrontEndHandler.php:1076
 msgid "Please provide a reason for cancellation"
 msgstr "Bitte geben Sie einen Grund für die Stornierung an"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:418
+#: app/Hooks/Handlers/FrontEndHandler.php:419
 msgid "Please provide a rescheduling reason"
 msgstr "Bitte geben Sie einen Grund für die Verschiebung an"
 
@@ -4588,16 +4595,16 @@ msgstr ""
 msgid "Please provide Group ID"
 msgstr "Bitte Gruppen-ID angeben"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:743
+#: app/Hooks/Handlers/FrontEndHandler.php:744
 msgid "Please provide your Address"
 msgstr "Bitte geben Sie Ihre Adresse an"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:754
+#: app/Hooks/Handlers/FrontEndHandler.php:755
 msgid "Please provide your address"
 msgstr "Bitte geben Sie Ihre Adresse an"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:740
-#: app/Hooks/Handlers/FrontEndHandler.php:756
+#: app/Hooks/Handlers/FrontEndHandler.php:741
+#: app/Hooks/Handlers/FrontEndHandler.php:757
 msgid "Please provide your phone number"
 msgstr "Bitte geben Sie Ihre Telefonnummer an"
 
@@ -4605,12 +4612,12 @@ msgstr "Bitte geben Sie Ihre Telefonnummer an"
 msgid "Please read the documentation"
 msgstr "Bitte lesen Sie die Dokumentation"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:687
+#: app/Hooks/Handlers/FrontEndHandler.php:688
 msgid "Please Select"
 msgstr ""
 
 #: app/Http/Controllers/BookingController.php:85
-#: app/Hooks/Handlers/FrontEndHandler.php:735
+#: app/Hooks/Handlers/FrontEndHandler.php:736
 msgid "Please select a date and time"
 msgstr "Bitte ein Datum und eine Uhrzeit wählen"
 
@@ -4618,12 +4625,12 @@ msgstr "Bitte ein Datum und eine Uhrzeit wählen"
 msgid "Please select a date first"
 msgstr "Bitte wählen Sie zuerst ein Datum"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:686
-#: app/Hooks/Handlers/FrontEndHandler.php:765
+#: app/Hooks/Handlers/FrontEndHandler.php:687
+#: app/Hooks/Handlers/FrontEndHandler.php:766
 msgid "Please select a valid payment method"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:746
+#: app/Hooks/Handlers/FrontEndHandler.php:747
 msgid "Please select location"
 msgstr "Bitte Standort auswählen"
 
@@ -4639,7 +4646,7 @@ msgstr ""
 msgid "Please select the timezone"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:734
+#: app/Hooks/Handlers/FrontEndHandler.php:735
 msgid "Please select timezone first"
 msgstr "Bitte wählen Sie zuerst die Zeitzone"
 
@@ -4673,7 +4680,7 @@ msgstr ""
 msgid "Plugins that will extend your Fluent Booking Functionalities"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:670
+#: app/Hooks/Handlers/FrontEndHandler.php:671
 msgid "PM"
 msgstr ""
 
@@ -4702,11 +4709,11 @@ msgstr ""
 msgid "Pro plugin is required for this event."
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:601
+#: app/Hooks/Handlers/FrontEndHandler.php:602
 msgid "Processing"
 msgstr "Wird bearbeitet"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:668
+#: app/Hooks/Handlers/FrontEndHandler.php:669
 msgid "Processing..."
 msgstr ""
 
@@ -4752,7 +4759,7 @@ msgid "Quantity"
 msgstr "Menge"
 
 #: app/Services/TransStrings.php:200
-#: app/Hooks/Handlers/AdminMenuHandler.php:681
+#: app/Hooks/Handlers/AdminMenuHandler.php:683
 msgid "Question Settings"
 msgstr ""
 
@@ -4878,7 +4885,7 @@ msgstr ""
 msgid "Regex Match"
 msgstr "Regex-Übereinstimmung"
 
-#: app/Services/TransStrings.php:497 app/Services/Helper.php:1665
+#: app/Services/TransStrings.php:497 app/Services/Helper.php:1676
 msgid "Reject"
 msgstr ""
 
@@ -4919,7 +4926,7 @@ msgstr "Erinnerungs-E-Mail an %s gesendet."
 msgid "Remote Calendar Sync Settings"
 msgstr "Einstellungen für die Remote-Kalender­synchronisierung"
 
-#: app/Hooks/Handlers/AdminMenuHandler.php:797
+#: app/Hooks/Handlers/AdminMenuHandler.php:799
 msgid "Remote Calendars"
 msgstr "Remote-Kalender"
 
@@ -4979,13 +4986,13 @@ msgstr "Anfrage-URL"
 msgid "Required"
 msgstr "Pflichtfeld"
 
-#: app/Services/TransStrings.php:338 app/Hooks/Handlers/FrontEndHandler.php:689
+#: app/Services/TransStrings.php:338 app/Hooks/Handlers/FrontEndHandler.php:690
 msgid "Requires Confirmation"
 msgstr ""
 
-#: app/Services/TransStrings.php:501 app/Services/Helper.php:1544
-#: app/Services/Helper.php:1562 app/Services/Helper.php:1620
-#: app/Services/Helper.php:1638 app/Views/public/booking_confirmation.php:85
+#: app/Services/TransStrings.php:501 app/Services/Helper.php:1555
+#: app/Services/Helper.php:1573 app/Services/Helper.php:1631
+#: app/Services/Helper.php:1649 app/Views/public/booking_confirmation.php:85
 msgid "Reschedule"
 msgstr "Verschieben"
 
@@ -4994,9 +5001,9 @@ msgid "Rescheduled"
 msgstr ""
 
 #: app/Services/EmailNotificationService.php:372
-#, php-format
-#| msgid "Rescheduled booking email sent to"
-msgid "Rescheduled booking email %s to $s"
+#, fuzzy, php-format
+#| msgid "Rescheduled booking email %s to $s"
+msgid "Rescheduled booking email %s to %s"
 msgstr "E-Mail %s zum verschobenen Termin gesendet an $s"
 
 #: app/Services/EmailNotificationService.php:374
@@ -5113,7 +5120,7 @@ msgid "Schedule has been updated successfully"
 msgstr "Der Zeitplan wurde erfolgreich aktualisiert"
 
 #: app/Services/TransStrings.php:836
-#: app/Hooks/Handlers/FrontEndHandler.php:1030
+#: app/Hooks/Handlers/FrontEndHandler.php:1031
 msgid "Schedule Meeting"
 msgstr "Termin buchen"
 
@@ -5336,7 +5343,7 @@ msgstr ""
 msgid "Select Member"
 msgstr "Mitglied wählen"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:657
+#: app/Hooks/Handlers/FrontEndHandler.php:658
 msgid "Select on the Next Step"
 msgstr "Beim nächsten Schritt auswählen"
 
@@ -5586,11 +5593,11 @@ msgid "SMS Body"
 msgstr "SMS-Text"
 
 #: app/Services/TransStrings.php:899
-#: app/Hooks/Handlers/AdminMenuHandler.php:560
+#: app/Hooks/Handlers/AdminMenuHandler.php:562
 msgid "SMS by Twilio"
 msgstr "SMS von Twilio"
 
-#: app/Hooks/Handlers/AdminMenuHandler.php:709
+#: app/Hooks/Handlers/AdminMenuHandler.php:711
 msgid "SMS Notification"
 msgstr ""
 
@@ -5602,7 +5609,7 @@ msgstr "Einstellungen der SMS-Benachrichtigungen"
 msgid "SMS Notifications"
 msgstr "SMS-Benachrichtigungen"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:688
+#: app/Hooks/Handlers/FrontEndHandler.php:689
 msgid "Something is wrong!"
 msgstr ""
 
@@ -5611,7 +5618,7 @@ msgid "Something went wrong. Please try again later."
 msgstr ""
 "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:1059
+#: app/Hooks/Handlers/FrontEndHandler.php:1060
 msgid "Sorry! meeting could not be found"
 msgstr "Entschuldigung! Termin konnte nicht gefunden werden"
 
@@ -5623,7 +5630,7 @@ msgstr ""
 msgid "Sorry! you can not reschedule this"
 msgstr ""
 
-#: app/Hooks/Handlers/FrontEndHandler.php:453
+#: app/Hooks/Handlers/FrontEndHandler.php:454
 #, fuzzy
 #| msgid "Sorry, you can not reschedule this meeting."
 msgid "Sorry! you can not reschedule to the same time."
@@ -5636,8 +5643,8 @@ msgstr ""
 #: app/Http/Controllers/BookingController.php:25
 #: app/Http/Controllers/BookingController.php:67
 #: app/Http/Controllers/BookingController.php:260
-#: app/Hooks/Handlers/FrontEndHandler.php:717
-#: app/Hooks/Handlers/FrontEndHandler.php:952
+#: app/Hooks/Handlers/FrontEndHandler.php:718
+#: app/Hooks/Handlers/FrontEndHandler.php:953
 #: app/Services/Integrations/FluentForms/FluentFormInit.php:94
 msgid "Sorry, the host is not accepting any new bookings at the moment."
 msgstr "Leider nimmt dieser Organisator im Moment keine neuen Buchungen an."
@@ -5698,7 +5705,7 @@ msgid "Status has been updated successfully"
 msgstr "Der Status wurde erfolgreich aktualisiert"
 
 #: app/Services/TransStrings.php:375
-#: app/Hooks/Handlers/AdminMenuHandler.php:573
+#: app/Hooks/Handlers/AdminMenuHandler.php:575
 msgid "Stripe"
 msgstr "Stripe"
 
@@ -5747,7 +5754,7 @@ msgstr "Status des Abonnements"
 msgid "Successfully deleted the Integration."
 msgstr "Die Integration wurde erfolgreich gelöscht."
 
-#: app/Hooks/Handlers/FrontEndHandler.php:596
+#: app/Hooks/Handlers/FrontEndHandler.php:597
 msgid "Summary"
 msgstr "Zusammenfassung"
 
@@ -5790,7 +5797,7 @@ msgid "Task Title"
 msgstr "Task-Titel"
 
 #: app/Services/TransStrings.php:527
-#: app/Hooks/Handlers/AdminMenuHandler.php:491
+#: app/Hooks/Handlers/AdminMenuHandler.php:493
 msgid "Team"
 msgstr "Team"
 
@@ -5802,7 +5809,7 @@ msgstr "Team-Avatar"
 msgid "Team Member"
 msgstr "Team-Mitglied"
 
-#: app/Services/Helper.php:1833 app/Services/Helper.php:1834
+#: app/Services/Helper.php:1844 app/Services/Helper.php:1845
 msgid "Team Member "
 msgstr "Team-Mitglied"
 
@@ -5817,6 +5824,10 @@ msgstr "Team-Name"
 #: app/Services/TransStrings.php:535 app/Hooks/filters.php:29
 msgid "Team Settings"
 msgstr "Team-Einstellungen"
+
+#: app/Services/TransStrings.php:923 app/Services/Helper.php:1529
+msgid "Terms & Conditions"
+msgstr ""
 
 #: app/Services/Helper.php:1481
 msgid "Text"
@@ -5877,16 +5888,16 @@ msgstr ""
 msgid "The default date format will be applied if no format is chosen."
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:714
+#: app/Http/Controllers/CalendarController.php:713
 msgid "The Event Type has been cloned successfully"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:747
+#: app/Http/Controllers/CalendarController.php:746
 msgid "The Notification has been cloned successfully"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:100
-#: app/Http/Controllers/CalendarController.php:201
+#: app/Http/Controllers/CalendarController.php:99
+#: app/Http/Controllers/CalendarController.php:200
 msgid "The provided slug is not available. Please choose a different one"
 msgstr ""
 "Der angegebene Slug ist nicht verfügbar. Bitte wählen Sie einen anderen"
@@ -5902,7 +5913,7 @@ msgid "The Slug need to be at least 4 characters"
 msgstr "Der Slug muss mindestens 4 Zeichen lang sein"
 
 #: app/Services/CalendarService.php:150
-#: app/Http/Controllers/CalendarController.php:164
+#: app/Http/Controllers/CalendarController.php:163
 msgid ""
 "The user already have a calendar. Please delete it first to create a new one"
 msgstr ""
@@ -5938,11 +5949,11 @@ msgid "This feature is only available in FluentBooking Pro"
 msgstr ""
 
 #: app/Http/Controllers/BookingController.php:118
-#: app/Hooks/Handlers/FrontEndHandler.php:788
+#: app/Hooks/Handlers/FrontEndHandler.php:789
 msgid "This field is required"
 msgstr "Das ist ein Pflichtfeld"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:680
+#: app/Hooks/Handlers/FrontEndHandler.php:681
 msgid "This field is required."
 msgstr "Das ist ein Pflichtfeld."
 
@@ -6005,7 +6016,7 @@ msgid "This portal can be accessed from"
 msgstr ""
 
 #: app/Http/Controllers/BookingController.php:217
-#: app/Hooks/Handlers/FrontEndHandler.php:892
+#: app/Hooks/Handlers/FrontEndHandler.php:893
 #: app/Services/Integrations/FluentForms/FluentFormInit.php:114
 msgid ""
 "This selected time slot is not available. Maybe someone booked the spot just "
@@ -6030,7 +6041,7 @@ msgstr "Do"
 msgid "Thursday"
 msgstr "Donnerstag"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:674
+#: app/Hooks/Handlers/FrontEndHandler.php:675
 msgid "Time"
 msgstr "Zeit"
 
@@ -6038,7 +6049,7 @@ msgstr "Zeit"
 msgid "Time-slot intervals"
 msgstr "Zeitfenster-Intervalle"
 
-#: app/Services/TransStrings.php:421 app/Hooks/Handlers/FrontEndHandler.php:588
+#: app/Services/TransStrings.php:421 app/Hooks/Handlers/FrontEndHandler.php:589
 msgid "Timezone"
 msgstr "Zeitzone"
 
@@ -6131,7 +6142,7 @@ msgstr "Abgeschlossene Sitzungen insgesamt"
 msgid "Total New Booked"
 msgstr "Insgesamt neu gebucht"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:598
+#: app/Hooks/Handlers/FrontEndHandler.php:599
 msgid "Total Payment"
 msgstr "Gesamte Zahlung"
 
@@ -6172,7 +6183,7 @@ msgstr "Unbestätigt"
 msgid "unconfirmed"
 msgstr "unbestätigt"
 
-#: app/Services/Helper.php:1710 app/Services/Helper.php:1775
+#: app/Services/Helper.php:1721 app/Services/Helper.php:1786
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:100
 msgid "Unique Booking Hash"
 msgstr "Einzigartiger Buchungshash"
@@ -6270,7 +6281,7 @@ msgstr ""
 msgid "Use WooCommerce Checkout"
 msgstr ""
 
-#: app/Http/Controllers/CalendarController.php:154
+#: app/Http/Controllers/CalendarController.php:153
 msgid "User not found"
 msgstr "Benutzer nicht gefunden"
 
@@ -6333,11 +6344,11 @@ msgstr "Event ansehen"
 msgid "View Form Submission"
 msgstr "View Form Ansicht der Formularübermittlung"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:682
+#: app/Hooks/Handlers/FrontEndHandler.php:683
 msgid "View next month"
 msgstr "Nächsten Monat ansehen"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:683
+#: app/Hooks/Handlers/FrontEndHandler.php:684
 msgid "View previous month"
 msgstr "Vorherigen Monat ansehen"
 
@@ -6366,7 +6377,7 @@ msgid "WebHook URL"
 msgstr "Webhook-URL"
 
 #: app/Services/TransStrings.php:365
-#: app/Hooks/Handlers/AdminMenuHandler.php:751
+#: app/Hooks/Handlers/AdminMenuHandler.php:753
 msgid "Webhooks Feeds"
 msgstr "Webhook-Feeds"
 
@@ -6454,7 +6465,7 @@ msgstr "Wer"
 msgid "Why are you cancelling?"
 msgstr "Warum sagen Sie die buchung ab?"
 
-#: app/Services/EditorShortCodeParser.php:253
+#: app/Services/EditorShortCodeParser.php:257
 msgid "will be available soon"
 msgstr "wird bald verfügbar sein"
 
@@ -6571,7 +6582,7 @@ msgstr "Ihre %s Buchungsübersicht"
 msgid "Your Address"
 msgstr "Ihre Adresse"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:659
+#: app/Hooks/Handlers/FrontEndHandler.php:660
 msgid "Your address"
 msgstr "Ihre Adresse"
 
@@ -6615,7 +6626,7 @@ msgstr "Ihr Lizenzschlüssel"
 msgid "Your meeting has been %s"
 msgstr "Ihr Meeting wurde %s"
 
-#: app/Hooks/Handlers/FrontEndHandler.php:501
+#: app/Hooks/Handlers/FrontEndHandler.php:502
 msgid "Your meeting has been rescheduled"
 msgstr "Ihr Termin wurde verschoben"
 
@@ -6653,11 +6664,11 @@ msgstr ""
 msgid "Zip"
 msgstr ""
 
-#: app/Hooks/Handlers/AdminMenuHandler.php:550
+#: app/Hooks/Handlers/AdminMenuHandler.php:552
 msgid "Zoom"
 msgstr "Zoom"
 
-#: app/Hooks/Handlers/AdminMenuHandler.php:810
+#: app/Hooks/Handlers/AdminMenuHandler.php:812
 msgid "Zoom Integration"
 msgstr "Zoom-Integration"
 
@@ -6665,7 +6676,7 @@ msgstr "Zoom-Integration"
 msgid "Zoom Integrations Settings"
 msgstr "Zoom-Integrationseinstellungen"
 
-#: app/Services/TransStrings.php:280 app/Hooks/Handlers/FrontEndHandler.php:665
+#: app/Services/TransStrings.php:280 app/Hooks/Handlers/FrontEndHandler.php:666
 msgid "Zoom Meeting"
 msgstr "Zoom-Meeting"
 
@@ -6673,6 +6684,6 @@ msgstr "Zoom-Meeting"
 msgid "Zoom Video"
 msgstr "Online-Meeting via Zoom"
 
-#: app/Models/CalendarSlot.php:696
+#: app/Models/CalendarSlot.php:703
 msgid "Zoom Video (Pro)"
 msgstr "Zoom Video (Pro)"

@@ -148,10 +148,14 @@ class TransStrings
             'PaymentSettings/multi_payment_description'                                        => __('Enable multiple payment options based on duration', 'fluent-booking'),
             'PaymentSettings/enable_stripe_description'                                        => __('Enable stripe payment method', 'fluent-booking'),
             'PaymentSettings/enable_paypal_description'                                        => __('Enable paypal payment method', 'fluent-booking'),
+            'PaymentSettings/enable_offline_description'                                       => __('Enable offline payment method', 'fluent-booking'),
             'PaymentSettings/enable_payment_settings'                                          => __('To accept payment for your bookings, please activate', 'fluent-booking'),
             'PaymentSettings/enable_global_payment_settings'                                   => __('To accept payment for your bookings, please enable payment from global settings', 'fluent-booking'),
             'PaymentSettings/from_global_settings'                                             => __('from global settings.', 'fluent-booking'),
             'PaymentSettings/woo_payment_description'                                          => __('The selected product will be used for checkout in WooCommerce. The amount will be equal to the selected product pricing.', 'fluent-booking'),
+            'Edit Transaction'                                                                 => __('Edit Transaction', 'fluent-booking'),
+            'Billing Address'                                                                  => __('Billing Address', 'fluent-booking'),
+            'Shipping Address'                                                                 => __('Shipping Address', 'fluent-booking'),
             'Go to Stripe Settings'                                                            => __('Go to Stripe Settings', 'fluent-booking'),
             'Enable Payment Module'                                                            => __('Enable Payment Module', 'fluent-booking'),
             'Settings Page'                                                                    => __('Settings Page', 'fluent-booking'),
@@ -332,6 +336,7 @@ class TransStrings
             'AdvancedSettings/cannot_reschedule_message_hint'                                  => __('User will see this if they attempt to reschedule without permission', 'fluent-booking'),
             'AdvancedSettings/multiple_booking_limit_hint'                                     => __('Set the maximum number of bookings allowed in a single transaction', 'fluent-booking'),
             'Allow Multiple Booking'                                                           => __('Allow Multiple Booking', 'fluent-booking'),
+            'Multiple hosts'                                                                   => __('Multiple hosts', 'fluent-booking'),
             'Sorry! you can not cancel this'                                                   => __('Sorry! you can not cancel this', 'fluent-booking'),
             'Sorry! you can not reschedule this'                                               => __('Sorry! you can not reschedule this', 'fluent-booking'),
             'Sorry! you cannot remove the organizer'                                           => __('Sorry! you cannot remove the organizer', 'fluent-booking'),
@@ -387,6 +392,7 @@ class TransStrings
             'One-to-One'                                                                       => __('One-to-One', 'fluent-booking'),
             'One host'                                                                         => __('One host', 'fluent-booking'),
             'with'                                                                             => __('with', 'fluent-booking'),
+            'Filter'                                                                           => __('Filter', 'fluent-booking'),
             'One invitee'                                                                      => __('One invitee', 'fluent-booking'),
             'Group of invitees'                                                                => __('Group of invitees', 'fluent-booking'),
             'Good for: coffee chats, 1:1 interviews, etc.'                                     => __('Good for: coffee chats, 1:1 interviews, etc.', 'fluent-booking'),
@@ -394,6 +400,7 @@ class TransStrings
             'Good for: distributing incoming sales leads.'                                     => __('Good for: distributing incoming sales leads.', 'fluent-booking'),
             'Good for: higher priority meetings.'                                              => __('Good for: higher priority meetings.', 'fluent-booking'),
             'Good for: reservation or ticketing system'                                        => __('Good for: reservation or ticketing system', 'fluent-booking'),
+            'Good for: Panel interviews, group sales calls, etc.'                              => __('Good for: Panel interviews, group sales calls, etc.', 'fluent-booking'),
             'Landing page URL'                                                                 => __('Landing page URL', 'fluent-booking'),
             'Publicly Accessible'                                                              => __('Publicly Accessible', 'fluent-booking'),
             'Disable Landing Page Feature'                                                     => __('Disable Landing Page Feature', 'fluent-booking'),
@@ -922,7 +929,8 @@ class TransStrings
             'Select Date'                                                                      => __('Select Date', 'fluent-booking'),
             'Terms & Conditions'                                                               => __('Terms & Conditions', 'fluent-booking'),
             'If no date is set, default date 1900-01-01 will be used as the minimum date.'     => __('If no date is set, default date 1900-01-01 will be used as the minimum date.', 'fluent-booking'),
-            'If no date is set, current date will be used as the maximum date.'                => __('If no date is set, current date will be used as the maximum date.', 'fluent-booking')
+            'If no date is set, current date will be used as the maximum date.'                => __('If no date is set, current date will be used as the maximum date.', 'fluent-booking'),
+            'Filter By Calendar Type'                                                          => __('Filter By Calendar Type', 'fluent-booking'),
         );
     }
 }

@@ -19,8 +19,9 @@ class BookingFieldService
         foreach ($customFields as $fieldKey => $customField) {
             $value = wp_unslash(Arr::get($postedData, $fieldKey));
             if (Arr::isTrue($customField, 'required')) {
-                if (!$value || ($customField['type'] == 'checkbox' && $value != 'Yes')) {
-                    // translators: %s is the label of the required field
+                $isTerms = $customField['type'] === 'terms-and-conditions';
+                $isCheckbox = $customField['type'] === 'checkbox';
+                if (!$value || ($isCheckbox && $value !== 'Yes') || ($isTerms && $value !== 'Accepted')) {
                     $errors[$fieldKey . '.required'] = sprintf(__('%s is required', 'fluent-booking'), $customField['label']);
                     continue;
                 }
@@ -255,7 +256,8 @@ class BookingFieldService
 
     public static function generateFieldName($calendarEvent, $fieldLabel)
     {
-        $fieldName     = 'custom_' . sanitize_title($fieldLabel);
+        $fieldLabel = str_replace(' ', '_', $fieldLabel);
+        $fieldName = 'custom_' . strtolower($fieldLabel);
         $bookingFields = self::getBookingFields($calendarEvent);
         
         $matched = 0;
@@ -315,6 +317,7 @@ class BookingFieldService
 
             $formattedData[$dataKey] = [
                 'label' => $label,
+                'type'  => $fieldType,
                 'value' => $formattedValue
             ];
         }

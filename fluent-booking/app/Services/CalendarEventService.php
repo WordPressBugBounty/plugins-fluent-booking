@@ -3,6 +3,7 @@
 namespace FluentBooking\App\Services;
 
 use FluentBooking\App\Models\Calendar;
+use FluentBooking\Framework\Support\Arr;
 
 class CalendarEventService
 {
@@ -38,5 +39,18 @@ class CalendarEventService
         }
 
         return $calendarEvents;
+    }
+
+    public static function isSharedCalendarEvent($calendarEvent)
+    {
+        $userId = get_current_user_id();
+
+        if ($calendarEvent->user_id == $userId) {
+            return true;
+        }
+
+        $teamMembers = Arr::get($calendarEvent, 'settings.team_members', []);
+
+        return in_array($userId, $teamMembers);
     }
 }

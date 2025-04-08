@@ -153,6 +153,17 @@ class DateTimeHelper
         return $dateTime->format('Y-m-d H:i:s');
     }
 
+    public static function getIsoDurationInMinutes($duration)
+    {
+        if (!$duration) {
+            return 0;
+        }
+
+        $duration = new \DateInterval($duration);
+
+        return ($duration->d * 24 * 60) + ($duration->h * 60) + ($duration->i) + ($duration->s / 60);
+    }
+
     public static function getTimestamp($timezone = 'UTC')
     {
         $timezone = self::getValidatedTimeZone($timezone);
@@ -381,5 +392,58 @@ class DateTimeHelper
         }
 
         return $isDstActive;
+    }
+
+    public static function getI18nDateTimeConfig()
+    {
+        return apply_filters('fluent_booking/i18n_date_time_config', [
+            'weekdays'      => array(
+                'sunday'    => _x('Sunday', 'calendar day full', 'fluent-booking'),
+                'monday'    => _x('Monday', 'calendar day full', 'fluent-booking'),
+                'tuesday'   => _x('Tuesday', 'calendar day full', 'fluent-booking'),
+                'wednesday' => _x('Wednesday', 'calendar day full', 'fluent-booking'),
+                'thursday'  => _x('Thursday', 'calendar day full', 'fluent-booking'),
+                'friday'    => _x('Friday', 'calendar day full', 'fluent-booking'),
+                'saturday'  => _x('Saturday', 'calendar day full', 'fluent-booking'),
+            ),
+            'months'        => array(
+                'January'   => _x('January', 'calendar month name full', 'fluent-booking'),
+                'February'  => _x('February', 'calendar month name full', 'fluent-booking'),
+                'March'     => _x('March', 'calendar month name full', 'fluent-booking'),
+                'April'     => _x('April', 'calendar month name full', 'fluent-booking'),
+                'May'       => _x('May', 'calendar month name full', 'fluent-booking'),
+                'June'      => _x('June', 'calendar month name full', 'fluent-booking'),
+                'July'      => _x('July', 'calendar month name full', 'fluent-booking'),
+                'August'    => _x('August', 'calendar month name full', 'fluent-booking'),
+                'September' => _x('September', 'calendar month name full', 'fluent-booking'),
+                'October'   => _x('October', 'calendar month name full', 'fluent-booking'),
+                'November'  => _x('November', 'calendar month name full', 'fluent-booking'),
+                'December'  => _x('December', 'calendar month name full', 'fluent-booking')
+            ),
+            'weekdaysShort' => array(
+                'sun' => _x('Sun', 'calendar day short', 'fluent-booking'),
+                'mon' => _x('Mon', 'calendar day short', 'fluent-booking'),
+                'tue' => _x('Tue', 'calendar day short', 'fluent-booking'),
+                'wed' => _x('Wed', 'calendar day short', 'fluent-booking'),
+                'thu' => _x('Thu', 'calendar day short', 'fluent-booking'),
+                'fri' => _x('Fri', 'calendar day short', 'fluent-booking'),
+                'sat' => _x('Sat', 'calendar day short', 'fluent-booking')
+            ),
+            'monthsShort'   => array(
+                'jan' => _x('Jan', 'calendar month name short', 'fluent-booking'),
+                'feb' => _x('Feb', 'calendar month name short', 'fluent-booking'),
+                'mar' => _x('Mar', 'calendar month name short', 'fluent-booking'),
+                'apr' => _x('Apr', 'calendar month name short', 'fluent-booking'),
+                'may' => _x('May', 'calendar month name short', 'fluent-booking'),
+                'jun' => _x('Jun', 'calendar month name short', 'fluent-booking'),
+                'jul' => _x('Jul', 'calendar month name short', 'fluent-booking'),
+                'aug' => _x('Aug', 'calendar month name short', 'fluent-booking'),
+                'sep' => _x('Sep', 'calendar month name short', 'fluent-booking'),
+                'oct' => _x('Oct', 'calendar month name short', 'fluent-booking'),
+                'nov' => _x('Nov', 'calendar month name short', 'fluent-booking'),
+                'dec' => _x('Dec', 'calendar month name short', 'fluent-booking')
+            ),
+            'numericSystem' => _x('0_1_2_3_4_5_6_7_8_9', 'calendar numeric system - Sequence must need to maintained', 'fluent-booking'),
+        ]);
     }
 }

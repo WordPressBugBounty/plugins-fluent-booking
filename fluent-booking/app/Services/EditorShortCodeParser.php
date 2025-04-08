@@ -95,12 +95,14 @@ class EditorShortCodeParser
 
         if (str_starts_with($key, 'start_date_time_for_attendee')) {
             $format = preg_match('/format\.([a-zA-Z\-]+)/', $key, $matches) ? $matches[1] : 'Y-m-d H:i:s';
-            return DateTimeHelper::convertFromUtc($booking->start_time, $booking->person_time_zone, $format);
+            $dateTime = DateTimeHelper::convertFromUtc($booking->start_time, $booking->person_time_zone, $format);
+            return date_i18n($format, strtotime($dateTime));
         }
 
         if (str_starts_with($key, 'start_date_time_for_host')) {
             $format = preg_match('/format\.([a-zA-Z\-]+)/', $key, $matches) ? $matches[1] : 'Y-m-d H:i:s';
-            return DateTimeHelper::convertFromUtc($booking->start_time, $booking->getHostTimezone(), $format);
+            $dateTime = DateTimeHelper::convertFromUtc($booking->start_time, $booking->getHostTimezone(), $format);
+            return date_i18n($format, strtotime($dateTime));
         }
 
         if ($key == 'cancel_reason') {

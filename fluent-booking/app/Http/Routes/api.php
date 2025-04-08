@@ -115,17 +115,16 @@ $router->prefix('reports')->withPolicy('UserPolicy')->group(function ($router) {
 });
 
 $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($router) {
-    $router->prefix('{id}/events/{slot_id}/integrations')->group(function ($router) {
-        $router->get('/', 'CalendarIntegrationController@index')->int('id')->int('slot_id');
-        $router->post('/clone', 'CalendarIntegrationController@cloneIntegrations')->int('id')->int('slot_id');
+    $router->prefix('{id}/events/{event_id}/integrations')->group(function ($router) {
+        $router->get('/', 'CalendarIntegrationController@index')->int('id')->int('event_id');
+        $router->post('/clone', 'CalendarIntegrationController@cloneIntegrations')->int('id')->int('event_id');
 
         $router->prefix('{integration_id}')->group(function ($router) {
-            $router->get('/', 'CalendarIntegrationController@find')->int('id')->int('slot_id')->int('integration_id');
-            $router->post('/', 'CalendarIntegrationController@update')->int('id')->int('slot_id')->int('integration_id');
-            $router->delete('/', 'CalendarIntegrationController@delete')->int('id')->int('slot_id')->int('integration_id');
+            $router->get('/', 'CalendarIntegrationController@find')->int('id')->int('event_id')->int('integration_id');
+            $router->post('/', 'CalendarIntegrationController@update')->int('id')->int('event_id')->int('integration_id');
+            $router->delete('/', 'CalendarIntegrationController@delete')->int('id')->int('event_id')->int('integration_id');
             $router->get('/merge-fields', 'CalendarIntegrationController@integrationListComponent');
             $router->get('/config-field-options', 'CalendarIntegrationController@getConfigFieldOptions');
         });
     });
 });
-

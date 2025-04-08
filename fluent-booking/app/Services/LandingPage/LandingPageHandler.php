@@ -224,11 +224,15 @@ class LandingPageHandler
 
         $publicCss = $isRtl ? 'public/saas-rtl.css' : 'public/saas.css';
 
+        $title = $calendarEvent->title . ' ' . __('with', 'fluent-booking') . ' ' . $authorProfile['name'];
+
+        $title = apply_filters('fluent_booking/booking_confirmation_page_title', $title, $calendarEvent, $authorProfile);
+
         $data = [
             'calendar'       => $calendar,
             'calendar_event' => $calendarEvent,
             'author'         => $authorProfile,
-            'title'          => $calendarEvent->title . ' ' . __('with', 'fluent-booking') . ' ' . $authorProfile['name'],
+            'title'          => $title,
             'description'    => substr(strip_shortcodes(wp_strip_all_tags(str_replace(PHP_EOL, ' ', $calendarEvent->description))), 0, 300) . '...',
             'url'            => home_url($wp->request),
             'css_files'      => [

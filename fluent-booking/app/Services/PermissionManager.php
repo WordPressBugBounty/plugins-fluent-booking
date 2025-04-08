@@ -2,8 +2,9 @@
 
 namespace FluentBooking\App\Services;
 
-use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\Meta;
+use FluentBooking\App\Models\Calendar;
+use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\Framework\Support\Arr;
 
 class PermissionManager
@@ -48,8 +49,30 @@ class PermissionManager
             return true;
         }
 
-
+        if (CalendarService::isSharedCalendar($calendar)) {
+            return true;
+        }
+        
         return self::userCan(['read_other_calendars', 'manage_other_calendars']);
+    }
+
+    public static function canUpdateCalendarEvent($slotId)
+    {
+        $calendarSlot = CalendarSlot::find($slotId);
+
+        if (!$calendarSlot) {
+            return false;
+        }
+
+        $userId = get_current_user_id();
+
+        $teamMembers = Arr::get($calendarSlot, 'settings.team_members', []);
+
+        if ($calendarSlot->user_id == $userId || in_array($userId, $teamMembers)) {
+            return true;
+        }
+
+        return current_user_can('manage_options') || self::userCan(['manage_other_calendars']);
     }
 
     public static function canWriteCalendar($calendarId)

@@ -302,10 +302,15 @@ class CalendarService
         return $formattedNotifications;
     }
 
-    public static function getSlotOptions($calendarId)
+    public static function getSlotOptions($calendarId = null, $userId = null)
     {
         $calendarSlots = CalendarSlot::select(['id', 'title'])
-            ->where('calendar_id', $calendarId)
+            ->when($calendarId, function ($query) use ($calendarId) {
+                return $query->where('calendar_id', $calendarId);
+            })
+            ->when($userId, function ($query) use ($userId) {
+                return $query->where('user_id', $userId);
+            })
             ->where('status', '!=', 'expired')
             ->latest()
             ->get();
@@ -427,6 +432,25 @@ class CalendarService
         }
 
         return $calendarIds;
+    }
+
+    public static function isSharedCalendar($calendar)
+    {
+        $calendarEvents = $calendar->events;
+
+        $userId = get_current_user_id();
+
+        foreach ($calendarEvents as $event) {
+            if ($event->user_id == $userId) {
+                return true;
+            }
+            $teamMembers = Arr::get($event, 'settings.team_members', []);
+            if (in_array($userId, $teamMembers)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static function updateCalendarEventsSchedule($calendarId, $oldTimezone, $updatedTimezone)

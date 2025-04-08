@@ -90,7 +90,11 @@ class CalendarSlot extends Model
     {
         $description = preg_replace('/<[^>]*>/', ' ', $this->getDescription());
 
-        return Helper::excerpt($description);
+        $maxLength = apply_filters('fluent_booking/event_short_description_length', 160, $this);
+        
+        $description = Helper::excerpt($description, $maxLength);
+
+        return apply_filters('fluent_booking/event_short_description', $description, $this);
     }
 
     public function calendar()
@@ -549,6 +553,10 @@ class CalendarSlot extends Model
             }
         }
 
+        if ($timeZone) {
+            $startDate = DateTimeHelper::convertToTimeZone($startDate, $timeZone, 'UTC');
+        }
+
         $totalCutStamp = DateTimeHelper::getTimestamp() + $this->getCutoutSeconds();
 
         if (strtotime($startDate) < $totalCutStamp) {
@@ -877,7 +885,7 @@ class CalendarSlot extends Model
         $total = 0;
         $items = $this->getPaymentItems();
         foreach ($items as $item) {
-            $total += (int)$item['value'];
+            $total += $item['value'];
         }
 
         return $total;
@@ -1061,6 +1069,7 @@ class CalendarSlot extends Model
             'multi_payment_enabled' => 'no',
             'stripe_enabled'        => 'no',
             'paypal_enabled'        => 'no',
+            'offline_enabled'       => 'no',
             'driver'                => 'native',
             'items'                 => [
                 [
@@ -1080,11 +1089,15 @@ class CalendarSlot extends Model
             ]
         ];
 
+        $defaults = apply_filters('fluent_booking/event_payment_settings_defaults', $defaults, $this);
+
         if (!$settings) {
             $settings = $defaults;
         }
 
-        return wp_parse_args($settings, $defaults);
+        $settings = wp_parse_args($settings, $defaults);
+
+        return apply_filters('fluent_booking/get_event_payment_settings', $settings, $this);
     }
 
     public function getHostSchedule($hostId) 

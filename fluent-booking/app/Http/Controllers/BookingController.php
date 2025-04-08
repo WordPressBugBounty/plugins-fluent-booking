@@ -184,6 +184,7 @@ class BookingController extends Controller
             $locationDetails['description'] = $eventLocations[$locationType]['description'];
         } else if (in_array($locationType, ['google_meet', 'online_meeting', 'zoom_meeting', 'ms_teams'])) {
             $locationDetails['description'] = Arr::get($eventLocations[$locationType], 'meeting_link', '');
+            $locationDetails['online_platform_link'] = $locationDetails['description'];
         }
 
         $bookingData['location_details'] = $locationDetails;

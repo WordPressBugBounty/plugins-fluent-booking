@@ -34,8 +34,8 @@ class TimeSlotService
 
         $bookedSlots = $this->getBookedSlots([$fromDate, $toDate], 'UTC', $isDoingBooking);
 
-        $ranges = $this->maybeBookingFrequencyLimitRanges($ranges, $bookedSlots);
-        $ranges = $this->maybeBookingDurationLimitRanges($ranges, $bookedSlots, $duration);
+        $ranges = $this->maybeBookingFrequencyLimitRanges($ranges);
+        $ranges = $this->maybeBookingDurationLimitRanges($ranges, $duration);
 
         $cutOutTime = DateTimeHelper::getTimestamp() + $this->calendarSlot->getCutoutSeconds();
 
@@ -44,6 +44,8 @@ class TimeSlotService
         $timezoneInfo = $this->getTimezoneInfo();
 
         $rangedSlots = $this->getRangedValidSlots($ranges, $duration, $bookedSlots, $cutOutTime, $maxBookingTime, $timezoneInfo);
+
+        $rangedSlots = $this->maybeBookingPerDayLimitSlots($rangedSlots, $bookedSlots, $duration);
 
         return $rangedSlots;
     }
@@ -706,7 +708,7 @@ class TimeSlotService
         return $rangeArray;
     }
 
-    private function maybeBookingFrequencyLimitRanges($ranges, $bookedSlots)
+    private function maybeBookingFrequencyLimitRanges($ranges)
     {
         if (!$ranges) {
             return $ranges;
@@ -763,37 +765,10 @@ class TimeSlotService
                 }
             }
         }
-
-        // Per Day Booking Frequency Limit Hanlder
-        if (!empty($keyedFrequenceyLimits['per_day'])) {
-            $perDayLimit = $keyedFrequenceyLimits['per_day'];
-            foreach ($ranges as $rangeIndex => $rangeDate) {
-                if (!isset($bookedSlots[$rangeDate])) {
-                    continue;
-                }
-
-                $dayBooked = array_filter($bookedSlots[$rangeDate], function ($slot) {
-                    return Arr::get($slot, 'event_id') == $this->calendarSlot->id;
-                });
-
-                if (!$dayBooked) {
-                    continue;
-                }
-
-                if (count($dayBooked) >= $perDayLimit) {
-                    unset($ranges[$rangeIndex]);
-                }
-
-                if (!$ranges) {
-                    return [];
-                }
-            }
-        }
-
         return $ranges;
     }
 
-    private function maybeBookingDurationLimitRanges($ranges, $bookedSlots, $duration)
+    private function maybeBookingDurationLimitRanges($ranges, $duration)
     {
         if (!$ranges) {
             return $ranges;
@@ -842,33 +817,151 @@ class TimeSlotService
                 }
             }
         }
+        return $ranges;
+    }
 
-        // Per Day Booking Frequency Limit Hanlder
-        if (!empty($keyedLimits['per_day'])) {
-            $perDayLimit = $keyedLimits['per_day'];
-            foreach ($ranges as $rangeIndex => $rangeDate) {
-                if (!isset($bookedSlots[$rangeDate])) {
-                    continue;
+    protected function maybeBookingPerDayLimitSlots($rangesSlots, $bookedSlots, $duration)
+    {
+        $isDurationEnabled = !!Arr::get($this->calendarSlot->settings, 'booking_duration.enabled');
+        
+        $isFrequencyEnabled = !!Arr::get($this->calendarSlot->settings, 'booking_frequency.enabled');
+
+        if (!$isDurationEnabled && !$isFrequencyEnabled) {
+            return $rangesSlots;
+        }
+
+        $hostTimeZone = $this->calendarSlot->getScheduleTimezone($this->hostId);
+
+        $convertedRangesSlots = $this->convertSlotsByTimezone($rangesSlots, 'UTC', $hostTimeZone);
+
+        $convertedBookedSlots = $this->convertSlotsByTimezone($bookedSlots, 'UTC', $hostTimeZone);
+
+        $convertedRangesSlots = $this->maybeBookingDurationDayLimit($convertedRangesSlots, $convertedBookedSlots, $duration, $isDurationEnabled);
+
+        $convertedRangesSlots = $this->maybeBookingFrequencyDayLimit($convertedRangesSlots, $convertedBookedSlots, $isFrequencyEnabled);
+
+        $rangesSlots = $this->convertSlotsByTimezone($convertedRangesSlots, $hostTimeZone, 'UTC');
+
+        return $rangesSlots;
+    }
+
+    protected function maybeBookingDurationDayLimit($rangesSlots, $bookedSlots, $duration, $isEnabled)
+    {
+        if (!$isEnabled) {
+            return $rangesSlots;
+        }
+
+        $limits = Arr::get($this->calendarSlot->settings, 'booking_duration.limits', []);
+
+        $perDayLimit = null;
+        foreach ($limits as $limit) {
+            if (Arr::get($limit, 'unit') == 'per_day' && Arr::get($limit, 'value')) {
+                $perDayLimit = (int)Arr::get($limit, 'value');
+                break;
+            }
+        }
+
+        if (!$perDayLimit) {
+            return $rangesSlots;
+        }
+
+        $isMultiSlot = $this->calendarSlot->isMultiGuestEvent();
+
+        foreach ($rangesSlots as $rangeDate => &$slots) {
+            if (!isset($bookedSlots[$rangeDate])) {
+                continue;
+            }
+
+            $dayDuration = array_reduce($bookedSlots[$rangeDate], function ($carry, $slot) {
+                if (Arr::get($slot, 'event_id') == $this->calendarSlot->id) {
+                    $carry += (int)((strtotime($slot['end']) - strtotime($slot['start'])) / 60);
                 }
+                return $carry;
+            }, 0);
 
-                $dayDurarion = array_reduce($bookedSlots[$rangeDate], function ($carry, $slot) {
-                    if (Arr::get($slot, 'event_id') == $this->calendarSlot->id) {
-                        $carry += (int)((strtotime($slot['end']) - strtotime($slot['start'])) / 60);
-                    }
-                    return $carry;
-                }, 0);
-
-                if (!$dayDurarion) {
-                    continue;
+            if ($dayDuration + $duration > $perDayLimit) {
+                if ($isMultiSlot) {
+                    $slots = array_values(array_filter($slots, function ($slot) {
+                        return !empty(Arr::get($slot, 'remaining'));
+                    }));
                 }
-
-                if ($dayDurarion + $duration > $perDayLimit) {
-                    unset($ranges[$rangeIndex]);
+                if (!$isMultiSlot || !count($slots)) {
+                    unset($rangesSlots[$rangeDate]);
                 }
             }
         }
 
-        return $ranges;
+        return $rangesSlots;
+    }
+
+    protected function maybeBookingFrequencyDayLimit($rangesSlots, $bookedSlots, $isEnabled)
+    {
+        if (!$isEnabled) {
+            return $rangesSlots;
+        }
+
+        $limits = Arr::get($this->calendarSlot->settings, 'booking_frequency.limits', []);
+
+        $perDayLimit = null;
+        foreach ($limits as $limit) {
+            if (Arr::get($limit, 'unit') == 'per_day' && Arr::get($limit, 'value')) {
+                $perDayLimit = (int)Arr::get($limit, 'value');
+                break;
+            }
+        }
+
+        if (!$perDayLimit) {
+            return $rangesSlots;
+        }
+
+        $isMultiSlot = $this->calendarSlot->isMultiGuestEvent();
+
+        foreach ($rangesSlots as $rangeDate => &$slots) {
+            if (!isset($bookedSlots[$rangeDate])) {
+                continue;
+            }
+
+            $dayBooked = array_filter($bookedSlots[$rangeDate], function ($slot) {
+                return Arr::get($slot, 'event_id') == $this->calendarSlot->id;
+            });
+
+            if (count($dayBooked) >= $perDayLimit) {
+                if ($isMultiSlot) {
+                    $slots = array_values(array_filter($slots, function ($slot) {
+                        return !empty(Arr::get($slot, 'remaining'));
+                    }));
+                }
+                if (!$isMultiSlot || !count($slots)) {
+                    unset($rangesSlots[$rangeDate]);
+                }
+            }
+        }
+
+        return $rangesSlots;
+    }
+
+    protected function convertSlotsByTimezone($slots, $fromTimeZone, $toTimeZone)
+    {
+        if ($fromTimeZone == $toTimeZone) {
+            return $slots;
+        }
+
+        $convertedSlots = [];
+
+        foreach ($slots as $spots) {
+            foreach ($spots as $spot) {
+                $spot['start'] = DateTimeHelper::convertToTimeZone($spot['start'], $fromTimeZone, $toTimeZone);
+                $spot['end'] = DateTimeHelper::convertToTimeZone($spot['end'], $fromTimeZone, $toTimeZone);
+
+                $spotDate = gmdate('Y-m-d', strtotime($spot['start']));
+
+                $convertedSlots[$spotDate] = $convertedSlots[$spotDate] ?? [];
+
+                $convertedSlots[$spotDate][] = $spot;
+            }
+        }
+
+        return $convertedSlots;
     }
 
     public function getFilledWeeks($from, $to, $weekStart = '')

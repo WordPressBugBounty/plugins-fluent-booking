@@ -2,11 +2,9 @@
 
 namespace FluentBooking\App\Http\Controllers;
 
-use FluentBooking\App\App;
 use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\BookingActivity;
-use FluentBooking\App\Models\Meta;
 use FluentBooking\App\Services\EmailNotificationService;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\CurrenciesHelper;
@@ -27,15 +25,17 @@ class SchedulesController extends Controller
 
         $eventType = Arr::get($filters, 'event_type');
 
-        $query = Booking::with(['calendar_event']);
-
         $author = Arr::get($filters, 'author');
 
-        if ($author !== 'all') {
+        $query = Booking::with(['calendar_event']);
+
+        if (is_numeric($author)) {
             $author = (int)$author;
         }
 
-        if (!PermissionManager::userCanSeeAllBookings()) {
+        $hasPermission = PermissionManager::userCanSeeAllBookings();
+
+        if (!$hasPermission) {
             if (!$author || $author == 'all') {
                 $authorCalendar = Calendar::where('user_id', get_current_user_id())
                     ->where('type', 'simple')
@@ -47,7 +47,14 @@ class SchedulesController extends Controller
         }
 
         if ($author && $author !== 'all') {
-            $query->where('calendar_id', $author);
+            if ($author == 'me') {
+                $query->where('host_user_id', get_current_user_id());
+            } else {
+                $query->where('calendar_id', $author);
+                if (!$hasPermission) {
+                    $query->where('host_user_id', get_current_user_id());
+                }
+            }
 
             if ($eventId && $eventId !== 'all') {
                 $query->where('event_id', $eventId);
@@ -69,7 +76,6 @@ class SchedulesController extends Controller
         $search = Arr::get($filters, 'search');
 
         if (!empty($search)) {
-            $author = 'all';
             $query = $query->orderBy('start_time', 'DESC');
             $query = $query->searchBy($search);
         }
@@ -87,23 +93,25 @@ class SchedulesController extends Controller
 
         $data['calendar_event_lists'] = CalendarService::getCalendarOptionsByTitle();
 
-        if ($author && $author != 'all') {
-            $slotOptions = CalendarService::getSlotOptions($author);
+        if ($author == 'me') {
+            $slotOptions = CalendarService::getSlotOptions(null, get_current_user_id());
             $data['slot_options'] = $slotOptions;
         }
 
         if ($request->get('page') == 1) {
-            $pendingQuery = Booking::query()
+            $pendingCount = Booking::query()
                 ->whereIn('status', ['pending', 'reserved'])
-                ->distinct('group_id');
-            if ($author && $author !== 'all') {
-                $pendingCount = $pendingQuery->where('calendar_id', $author)->count('group_id');
-            } else {
-                $pendingCount = $pendingQuery->count('group_id');
-            }
+                ->distinct('group_id')
+                ->when($author == 'me', function($query) {
+                    return $query->where('host_user_id', get_current_user_id());
+                })
+                ->when($author && is_numeric($author), function($query) use ($author) {
+                    return $query->where('calendar_id', $author);
+                })
+                ->count('group_id');
 
-            $data['no_show_count'] = Booking::where('status', 'no_show')->count();
             $data['pending_count'] = $pendingCount;
+            $data['no_show_count'] = Booking::where('status', 'no_show')->count();
             $data['cancelled_count'] = Booking::where('status', 'cancelled')->count();
         }
 
@@ -208,6 +216,10 @@ class SchedulesController extends Controller
 
             if ($value == 'pending') {
                 do_action('fluent_booking/log_booking_activity', $this->getPaymentPendingLog($booking->id));
+            }
+
+            if ($booking->payment_order) {
+                do_action('fluent_booking/payment/status_changed', $booking->payment_order, $booking);
             }
         }
 
@@ -428,6 +440,17 @@ class SchedulesController extends Controller
         return $booking;
     }
 
+    private function getConfirmedBy()
+    {
+        $confirmedBy = 'host';
+        $userId = get_current_user_id();
+        if ($userId && $user = get_user_by('ID', $userId)) {
+            $confirmedBy = $user->display_name;
+        }
+
+        return $confirmedBy;
+    }
+
     private function getPaymentPaidLog($bookingId)
     {
         return [
@@ -435,7 +458,7 @@ class SchedulesController extends Controller
             'status'      => 'closed',
             'type'        => 'success',
             'title'       => __('Payment Successfully Completed', 'fluent-booking'),
-            'description' => __('Payment marked as paid by admin', 'fluent-booking')
+            'description' => __('Payment marked as paid by ', 'fluent-booking') . $this->getConfirmedBy()
         ];
     }
 
@@ -446,24 +469,18 @@ class SchedulesController extends Controller
             'status'      => 'closed',
             'type'        => 'success',
             'title'       => __('Payment Successfully Marked as Pending', 'fluent-booking'),
-            'description' => __('Payment marked as pending by admin', 'fluent-booking')
+            'description' => __('Payment marked as pending by ', 'fluent-booking') . $this->getConfirmedBy()
         ];
     }
 
     private function getConfirmLog($bookingId)
     {
-        $confirmedBy = 'host';
-        $userId = get_current_user_id();
-        if ($userId && $user = get_user_by('ID', $userId)) {
-            $confirmedBy = $user->display_name;
-        }
-
         return [
             'booking_id'  => $bookingId,
             'status'      => 'closed',
             'type'        => 'success',
             'title'       => __('Booking Confirmed', 'fluent-booking'),
-            'description' => __('Booking has been confirmed by ', 'fluent-booking') . $confirmedBy
+            'description' => __('Booking has been confirmed by ', 'fluent-booking') . $this->getConfirmedBy()
         ];
     }
 }

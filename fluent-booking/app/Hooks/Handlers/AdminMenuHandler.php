@@ -5,7 +5,6 @@ namespace FluentBooking\App\Hooks\Handlers;
 use FluentBooking\App\App;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
-use FluentBooking\App\Models\User;
 use FluentBooking\App\Services\DateTimeHelper;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\PermissionManager;
@@ -401,6 +400,9 @@ class AdminMenuHandler
             'supported_features'     => apply_filters('fluent_booking/supported_featured', [
                 'multi_users' => true
             ]),
+            'i18'                    => [
+                'date_time_config' => DateTimeHelper::getI18nDateTimeConfig(),
+            ],
             'has_pro'                => defined('FLUENT_BOOKING_PRO_DIR_FILE'),
             'require_upgrade'        => defined('FLUENT_BOOKING_PRO_DIR_FILE') && !defined('FLUENT_BOOKING_LITE'),
             'dashboard_notices'      => apply_filters('fluent_booking/dashboard_notices', []),
@@ -410,6 +412,7 @@ class AdminMenuHandler
             'date_time_formatter'    => DateTimeHelper::getDateFormatter(true) . ', ' . DateTimeHelper::getTimeFormatter(true),
             'available_date_formats' => DateTimeHelper::getAvailableDateFormats(),
             'admin_url'              => admin_url(),
+            'is_rtl'                 => Helper::fluentbooking_is_rtl()
         ]);
     }
 
@@ -594,6 +597,19 @@ class AdminMenuHandler
                     'name'   => 'PaymentSettingsIndex',
                     'params' => [
                         'settings_key' => 'paypal'
+                    ]
+                ]
+            ],
+            'offline'             => [
+                'title'          => __('Offline Payment', 'fluent-booking'),
+                'disable'        => true,
+                'icon_url'       => $urlAssets . 'images/payment-methods/offline.svg',
+                'component_type' => 'GlobalSettingsComponent',
+                'class'          => 'offline_payment',
+                'route'          => [
+                    'name' => 'PaymentSettingsIndex',
+                    'params' => [
+                        'settings_key' => 'offline'
                     ]
                 ]
             ],

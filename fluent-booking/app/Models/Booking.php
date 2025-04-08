@@ -370,37 +370,23 @@ class Booking extends Model
         $details = $this->location_details;
         $locationType = Arr::get($details, 'type');
 
-        if (!$locationType) {
-            return '--';
-        }
-
-        if ($locationType == 'in_person_guest') {
-            return '<b>' . __('Invitee Address:', 'fluent-booking') . ' </b>' . Arr::get($details, 'description');
-        }
-
-        if ($locationType == 'in_person_organizer') {
+        $html = '';
+        if ($locationType === 'in_person_guest') {
+            $html = '<b>' . __('Invitee Address:', 'fluent-booking') . ' </b>' . Arr::get($details, 'description');
+        } else if ($locationType === 'in_person_organizer') {
             $html = '<b>' . Arr::get($details, 'title') . ' </b>';
-            if ($description = Arr::get($details, 'description')) {
+            $description = Arr::get($details, 'description');
+            if ($description) {
                 $html .= wpautop($description);
             }
-            return $html;
-        }
-
-        if ($locationType == 'phone_guest') {
-            return '<b>' . __('Phone Call:', 'fluent-booking') . ' </b>' . $this->phone;
-        }
-
-        if ($locationType == 'phone_organizer') {
-            return '<b>' . __('Phone Call:', 'fluent-booking') . ' </b>' . Arr::get($details, 'description') . __(' (Host phone number)', 'fluent-booking');
-        }
-
-        if ($locationType == 'custom') {
+        } else if ($locationType === 'phone_guest') {
+            $html = '<b>' . __('Phone Call:', 'fluent-booking') . ' </b>' . $this->phone;
+        } else if ($locationType === 'phone_organizer') {
+            $html = '<b>' . __('Phone Call:', 'fluent-booking') . ' </b>' . Arr::get($details, 'description') . __(' (Host phone number)', 'fluent-booking');
+        } else if ($locationType === 'custom') {
             $html = '<b>' . Arr::get($details, 'title') . '</b>';
             $html .= wpautop(Arr::get($details, 'description'));
-            return $html;
-        }
-
-        if (in_array($locationType, ['google_meet', 'online_meeting', 'zoom_meeting', 'ms_teams'])) {
+        } else if (in_array($locationType, ['google_meet', 'online_meeting', 'zoom_meeting', 'ms_teams'])) {
             $platformLabels = [
                 'google_meet'    => __('Google Meet', 'fluent-booking'),
                 'online_meeting' => __('Online Meeting', 'fluent-booking'),
@@ -409,15 +395,15 @@ class Booking extends Model
             ];
 
             $html = '<b>' . $platformLabels[$locationType] . '</b> ';
-
-            if ($meetingLink = Arr::get($details, 'online_platform_link')) {
+            $meetingLink = Arr::get($details, 'online_platform_link');
+            if ($meetingLink) {
                 $html .= '<a target="_blank" href="' . esc_url($meetingLink) . '">' . __('Join Meeting', 'fluent-booking') . '</a>';
             }
-
-            return $html;
+        } else {
+            return '--';
         }
 
-        return '--';
+        return apply_filters('fluent_booking/location_details_html', $html, $details);
     }
 
     public function getLocationAsText()
@@ -441,7 +427,9 @@ class Booking extends Model
             return $this->phone;
         }
 
-        return wp_strip_all_tags($this->getLocationDetailsHtml());
+        $text = wp_strip_all_tags($this->getLocationDetailsHtml());
+
+        return apply_filters('fluent_booking/location_details_text', $text, $details);
     }
 
     public function getMessage()
@@ -917,6 +905,11 @@ class Booking extends Model
     public function isMultiGuestBooking()
     {
         return $this->event_type == 'group' || $this->event_type == 'group_event';
+    }
+
+    public function isRoundRobinBooking()
+    {
+        return $this->event_type == 'round_robin';
     }
 
     public function isMultiHostBooking()

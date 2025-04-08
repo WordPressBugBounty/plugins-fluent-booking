@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.3
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,25 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 1.7.0 (Date: 08 Apr 2025)
+- Added Offline Payment Option
+- Added Team Event Filter in All Meetings
+- Added Remove Calendar and Feature Image Buttons
+- Added Support for Other Languages in Add Question
+- Sync Apple Calendar Event Travel Time
+- Updated Host for Round Robin Meeting Rescheduling
+- Added Hooks to Update Location Details and Event Title Heading Tag
+- Added Missing Translations
+- Fixed Online Meeting URL Not Showing in Manual Bookings
+- Fixed Add Calendar UI Issue for RTL Layouts
+- Fixed Fluent Forms Calendar UI Issue with Conditional Logic
+- Fixed Calendar UI Issue in Conversational Forms
+- Fixed Wrong Admin URL in Shortcode Issue
+- Resolved Multi-Booking Issue with WooCommerce
+- Resolved Melbourne Timezone Offset Issue
+- Resolved Payment Not Paid Issue for Decimal Amounts
+- Resolved Duplicate Event Creation Issue with Google Calendar
 
 = 1.6.0 (Date: 01 Jan 2025)
 - Added New Field Terms and Conditions

@@ -3,10 +3,8 @@
 namespace FluentBooking\App\Services\Integrations\FluentCRM;
 
 use FluentBooking\Framework\Support\Arr;
-use FluentBooking\App\Models\Calendar;
 use FluentCrm\App\Services\Funnel\FunnelHelper;
 use FluentCrm\App\Services\Funnel\FunnelProcessor;
-use FluentBooking\App\Services\PermissionManager;
 use FluentCrm\App\Services\Funnel\BaseTrigger;
 use FluentBooking\App\Services\CalendarService;
 
