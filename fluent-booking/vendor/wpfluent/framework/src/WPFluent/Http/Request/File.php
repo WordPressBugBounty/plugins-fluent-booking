@@ -54,7 +54,8 @@ class File extends SplFileInfo implements Contract, JsonSerializable
         $mimeType = null,
         $size = null,
         $error = null
-    ) {
+    )
+    {
         $this->init($path, $size, $error);
         $this->originalName = $this->getName($originalName);
         $this->mimeType = $this->getFileMimeType($mimeType);
@@ -62,10 +63,10 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
     /**
      * Init the file object with size and error.
-     * 
-     * @param  string $path
-     * @param  int|null $size
-     * @param  string|nill $error
+     *
+     * @param string $path
+     * @param int|null $size
+     * @param string|nill $error
      * @return void
      */
     protected function init($path, $size, $error)
@@ -87,9 +88,9 @@ class File extends SplFileInfo implements Contract, JsonSerializable
     public function getName($name)
     {
         $originalName = str_replace('\\', '/', $name);
-        
+
         $pos = strrpos($originalName, '/');
-        
+
         $originalName = false === $pos ? $originalName : substr(
             $originalName, $pos + 1
         );
@@ -191,8 +192,8 @@ class File extends SplFileInfo implements Contract, JsonSerializable
     {
         $path = $this->getPathname();
 
-        if(!function_exists('wp_check_filetype_and_ext')) {
-            require_once ABSPATH .'wp-admin/includes/file.php';
+        if (!function_exists('wp_check_filetype_and_ext')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
         }
 
         return wp_check_filetype_and_ext($path, $this->originalName);
@@ -200,7 +201,7 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
     /**
      * Get the file name.
-     * 
+     *
      * @return string
      */
     public function getSavedFileName()
@@ -214,7 +215,7 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
     /**
      * Get the url from path.
-     * 
+     *
      * @return string
      */
     public function getUrl()
@@ -256,7 +257,9 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
         $target = $this->getTargetFile($directory, $name);
 
-        set_error_handler(function ($_, $msg) use (&$err) { $err = $msg; });
+        set_error_handler(function ($_, $msg) use (&$err) {
+            $err = $msg;
+        });
 
         try {
             $renamed = rename($this->getPathname(), $target);
@@ -280,8 +283,8 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
     /**
      * Save the uploaded file.
-     * 
-     * @param  string $path
+     *
+     * @param string $path
      * @return self (File Object)
      * @throws RuntimeException
      */
@@ -294,9 +297,9 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
     /**
      * Save the uploaded file with a given name.
-     * 
-     * @param  string $name
-     * @param  string $path
+     *
+     * @param string $name
+     * @param string $path
      * @return self (File Object)
      * @throws RuntimeException
      */
@@ -309,15 +312,15 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
     /**
      * Check that the given path exists.
-     * 
-     * @param  string $path
+     *
+     * @param string $path
      * @return string
      * @throws RuntimeException
      */
     protected function resolveTargetPath($path)
     {
         if ($this->isAbsolutePath($path)) {
-            
+
             $pieces = array_values(
                 array_filter(
                     explode(DIRECTORY_SEPARATOR, $path)
@@ -328,8 +331,8 @@ class File extends SplFileInfo implements Contract, JsonSerializable
             // absolute directory so in that case, If the root is not a
             // real directory then make it relative and resolve it:
             // i.e: 'a/relative/path/looks/like/an/absolute/path'
-            
-            if (!is_dir(DIRECTORY_SEPARATOR.$pieces[0])) {
+
+            if (!is_dir(DIRECTORY_SEPARATOR . $pieces[0])) {
                 return $this->resolveTargetPath(trim($path, DIRECTORY_SEPARATOR));
             }
 
@@ -345,14 +348,14 @@ class File extends SplFileInfo implements Contract, JsonSerializable
         $config = App::make('config');
 
         $default = $config->get(
-            'app.file_upload_path', function() use ($config) {
-                $slug = $config->get('app.slug');
-                $uploadDir = wp_upload_dir()['basedir'];
-                $uploadDir .= DIRECTORY_SEPARATOR . $slug;
-                return $uploadDir;
-            }
+            'app.file_upload_path', function () use ($config) {
+            $slug = $config->get('app.slug');
+            $uploadDir = wp_upload_dir()['basedir'];
+            $uploadDir .= DIRECTORY_SEPARATOR . $slug;
+            return $uploadDir;
+        }
         );
-        
+
         $path = rtrim(
             ($default . DIRECTORY_SEPARATOR . $path), DIRECTORY_SEPARATOR
         );
@@ -364,14 +367,14 @@ class File extends SplFileInfo implements Contract, JsonSerializable
         if (!is_dir($path = dirname($this->getTargetFile($path)))) {
             throw new RuntimeException("Invalid file upload path: {$path}");
         }
-        
+
         return $path;
     }
 
     /**
      * Check if given path is absolute.
-     * 
-     * @param  string $path
+     *
+     * @param string $path
      * @return boolean
      */
     function isAbsolutePath($path)
@@ -386,8 +389,8 @@ class File extends SplFileInfo implements Contract, JsonSerializable
         // For Windows
         if (DIRECTORY_SEPARATOR === '\\') {
             return preg_match(
-                '/^[a-zA-Z]:\\\\/', $path
-            ) || substr($path, 0, 2) === '\\\\';
+                    '/^[a-zA-Z]:\\\\/', $path
+                ) || substr($path, 0, 2) === '\\\\';
         }
 
         return false;
@@ -395,8 +398,8 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
     /**
      * Get the URL from the file path.
-     * 
-     * @param  string $path
+     *
+     * @param string $path
      * @return string
      */
     public function url($path = '')
@@ -428,7 +431,7 @@ class File extends SplFileInfo implements Contract, JsonSerializable
 
         $target = rtrim($directory, "/\\") . DIRECTORY_SEPARATOR . (
             null === $name ? $this->originalName : $this->getName($name)
-        );
+            );
 
         return new self($target, false);
     }
@@ -445,6 +448,7 @@ class File extends SplFileInfo implements Contract, JsonSerializable
             'size_in_bytes' => $this->size,
             'size'          => size_format($this->size),
             'name'          => $this->getSavedFileName(),
+            'tmp_name' => $this->getPathname(),
             'path'          => $this->getPathname(),
             'url'           => $this->getUrl(),
         ];

@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.3
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -301,7 +301,7 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 
 == Changelog ==
 
-= 1.7.1 (Date: 09 Apr 2025)
+= 1.7.2 (Date: 09 Apr 2025)
 - Security: Updated Framework Library
 - Fixed Offline Payment Status Not Updating Issue
 
