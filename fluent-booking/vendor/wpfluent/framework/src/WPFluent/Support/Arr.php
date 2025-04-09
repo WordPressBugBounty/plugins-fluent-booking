@@ -25,24 +25,6 @@ class Arr
     }
 
     /**
-     * Makes a fluent object from iterable|object
-     * An iterable is an array or instanceof Traversable
-     * 
-     * @param  items iterable|object
-     * @return FluentBooking\Framework\Support\Fluent
-     */
-    public static function make(/*iterable|stdClass*/ $items, $isFluent = true)
-    {
-        if (is_iterable($items) || $items instanceof \stdClass) {
-            return new FluentArray($items, $isFluent);
-        }
-
-        throw new InvalidArgumentException (
-            "The parameter must be an stdClass or stdClass")
-        ; 
-    }
-
-    /**
      * Determine whether the given value is array accessible.
      *
      * @param  mixed  $value
@@ -234,7 +216,7 @@ class Arr
      * @param  mixed  $default
      * @return mixed
      */
-    public static function first($array, callable $callback = null, $default = null)
+    public static function first($array, ?callable $callback = null, $default = null)
     {
         if (is_null($callback)) {
             if (empty($array)) {
@@ -263,7 +245,7 @@ class Arr
      * @param  callable|null $callback
      * @return mixed
      */
-    public static function firstKey($array, callable $callback = null)
+    public static function firstKey($array, ?callable $callback = null)
     {
         if (!$callback) {
             return array_key_first($array);
@@ -286,7 +268,7 @@ class Arr
      * @param  integer $mode (ARRAY_FILTER_USE_BOTH = 1 | ARRAY_FILTER_USE_KEY = 2)
      * @return array
      */
-    public static function filterRecursive($array, callable $cb = null, $mode = 0)
+    public static function filterRecursive($array, ?callable $cb = null, $mode = 0)
     {
         $result = [];
 
@@ -359,7 +341,7 @@ class Arr
      * @param  mixed  $default
      * @return mixed
      */
-    public static function last($array, callable $callback = null, $default = null)
+    public static function last($array, ?callable $callback = null, $default = null)
     {
         if (is_null($callback)) {
             return empty($array) ? Helper::value($default) : end($array);
@@ -376,7 +358,7 @@ class Arr
      * @param  callable|null $callback
      * @return mixed
      */
-    public static function lastKey($array, callable $callback = null)
+    public static function lastKey($array, ?callable $callback = null)
     {
         if (!$callback) {
             return array_key_last($array);
@@ -645,6 +627,37 @@ class Arr
     }
 
     /**
+     * Select an array of values from an array.
+     *
+     * @param  array  $array
+     * @param  array|string  $keys
+     * @return array
+     */
+    public static function select($array, $keys)
+    {
+        $keys = static::wrap($keys);
+
+        return array_map(function ($item) use ($keys) {
+            $result = [];
+            
+            $item = (array) $item;
+            
+            foreach ($keys as $key) {
+                
+                if (static::accessible($item) && static::has($item, $key)) {
+                    
+                    [$first] = explode('.', $key);
+
+                    $result[$first] = static::get($item, $first);
+                }
+            }
+
+            return $result;
+
+        }, (array) $array);
+    }
+
+    /**
      * Pluck an array of values from an array.
      *
      * @param  iterable  $array
@@ -839,12 +852,14 @@ class Arr
      */
     public static function shuffle($array, $seed = null)
     {
-        if (is_null($seed)) {
-            shuffle($array);
-        } else {
+        if (!is_null($seed)) {
             mt_srand($seed);
-            shuffle($array);
+            usort($array, function () {
+                return mt_rand(-1, 1);
+            });
             mt_srand();
+        } else {
+            shuffle($array);
         }
 
         return $array;
@@ -1273,6 +1288,41 @@ class Arr
     }
 
     /**
+     * Recursively merge the given array with defaults.
+     * Overwrite $array with $defaults if only $array
+     * contains null or empty values or doesn't exist.
+     *
+     * @param  array  $array
+     * @param  array  $defaults
+     * @return array
+     */
+    public static function mergeMissingValues(array $array, array $defaults)
+    {
+        $merged = array_merge($defaults, $array);
+
+        foreach ($merged as $key => $value) {
+            if (
+                is_array($value) &&
+                isset($defaults[$key]) &&
+                is_array($defaults[$key])
+            ) {
+                // Recursively merge arrays
+                $merged[$key] = static::mergeMissingValues(
+                    $value, $defaults[$key]
+                );
+            } elseif (
+                isset($defaults[$key]) &&
+                (is_null($value) || $value === '')
+            ) {
+                // Replace null or empty values
+                $merged[$key] = $defaults[$key];
+            }
+        }
+
+        return $merged;
+    }
+
+    /**
      * Return matching items from array (similar to mysql's %LIKE%)
      * 
      * @param  string|regex $pattern
@@ -1281,7 +1331,7 @@ class Arr
      */
     public static function like($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '~i';
         }
 
@@ -1297,7 +1347,7 @@ class Arr
      */
     public static function notLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '~i';
         }
 
@@ -1313,7 +1363,7 @@ class Arr
      */
     public static function startsLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~^'. preg_quote($pattern, '~') . '~i';
         }
 
@@ -1329,7 +1379,7 @@ class Arr
      */
     public static function DoesNotStartLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern = '~^(?!' . preg_quote($pattern, '~') . ')~i';
         }
 
@@ -1345,7 +1395,7 @@ class Arr
      */
     public static function endsLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '$~i';
         }
 
@@ -1361,7 +1411,7 @@ class Arr
      */
     public static function DoesNotEndLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '$~i';
         }
 
@@ -1377,7 +1427,7 @@ class Arr
      */
     public static function keysLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '~i';
         }
 
@@ -1401,7 +1451,7 @@ class Arr
      */
     public static function keysNotLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '~i';
         }
 
@@ -1425,7 +1475,7 @@ class Arr
      */
     public static function keysStartLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~^'. preg_quote($pattern, '~') . '~i';
         }
 
@@ -1449,7 +1499,7 @@ class Arr
      */
     public static function keysDoesNotStartLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern = '~^(?!' . preg_quote($pattern, '~') . ')~i';
         }
 
@@ -1473,7 +1523,7 @@ class Arr
      */
     public static function keysEndLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '$~i';
         }
 
@@ -1497,7 +1547,7 @@ class Arr
      */
     public static function keysDoesNotEndLike($array, $pattern)
     {
-        if (@preg_match($pattern, '') === false) {
+        if (!preg_match('/^([\/#~]).*\1$/', $pattern)) {
             $pattern =  '~'. preg_quote($pattern, '~') . '$~i';
         }
 
@@ -1658,5 +1708,34 @@ class Arr
     public static function findKey($array, callable $callback)
     {
         return static::find($array, $callback, true);
+    }
+
+    /**
+     * Pass the items through a series of callbacks.
+     * 
+     * @param  array   $items
+     * @param  array   $callbacks
+     * @param  integer $mode
+     * @return array
+     */
+    public static function passThrough(array $items, array $callbacks, $mode = 0)
+    {
+        foreach ($items as $key => &$item) {
+            reset($callbacks);
+            foreach ($callbacks as $callback) {
+                switch ($mode) {
+                    case 1:
+                        $items[$key] = $callback($key);
+                        break;
+                    case 2:
+                        $items[$key] = $callback($key, $item);
+                        break;
+                    default:
+                        $items[$key] = $callback($item);
+                }
+            }
+        }
+
+        return $items;
     }
 }

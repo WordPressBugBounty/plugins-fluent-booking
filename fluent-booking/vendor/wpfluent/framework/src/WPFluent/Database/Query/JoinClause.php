@@ -30,14 +30,14 @@ class JoinClause extends Builder
     /**
      * The grammar of the parent query builder.
      *
-     * @var \FluentBooking\Framework\Database\Query\Grammar
+     * @var \FluentBooking\Framework\Database\Query\Grammars\Grammar
      */
     protected $parentGrammar;
 
     /**
      * The processor of the parent query builder.
      *
-     * @var \FluentBooking\Framework\Database\Query\Processor
+     * @var \FluentBooking\Framework\Database\Query\Processors\Processor
      */
     protected $parentProcessor;
 

@@ -3,8 +3,8 @@
 namespace FluentBooking\Framework\Foundation;
 
 use FluentBooking\Framework\Support\Arr;
-use FluentBooking\Framework\Support\Str;
 use FluentBooking\Framework\View\View;
+use FluentBooking\Framework\Cache\Cache;
 use FluentBooking\Framework\Http\URL;
 use FluentBooking\Framework\Http\Router;
 use FluentBooking\Framework\Support\Facade;
@@ -12,6 +12,7 @@ use FluentBooking\Framework\Support\Pipeline;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\Framework\Http\Response\Response;
 use FluentBooking\Framework\Events\Dispatcher;
+use FluentBooking\Framework\Encryption\Encrypter;
 use FluentBooking\Framework\Database\Orm\Model;
 use FluentBooking\Framework\Validator\Validator;
 use FluentBooking\Framework\Foundation\RequestGuard;
@@ -36,11 +37,13 @@ class ComponentBinder
      * @var array
      */
     protected $bindables = [
+        'Cache',
         'Request',
         'Response',
         'Validator',
         'View',
         'Events',
+        'Encrypter',
         'DB',
         'URL',
         'Router',
@@ -111,11 +114,10 @@ class ComponentBinder
 
             $ns = substr(($fqn = __NAMESPACE__), 0, strpos($fqn, '\\'));
 
-            if (Str::contains($class, ($facade = $ns.'\Facade'))) {
-
+            if (str_contains($class, ($facade = $ns.'\Facade'))) {
                 $this->createFacadeFor($facade, $class, $app);
             }
-        });
+        }, true, true);
     }
 
     /**
@@ -164,12 +166,27 @@ class ComponentBinder
     }
 
     /**
+     * Bind the cache instance into the container.
+     * @return null
+     */
+    protected function bindCache()
+    {
+        $this->app->singleton(Cache::class, function ($app) {
+            return Cache::init();
+        });
+
+        $this->app->alias(Cache::class, 'cache');
+    }
+
+    /**
      * Bind the request instance into the container.
      * @return null
      */
     protected function bindRequest()
     {
-        $this->app->singleton(Request::class, function ($app) {
+        $method = $this->getBindingMethod('singleton');
+
+        $this->app->$method(Request::class, function ($app) {
             return new Request($app, $_GET, $_POST, $_FILES);
         });
 
@@ -184,13 +201,30 @@ class ComponentBinder
      */
     protected function bindResponse()
     {
-        $this->app->singleton(Response::class, function($app) {
+        $method = $this->getBindingMethod('singleton');
+
+        $this->app->$method(Response::class, function($app) {
             return new Response($app);
         });
 
         $this->app->alias(Response::class, 'response');
         
         $this->addBackwardCompatibleAlias(Response::class);
+    }
+
+    /**
+     * Get the binding method to bind a component.
+     * In the testing environment, we use bind
+     * method instead of singleton method.
+     * 
+     * @param  string $original
+     * @return string
+     */
+    protected function getBindingMethod($original)
+    {
+        return str_starts_with(
+            $this->app->env(), 'testing'
+        ) ? 'bind' : $original;
     }
 
     /**
@@ -233,6 +267,20 @@ class ComponentBinder
     }
 
     /**
+     * Bind the encrypter instance into the container.
+     * @return null
+     */
+    protected function bindEncrypter()
+    {
+        $this->app->singleton(Encrypter::class, function($app) {
+            return new Encrypter($app->config->get('app.key'));
+        });
+
+        $this->app->alias(Encrypter::class, 'encrypter');
+        $this->app->alias(Encrypter::class, 'crypt');
+    }
+
+    /**
      * Bind the db (query builder) instance into the container.
      * @return null
      */
@@ -255,9 +303,11 @@ class ComponentBinder
      */
     protected function bindURL()
     {
-        $this->app->bind('url', function($app) {
-            return new URL;
+        $this->app->bind(URL::class, function($app) {
+            return new URL($app->make(Encrypter::class));
         });
+
+        $this->app->alias(URL::class, 'url');
     }
 
     /**
@@ -266,9 +316,11 @@ class ComponentBinder
      */
     protected function bindRouter()
     {
-        $this->app->singleton('router', function($app) {
+        $this->app->singleton(Router::class, function($app) {
             return new Router($app);
         });
+
+        $this->app->alias(Router::class, 'router');
     }
 
     /**
@@ -310,7 +362,7 @@ class ComponentBinder
             return new Pipeline($app);
         });
 
-        $this->app->alias(Pipeline::class, 'pipeline');    
+        $this->app->alias(Pipeline::class, 'pipeline');  
     }
 
     /**
@@ -344,7 +396,7 @@ class ComponentBinder
     }
 
     /**
-     * Adds new alias to maintain ther backward compatibility.
+     * Adds new alias to maintain the backward compatibility.
      *
      * @param string $class
      * @return void

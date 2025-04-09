@@ -5,13 +5,14 @@ namespace FluentBooking\Framework\Database\Orm;
 use LogicException;
 use FluentBooking\Framework\Support\Arr;
 use FluentBooking\Framework\Support\Str;
-use FluentBooking\Framework\Support\QueueableEntity;
-use FluentBooking\Framework\Support\QueueableCollection;
 use FluentBooking\Framework\Support\ArrayableInterface;
 use FluentBooking\Framework\Support\Collection as BaseCollection;
+use FluentBooking\Framework\Database\Orm\Relations\Concerns\InteractsWithDictionary;
 
-class Collection extends BaseCollection implements QueueableCollection
+class Collection extends BaseCollection
 {
+    use InteractsWithDictionary;
+
     /**
      * Find a model in the collection by key.
      *
@@ -37,9 +38,7 @@ class Collection extends BaseCollection implements QueueableCollection
             return $this->whereIn($this->first()->getKeyName(), $key);
         }
 
-        return Arr::first($this->items, function ($model) use ($key) {
-            return $model->getKey() == $key;
-        }, $default);
+        return Arr::first($this->items, fn ($model) => $model->getKey() == $key, $default);
     }
 
     /**
@@ -333,7 +332,7 @@ class Collection extends BaseCollection implements QueueableCollection
         $dictionary = $this->getDictionary();
 
         foreach ($items as $item) {
-            $dictionary[$item->getKey()] = $item;
+            $dictionary[$this->getDictionaryKey($item->getKey())] = $item;
         }
 
         return new static(array_values($dictionary));
@@ -412,7 +411,7 @@ class Collection extends BaseCollection implements QueueableCollection
         $dictionary = $this->getDictionary($items);
 
         foreach ($this->items as $item) {
-            if (! isset($dictionary[$item->getKey()])) {
+            if (! isset($dictionary[$this->getDictionaryKey($item->getKey())])) {
                 $diff->add($item);
             }
         }
@@ -437,7 +436,7 @@ class Collection extends BaseCollection implements QueueableCollection
         $dictionary = $this->getDictionary($items);
 
         foreach ($this->items as $item) {
-            if (isset($dictionary[$item->getKey()])) {
+            if (isset($dictionary[$this->getDictionaryKey($item->getKey())])) {
                 $intersect->add($item);
             }
         }
@@ -473,7 +472,10 @@ class Collection extends BaseCollection implements QueueableCollection
             return new static($this->items);
         }
 
-        $dictionary = Arr::only($this->getDictionary(), $keys);
+        $dictionary = Arr::only($this->getDictionary(), array_map(
+            fn($value) => $this->getDictionaryKey($value),
+            (array) $keys)
+        );
 
         return new static(array_values($dictionary));
     }
@@ -486,7 +488,14 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function except($keys)
     {
-        $dictionary = Arr::except($this->getDictionary(), $keys);
+        if (is_null($keys)) {
+            return new static($this->items);
+        }
+
+        $dictionary = Arr::except($this->getDictionary(), array_map(
+            fn($value) => $this->getDictionaryKey($value),
+            (array) $keys)
+        );
 
         return new static(array_values($dictionary));
     }
@@ -514,6 +523,28 @@ class Collection extends BaseCollection implements QueueableCollection
     }
 
     /**
+     * Set the visible attributes across the entire collection.
+     *
+     * @param  array<int, string>  $visible
+     * @return $this
+     */
+    public function setVisible($visible)
+    {
+        return $this->each->setVisible($visible);
+    }
+
+    /**
+     * Set the hidden attributes across the entire collection.
+     *
+     * @param  array<int, string>  $hidden
+     * @return $this
+     */
+    public function setHidden($hidden)
+    {
+        return $this->each->setHidden($hidden);
+    }
+
+    /**
      * Append an attribute across the entire collection.
      *
      * @param  array|string  $attributes
@@ -537,10 +568,21 @@ class Collection extends BaseCollection implements QueueableCollection
         $dictionary = [];
 
         foreach ($items as $value) {
-            $dictionary[$value->getKey()] = $value;
+            $dictionary[$this->getDictionaryKey($value->getKey())] = $value;
         }
 
         return $dictionary;
+    }
+
+    /**
+     * Count the number of items in the collection by a field or using a callback.
+     *
+     * @param  (callable(TModel, TKey): array-key)|string|null  $countBy
+     * @return \FluentBooking\Framework\Support\Collection<array-key, int>
+     */
+    public function countBy($countBy = null)
+    {
+        return $this->toBase()->countBy($countBy);
     }
 
     /**
@@ -557,6 +599,17 @@ class Collection extends BaseCollection implements QueueableCollection
     public function pluck($value, $key = null)
     {
         return $this->toBase()->pluck($value, $key);
+    }
+
+    /**
+     * Get the comparison function to detect duplicates.
+     *
+     * @param  bool  $strict
+     * @return callable(TModel, TModel): bool
+     */
+    protected function duplicateComparator($strict)
+    {
+        return fn ($a, $b) => $a->is($b);
     }
 
     /**
@@ -621,105 +674,6 @@ class Collection extends BaseCollection implements QueueableCollection
     public function pad($size, $value)
     {
         return $this->toBase()->pad($size, $value);
-    }
-
-    /**
-     * Get the comparison function to detect duplicates.
-     *
-     * @param  bool  $strict
-     * @return \Closure
-     */
-    protected function duplicateComparator($strict)
-    {
-        return function ($a, $b) {
-            return $a->is($b);
-        };
-    }
-
-    /**
-     * Get the type of the entities being queued.
-     *
-     * @return string|null
-     *
-     * @throws \LogicException
-     */
-    public function getQueueableClass()
-    {
-        if ($this->isEmpty()) {
-            return;
-        }
-
-        $class = get_class($this->first());
-
-        $this->each(function ($model) use ($class) {
-            if (get_class($model) !== $class) {
-                throw new LogicException('Queueing collections with multiple model types is not supported.');
-            }
-        });
-
-        return $class;
-    }
-
-    /**
-     * Get the identifiers for all of the entities.
-     *
-     * @return array
-     */
-    public function getQueueableIds()
-    {
-        if ($this->isEmpty()) {
-            return [];
-        }
-
-        return $this->first() instanceof QueueableEntity
-                    ? $this->map->getQueueableId()->all()
-                    : $this->modelKeys();
-    }
-
-    /**
-     * Get the relationships of the entities being queued.
-     *
-     * @return array
-     */
-    public function getQueueableRelations()
-    {
-        if ($this->isEmpty()) {
-            return [];
-        }
-
-        $relations = $this->map->getQueueableRelations()->all();
-
-        if (count($relations) === 0 || $relations === [[]]) {
-            return [];
-        } elseif (count($relations) === 1) {
-            return reset($relations);
-        } else {
-            return array_intersect(...array_values($relations));
-        }
-    }
-
-    /**
-     * Get the connection of the entities being queued.
-     *
-     * @return string|null
-     *
-     * @throws \LogicException
-     */
-    public function getQueueableConnection()
-    {
-        if ($this->isEmpty()) {
-            return;
-        }
-
-        $connection = $this->first()->getConnectionName();
-
-        $this->each(function ($model) use ($connection) {
-            if ($model->getConnectionName() !== $connection) {
-                throw new LogicException('Queueing collections with multiple model connections is not supported.');
-            }
-        });
-
-        return $connection;
     }
 
     /**

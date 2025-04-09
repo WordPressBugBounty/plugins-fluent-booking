@@ -114,7 +114,7 @@ class Router
             }
         }
 
-        // If the current group doesn't have a after middleware
+        // If the current group doesn't have an after middleware
         // but the parent group has then bring it in this group.
         if (!isset($this->middleware['after'][$this->groupCount])) {
             if (isset($this->middleware['after'][$this->groupCount - 1])) {

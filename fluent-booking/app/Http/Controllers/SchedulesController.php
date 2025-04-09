@@ -219,7 +219,7 @@ class SchedulesController extends Controller
             }
 
             if ($booking->payment_order) {
-                do_action('fluent_booking/payment/status_changed', $booking->payment_order, $booking);
+                do_action('fluent_booking/payment/status_changed', $booking->payment_order, $booking, $value);
             }
         }
 

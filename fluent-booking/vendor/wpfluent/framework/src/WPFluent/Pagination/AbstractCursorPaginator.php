@@ -12,14 +12,13 @@ use FluentBooking\Framework\Database\Orm\Model;
 use FluentBooking\Framework\Support\Collection;
 use FluentBooking\Framework\Support\ForwardsCalls;
 use FluentBooking\Framework\Database\Orm\Relations\Pivot;
-use FluentBooking\Framework\Database\Orm\ResourceAbleTrait;
 
 /**
  * @mixin \FluentBooking\Framework\Support\Collection
  */
 abstract class AbstractCursorPaginator
 {
-    use ForwardsCalls, Tappable, ResourceAbleTrait;
+    use ForwardsCalls, Tappable;
 
     /**
      * All of the items being paginated.

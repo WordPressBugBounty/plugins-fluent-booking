@@ -10,14 +10,13 @@ use FluentBooking\Framework\Support\Helper;
 use FluentBooking\Framework\Support\Tappable;
 use FluentBooking\Framework\Support\Collection;
 use FluentBooking\Framework\Support\ForwardsCalls;
-use FluentBooking\Framework\Database\Orm\ResourceAbleTrait;
 
 /**
  * @mixin \FluentBooking\Framework\Support\Collection
  */
 abstract class AbstractPaginator
 {
-    use ForwardsCalls, Tappable, ResourceAbleTrait;
+    use ForwardsCalls, Tappable;
 
     /**
      * All of the items being paginated.
@@ -176,7 +175,7 @@ abstract class AbstractPaginator
         }
 
         return $this->path()
-                        .(Str::contains($this->path(), '?') ? '&' : '?')
+                        .(Str::contains($this->path(), '?') ? '&' : '/?')
                         .Arr::query($parameters)
                         .$this->buildFragment();
     }

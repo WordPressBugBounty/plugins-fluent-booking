@@ -3,7 +3,7 @@
         'name' => 'wpfluent/wpfluent',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '0405017da005c57dbc893f753283670c20536824',
+        'reference' => '81199013336c425e864c0299986b0abb5fa471d1',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(
@@ -33,9 +33,9 @@
             'dev_requirement' => false,
         ),
         'wpfluent/framework' => array(
-            'pretty_version' => '2.4.2',
-            'version' => '2.4.2.0',
-            'reference' => 'f9e76750cce20b3536d63b55f721f3f802635856',
+            'pretty_version' => '2.10.41',
+            'version' => '2.10.41.0',
+            'reference' => '4e2b117457d482b72a2a027de438f2273dbbc01d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../wpfluent/framework',
             'aliases' => array(),
@@ -44,7 +44,7 @@
         'wpfluent/wpfluent' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '0405017da005c57dbc893f753283670c20536824',
+            'reference' => '81199013336c425e864c0299986b0abb5fa471d1',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(

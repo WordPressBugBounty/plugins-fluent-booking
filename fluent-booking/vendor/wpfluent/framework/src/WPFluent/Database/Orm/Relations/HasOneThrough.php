@@ -7,7 +7,7 @@ use FluentBooking\Framework\Database\Orm\Collection;
 use FluentBooking\Framework\Database\Orm\Relations\Concerns\SupportsDefaultModels;
 use FluentBooking\Framework\Database\Orm\Relations\Concerns\InteractsWithDictionary;
 
-class HasOneThrough extends HasManyThrough
+class HasOneThrough extends HasOneOrManyThrough
 {
     use InteractsWithDictionary, SupportsDefaultModels;
 
