@@ -64,7 +64,7 @@ class ElementorIntegration
     public function addElementorCategory()
     {
         \Elementor\Plugin::instance()->elements_manager->add_category('fluentbooking', [
-            'title' => __('FluentBooking', 'fluent-booking-pro'),
+            'title' => __('FluentBooking', 'fluent-booking'),
         ], 1);
     }
 
@@ -98,12 +98,12 @@ class ElementorIntegration
 
     public function ajaxGetCalendarEvents() {
         if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'calendar_events_nonce')) {
-            wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking-pro')]);
+            wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking')]);
             exit;
         }
 
         if (!isset($_POST['cal_id'])) {
-            wp_send_json_error(['message' => __('No calendar ID provided', 'fluent-booking-pro')]);
+            wp_send_json_error(['message' => __('No calendar ID provided', 'fluent-booking')]);
         }
 
         $calId = intval($_POST['cal_id']);
@@ -117,7 +117,7 @@ class ElementorIntegration
 
     public function ajaxGetEventHash() {
         if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'calendar_events_nonce')) {
-            wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking-pro')]);
+            wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking')]);
             exit;
         }
 
@@ -126,7 +126,7 @@ class ElementorIntegration
         $event = CalendarSlot::find($eventId);
 
         if (!$event) {
-            wp_send_json_error(['message' => __('Event not found', 'fluent-booking-pro')]);
+            wp_send_json_error(['message' => __('Event not found', 'fluent-booking')]);
             exit;
         }
 
@@ -151,7 +151,7 @@ class ElementorIntegration
         if (file_exists($filePath)) {
             require_once($filePath);
         } else {
-            throw new \Exception(sprintf(__("File not found: %s", "fluent-booking-pro"), $filePath));
+            throw new \Exception(sprintf(__("File not found: %s", "fluent-booking"), $filePath));
         }
     }
 

@@ -3,9 +3,9 @@ Contributors: techjewel, wpmanageninja
 Author URI: https://fluentbooking.com/
 Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.3
-Stable tag: 1.7.2
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,16 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 1.8.0 (Date: 23 Apr 2025)
+- New: Introduced Calendar View
+- Resolved Text Domain Warning
+- Resolved Issue with FluentForm Field Mapping
+- Fixed Last Day of the Month Not Displaying Issue
+- Fixed Outlook Holiday Not Syncing Issue
+- Fixed Delete Calendar/Event Permission Issue
+- Fixed Last Name Not Generating for Additional Guests in Group Events
+- Fixed Offline Payment Not Displaying When Stripe or PayPal Are Disabled
 
 = 1.7.2 (Date: 09 Apr 2025)
 - Security: Updated Framework Library

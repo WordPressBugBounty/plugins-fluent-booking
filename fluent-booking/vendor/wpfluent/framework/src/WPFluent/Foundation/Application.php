@@ -9,7 +9,7 @@ use FluentBooking\Framework\Http\Client;
 use FluentBooking\Framework\Foundation\Config;
 use FluentBooking\Framework\Container\Container;
 use FluentBooking\Framework\Foundation\ComponentBinder;
-use FluentBooking\Framework\Foundation\FoundationTrait;
+use FluentBooking\Framework\Foundation\Concerns\FoundationTrait;
 
 class Application extends Container
 {
@@ -100,6 +100,12 @@ class Application extends Container
         $this->baseUrl = plugin_dir_url($this->file);
     }
 
+    /**
+     * Load the environment bariables from .env file.
+     * 
+     * @param  string $path
+     * @return void
+     */
     protected function loadEnvironmentVars($path = null)
     {
         $path = $path ?: $this->basePath . '.env';
@@ -160,7 +166,6 @@ class Application extends Container
         $this->loadConfigIfExists();
         $this->registerTextdomain();
         $this->bindCoreComponents();
-        // $this->registerAsyncActions();
         $this->requireCommonFiles($this);
         $this->addRestApiInitAction($this);
     }
@@ -238,6 +243,7 @@ class Application extends Container
 
     /**
      * Resolve the given type from the container.
+     * This method is required for unit testing.
      *
      * @param  string  $abstract
      * @param  array   $parameters
@@ -491,16 +497,6 @@ class Application extends Container
     {
         $this->onReady[] = $callback;
     }
-
-    /**
-     * Register Async Actions.
-     * 
-     * @return void
-     */
-    // protected function registerAsyncActions()
-    // {
-    //     Client::registerAsyncRequestHandler();
-    // }
 
     /**
      * Execute plugin booted callbacks.

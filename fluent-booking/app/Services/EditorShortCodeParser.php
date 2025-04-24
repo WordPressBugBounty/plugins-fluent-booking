@@ -114,7 +114,7 @@ class EditorShortCodeParser
         }
 
         if ($key == 'reschedule_reason') {
-            return $booking->getRescheduleReason();
+            return $booking->getRescheduleReason(true);
         }
 
         if ($key == 'previous_meeting_time') {

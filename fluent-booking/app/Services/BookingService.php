@@ -199,7 +199,7 @@ class BookingService
                 $guestNames = array_map(function ($guest) {
                     return $guest['name'];
                 }, $additionalGuests);
-                $data['first_name'] = array_merge($guestNames, (array) $data['first_name']);
+                $data['first_name'] = array_merge($guestNames, (array) ($data['first_name'] . ' ' . $data['last_name']));
 
                 $data['additional_guests'] = [];
             }

@@ -24,7 +24,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
      */
     public function get_title()
     {
-        return esc_html__('Calendar Event', 'fluent-booking-pro');
+        return esc_html__('Calendar Event', 'fluent-booking');
     }
 
     /**
@@ -68,7 +68,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $this->start_controls_section(
             'content_section',
             [
-                'label' => esc_html__('Content', 'fluent-booking-pro'),
+                'label' => esc_html__('Content', 'fluent-booking'),
                 'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
             ]
         );
@@ -76,7 +76,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $this->add_control(
             'selected_event',
             [
-                'label'   => __('Select Event', 'fluent-booking-pro'),
+                'label'   => __('Select Event', 'fluent-booking'),
                 'type'    => 'fcal_group_select',
                 'options' => $this->getCalendarEvents()
             ]
@@ -93,10 +93,10 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $this->add_control(
             'show_host_info',
             [
-                'label'        => __('Show Host Info', 'fluent-booking-pro'),
+                'label'        => __('Show Host Info', 'fluent-booking'),
                 'type'         => \Elementor\Controls_Manager::SWITCHER,
-                'label_on'     => __('Show', 'fluent-booking-pro'),
-                'label_off'    => __('Hide', 'fluent-booking-pro'),
+                'label_on'     => __('Show', 'fluent-booking'),
+                'label_off'    => __('Hide', 'fluent-booking'),
                 'return_value' => 'yes',
                 'default'      => 'yes',
             ]
@@ -105,13 +105,13 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $this->add_control(
             'select_theme',
             [
-                'label'   => __('Color Schema', 'fluent-booking-pro'),
+                'label'   => __('Color Schema', 'fluent-booking'),
                 'type'    => \Elementor\Controls_Manager::SELECT,
                 'default' => 'light',
                 'options' => [
-                    'light'          => __('Light', 'fluent-booking-pro'),
-                    'dark'           => __('dark', 'fluent-booking-pro'),
-                    'system-default' => __('System Default', 'fluent-booking-pro'),
+                    'light'          => __('Light', 'fluent-booking'),
+                    'dark'           => __('dark', 'fluent-booking'),
+                    'system-default' => __('System Default', 'fluent-booking'),
                 ],
             ]
         );
@@ -127,13 +127,13 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $this->start_controls_section(
             'content_style',
             [
-                'label' => esc_html__('Style', 'fluent-booking-pro'),
+                'label' => esc_html__('Style', 'fluent-booking'),
                 'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
             ]
         );
         $this->add_control('fcal_primary_color',
             [
-                'label'     => esc_html__('Primary Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Primary Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_date_wrapper .calendar .day .is-today,
@@ -172,7 +172,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         );
         $this->add_control('fcal_border_color',
             [
-                'label'     => esc_html__('Border Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Border Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_side'  => 'border-right-color: {{VALUE}}',
@@ -195,7 +195,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $this->add_control(
             'avatar-radius',
             [
-                'label'      => esc_html__('Avatar Radius', 'fluent-booking-pro'),
+                'label'      => esc_html__('Avatar Radius', 'fluent-booking'),
                 'type'       => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', '%', 'em', 'rem', 'custom'],
                 'default'    => [
@@ -218,7 +218,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $this->add_control(
             'date-radius',
             [
-                'label'      => esc_html__('Date Radius', 'fluent-booking-pro'),
+                'label'      => esc_html__('Date Radius', 'fluent-booking'),
                 'type'       => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', '%', 'em', 'rem', 'custom'],
                 'default'    => [
@@ -237,7 +237,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
 
         $this->add_control('enabled_date_background',
             [
-                'label'     => esc_html__('Enabled Date Background', 'fluent-booking-pro'),
+                'label'     => esc_html__('Enabled Date Background', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_payment_items table thead th' => 'background-color: {{VALUE}}',
@@ -248,7 +248,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         );
         $this->add_control('enabled_date_color',
             [
-                'label'     => esc_html__('Enabled Date Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Enabled Date Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_date_wrapper .calendar .day.day-enabled span' => 'color: {{VALUE}}',
@@ -257,7 +257,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         );
         $this->add_control('disabled_date_color',
             [
-                'label'     => esc_html__('Disabled Date Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Disabled Date Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_date_wrapper .calendar .day.day-disabled' => 'color: {{VALUE}}',
@@ -323,7 +323,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $settings = $this->get_settings_for_display();
 
         if (empty($settings['selected_event']) && empty($settings['event_hash'])) {
-            echo __('Please select an event', 'fluent-booking-pro');
+            echo __('Please select an event', 'fluent-booking');
             return;
         }
 
@@ -334,7 +334,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $selectedEvent = $this->getCalendarEvent($selectedEventId, $eventHash);
 
         if (empty($selectedEvent['id'])) {
-            echo __('Calendar event not found', 'fluent-booking-pro');
+            echo __('Calendar event not found', 'fluent-booking');
             return;
         }
 

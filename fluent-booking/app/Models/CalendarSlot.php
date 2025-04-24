@@ -553,10 +553,6 @@ class CalendarSlot extends Model
             }
         }
 
-        if ($timeZone) {
-            $startDate = DateTimeHelper::convertToTimeZone($startDate, $timeZone, 'UTC');
-        }
-
         $totalCutStamp = DateTimeHelper::getTimestamp() + $this->getCutoutSeconds();
 
         if (strtotime($startDate) < $totalCutStamp) {

@@ -9,17 +9,42 @@ use FluentBooking\Framework\Foundation\App;
 use FluentBooking\Framework\Http\Request\File;
 
 /**
- * @method mixed get(string $url, $params = []) Send a GET request.
- * @method mixed post(string $url, $params = []) Send a POST request.
- * @method mixed put(string $url, $params = []) Send a PUT request.
- * @method mixed delete(string $url, $params = []) Send a DELETE request.
- * @method Client asynGet(string $url, $params = []) Send an async GET request.
- * @method Client asyncPost(string $url, $params = []) Send an async POST request.
- * @method Client asyncPut(string $url, $params = []) Send an async PUT request.
- * @method Client asyncDelete(string $url, $params = []) Send an async DELETE request.
- * @method File download(string|File $url) Download a remote file.
- * @method mixed upload(string $url, string $path, string $name = 'file') upload a file to a remote server.
+ * @method mixed get(string $url, array $params = [])     Send a GET request.
+ * @method mixed post(string $url, array $params = [])    Send a POST request.
+ * @method mixed put(string $url, array $params = [])     Send a PUT request.
+ * @method mixed patch(string $url, array $params = [])   Send a PATCH request.
+ * @method mixed delete(string $url, array $params = [])  Send a DELETE request.
+ * @method mixed head(string $url, array $params = [])    Send a HEAD request.
+ * @method mixed options(string $url, array $params = []) Send an OPTIONS request.
+ * @method File download(string|File $url)                Download a remote file.
+ * @method mixed upload(string $url, string $path, array $fields = [], string $name = 'file') Upload a file to a remote server.
  */
+
+
+/**
+ * Some examples:
+ * 
+ * // Using an instance:
+ * $client = Client::make('https://example.com');
+ * 
+ * $response1 = $client->get('/users');
+ * $response2 = $client->post('/users', ['body' => ['name' => 'Heera']]);
+ * $response3 = $client->put('/users/1', ['body' => ['name' => 'Updated']]);
+ * $response4 = $client->patch('/users/1', [
+ *     'body' => ['email' => 'updated@example.com']]
+ * );
+ * $response5 = $client->delete('/users/1');
+ * $response6 = $client->head('/users');
+ * $response7 = $client->options('/users');
+ * 
+ * // Using statically (default base URL is empty):
+ * $response8 = Client::get('https://example.com/users');
+ * $response9 = Client::post('https://example.com/users', [
+ *     'body' => ['name' => 'Static']]
+ * );
+ */
+
+
 class Client
 {
 	/**
@@ -79,7 +104,7 @@ class Client
 	 */
 	public function __construct($baseUrl = '', $args = [])
 	{
-		$this->baseUrl = $baseUrl;
+		$this->baseUrl = rtrim($baseUrl, '/');
 		$this->cookies = $args['cookies'] ?? [];
 		$this->headers = $args['headers'] ?? [];
 		$this->options = $args['options'] ?? [];
@@ -234,22 +259,15 @@ class Client
 	        'headers' => [],
 	    ];
 
-	    $callback = isset($params[1]) ? $params[1] : null;
-
-	    $params = wp_parse_args(reset($params), $defaultParams);
+	    $params = wp_parse_args($params[0] ?? [], $defaultParams);
 
 	    $options = array_merge($this->options, $params['options'] ?? []);
-
-	    if ($callback) {
-	    	$params['callback'] = $callback;
-	    }
 
 	    $params = [
 	        'method' => strtoupper($method),
 	        'body' => array_merge($this->body, $params['body']),
 	        'cookies' => array_merge($this->cookies, $params['cookies']),
 	        'headers' => array_merge($this->headers, $params['headers']),
-	    	'callback' => $params['callback'] ?? null,
 	    ];
 
 	    
@@ -269,9 +287,9 @@ class Client
 	 */
 	protected function request($url, $args = [])
 	{
-		if ($query = http_build_query($this->query)) {
-			$url .= '?' . $query;
-		}
+		$parsedUrl = parse_url($url);
+		$delimiter = isset($parsedUrl['query']) ? '&' : '?';
+		$url .= $this->query ? $delimiter . http_build_query($this->query) : '';
 
 		$response = wp_remote_request($url, $args);
 
@@ -285,188 +303,6 @@ class Client
 		);
 
 		return $this->makeResponse($response);
-	}
-
-	/**
-	 * Send the request.
-	 * 
-	 * @param  string $url
-	 * @param  array  $args
-	 * @return \FluentBooking\Framework\Http\Response
-	 */
-	protected function asyncRequest($url, $args = [])
-	{
-		$args['url'] = $url;
-
-		if ($query = http_build_query($this->query)) {
-			$args['url'] .= '?' . $query;
-		}
-		
-		$this->args = $args;
-		
-		if (isset($args['callback'])) {
-			$this->then($args['callback']);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Add the callback for handling the response.
-	 * 
-	 * @param  callable $callback
-	 * @return void
-	 */
-	// public function then($callback)
-	// {
-	// 	// Normalize [ClassName::class, 'method'] to 'ClassName@method'
-	// 	if (
-	// 		is_array($callback) &&
-	// 		count($callback) === 2 &&
-	// 		is_string($callback[0]) &&
-	// 		is_string($callback[1])
-	// 	) {
-	// 		$callback = implode('@', $callback);
-	// 	}
-
-	// 	if (is_string($callback) && function_exists($callback)) {
-	// 		throw new Exception(
-	// 			'The callback must not be a function', 500
-	// 		);
-	// 	}
-
-	// 	if (!is_string($callback) || !str_contains($callback, '@')) {
-	// 		throw new Exception(
-	// 			'The callback must be a string in the format Class@method', 500
-	// 		);
-	// 	}
-
-	// 	$this->args['callback'] = $callback;
-
-	// 	$this->registerShutdownHandler($this->args);
-	// }
-
-	/**
-	 * Register the shutdown handler.
-	 * 
-	 * @param  array $args
-	 * @return void
-	 */
-	// protected function registerShutdownHandler($args)
-	// {
-	// 	$this->serializeCallback($args);
-
-	// 	add_action('shutdown', function() use ($args) {
-	// 		$action = static::makeAsyncRequestAction();
-	// 	    wp_remote_post(admin_url('admin-post.php'), [
-	// 	        'timeout'   => 1,
-	// 	        'blocking'  => false,
-	// 	        'sslverify' => false,
-	// 	        'body'      => [
-	// 	            'args'   => $args,
-	// 	            'action' => $action
-	// 	        ],
-	// 	    ]);
-	// 	});
-	// }
-
-	/**
-	 * Serializes the callback.
-	 * 
-	 * @param  array &$args
-	 * @return void
-	 */
-	protected function serializeCallback(&$args)
-	{
-		$args['callback'] = base64_encode(json_encode($args['callback']));
-	}
-
-	/**
-	 * Get the closure.
-	 * 
-	 * @param  Array &$params
-	 * @return \Closure
-	 */
-	protected static function getCallback(&$params)
-	{
-		$callback = json_decode(
-			base64_decode($params['callback']), true
-		);
-
-		if (!is_string($callback) || !str_contains($callback, '@')) {
-			throw new Exception('Invalid callback.');
-		}
-
-		unset($params['callback']);
-
-		[$class, $method] = explode('@', $callback, 2);
-
-		if (!class_exists($class)) {
-			throw new Exception("Class {$class} not found.");
-		}
-
-		$instance = App::make($class);
-
-		if (
-			!method_exists($instance, $method) ||
-			!is_callable([$instance, $method])
-		) {
-			throw new Exception(
-				"Method {$method} not callable on {$class}."
-			);
-		}
-
-		return [$instance, $method];
-	}
-
-	/**
-	 * Register the main async request handler.
-	 * 
-	 * @return void
-	 */
-	// public static function registerAsyncRequestHandler()
-	// {
-	// 	$action = static::makeAsyncRequestAction();
-
-	// 	App::addAction("admin_post_nopriv_{$action}", function() {
-			
-	// 		$request = App::make('request');
-			
-	// 		$requestUrl = $request->get('args.url');
-			
-	// 		$requestMethod = $request->get('args.method');
-			
-	// 		$client = Client::make($requestUrl);
-			
-	// 		$params = $request->except(
-	// 			'action', 'args.url', 'args.method',
-	// 		)['args'];
-
-			
-	// 		$callback = static::getCallback($params);
-
-	// 		$response = $client->{$requestMethod}('', $params);
-
-	// 		if (is_wp_error($response)) {
-	// 			$exception = new Exception(
-	// 				$response->get_error_message(), 500
-	// 			);
-	// 		}
-
-	// 		return $callback($response, $exception ?? null);
-	// 	});
-	// }
-
-	/**
-	 * Make the action for async request.
-	 * 
-	 * @return string
-	 */
-	protected static function makeAsyncRequestAction()
-	{
-		return 'wpf-async-request-'.sha1(
-			App::config()->get('app.slug')
-		);
 	}
 
 	/**
@@ -512,7 +348,7 @@ class Client
 	 * @param  string $path
 	 * @param  array  $fields
 	 * @param  string $name
-	 * @return \WpAgent\Http\Response
+	 * @return \FluentBooking\Framework\Http\Response
 	 */
 	public function uploadFile($url, $path, $fields = [], $name = 'file')
 	{
@@ -560,7 +396,7 @@ class Client
 	 * Build a response object from an anonymous class.
 	 * 
 	 * @param  array $response
-	 * @return @return \FluentBooking\Framework\Http\Response
+	 * @return \FluentBooking\Framework\Http\Response
 	 */
 	protected function makeResponse($response)
 	{
@@ -592,8 +428,7 @@ class Client
 		}
 		
 		// Handles dynamic method calls like:
-		// asyncGet, asyncPost and so on
-		// get, post and so on
+		// get, post and so on.
 		$url = array_shift($args);
 
 		$parsed = parse_url($url);
@@ -601,16 +436,9 @@ class Client
 		if (!isset($parsed['scheme'])) {
 			$url = trim($this->baseUrl, '/') . '/' . trim($url, '/');
 		}
-
-		if (str_starts_with($method, 'async')) {
-			$method = substr($method, strlen('async'));
-			$this->checkIfValidHttpMethod($method);
-			return $this->asyncRequest(
-				$url, $this->buildRequestArgs($args, $method)
-			);
-		}
 		
 		$this->checkIfValidHttpMethod($method);
+
 		return $this->request(
 			$url, $this->buildRequestArgs($args, $method)
 		);

@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: FluentBooking - Appointment Scheduling & Booking "
 "Solution\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-08 10:28+0000\n"
+"POT-Creation-Date: 2025-04-23 13:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -17,7 +17,7 @@ msgstr ""
 "X-Loco-Version: 2.6.6; wp-6.6.1\n"
 "X-Domain: fluent-booking"
 
-#: app/Models/Booking.php:385
+#: app/Models/Booking.php:399
 msgid " (Host phone number)"
 msgstr ""
 
@@ -38,7 +38,7 @@ msgid " Name"
 msgstr ""
 
 #. 1: Calendar slot title, 2: Author name, 3: Full name of the gueset
-#: app/Models/Booking.php:663
+#: app/Models/Booking.php:683
 #, php-format
 msgid "%1$s meeting between %2$s and %3$s"
 msgstr ""
@@ -55,7 +55,7 @@ msgid "%s field is required"
 msgstr ""
 
 #. Updated column name
-#: app/Http/Controllers/SchedulesController.php:246
+#: app/Http/Controllers/SchedulesController.php:252
 #, php-format
 msgid "%s has been updated"
 msgstr ""
@@ -77,41 +77,41 @@ msgid ""
 "(Optional) The selected tags will be removed from the contact (if exist)"
 msgstr ""
 
-#: app/Services/TransStrings.php:545
+#: app/Services/TransStrings.php:547
 msgid "(Required Permission)"
 msgstr ""
 
-#: app/Services/TransStrings.php:669
+#: app/Services/TransStrings.php:671
 msgid "(Will Take Less Than a Minute!)"
 msgstr ""
 
-#: app/Services/TransStrings.php:353
+#: app/Services/TransStrings.php:355
 msgid "+ Add Another Limit"
 msgstr ""
 
-#: app/Services/TransStrings.php:217
+#: app/Services/TransStrings.php:219
 msgid "+ Add Another Reminder"
 msgstr ""
 
-#: app/Services/TransStrings.php:294
+#: app/Services/TransStrings.php:296
 msgid "+ Add more questions for invitees"
 msgstr ""
 
-#: app/Services/TransStrings.php:201
+#: app/Services/TransStrings.php:203
 msgid "+ Add new option"
 msgstr ""
 
-#: app/Services/TransStrings.php:617
+#: app/Services/TransStrings.php:619
 msgid "+Add more questions for invitees"
 msgstr ""
 
-#: app/Services/TransStrings.php:777
+#: app/Services/TransStrings.php:789
 msgid ""
 ", you can configure the integration feed here. More integration will be "
 "available soon. For now, you may use webhook feed."
 msgstr ""
 
-#: app/Services/TransStrings.php:373
+#: app/Services/TransStrings.php:375
 msgid "- Administrator (Owner)"
 msgstr ""
 
@@ -149,7 +149,7 @@ msgstr ""
 msgid "120 Minutes"
 msgstr ""
 
-#: app/Services/TransStrings.php:722
+#: app/Services/TransStrings.php:733
 msgid "12h"
 msgstr ""
 
@@ -187,7 +187,7 @@ msgstr ""
 msgid "240 Minutes"
 msgstr ""
 
-#: app/Services/TransStrings.php:723
+#: app/Services/TransStrings.php:734
 msgid "24h"
 msgstr ""
 
@@ -259,17 +259,17 @@ msgid ""
 "Details%2$s"
 msgstr ""
 
-#: app/Services/TransStrings.php:438
+#: app/Services/TransStrings.php:440
 msgid ""
 "A particular user can have one calendar with multiple events. Please select "
 "a user who does not have a calendar yet"
 msgstr ""
 
-#: app/Services/TransStrings.php:120
+#: app/Services/TransStrings.php:122
 msgid "About"
 msgstr ""
 
-#: app/Services/TransStrings.php:881
+#: app/Services/TransStrings.php:893
 msgid "about this feature"
 msgstr ""
 
@@ -277,7 +277,7 @@ msgstr ""
 msgid "Accept payment on your booking appointment with WooCommerce Checkout"
 msgstr ""
 
-#: app/Services/TransStrings.php:544
+#: app/Services/TransStrings.php:546
 msgid "Access Permissions for this user"
 msgstr ""
 
@@ -285,15 +285,15 @@ msgstr ""
 msgid "Action"
 msgstr ""
 
-#: app/Services/TransStrings.php:654
+#: app/Services/TransStrings.php:656
 msgid "Active"
 msgstr ""
 
-#: app/Services/TransStrings.php:134
+#: app/Services/TransStrings.php:136
 msgid "Add"
 msgstr ""
 
-#: app/Services/TransStrings.php:257
+#: app/Services/TransStrings.php:259
 msgid "Add a date override"
 msgstr ""
 
@@ -305,7 +305,7 @@ msgstr ""
 msgid "Add Another Conditional Group"
 msgstr ""
 
-#: app/Services/TransStrings.php:273
+#: app/Services/TransStrings.php:275
 msgid "Add another location option"
 msgstr ""
 
@@ -317,7 +317,7 @@ msgstr ""
 msgid "Add Booking to Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:424
+#: app/Services/TransStrings.php:426
 msgid "Add Calendar to Gutenberg Block"
 msgstr ""
 
@@ -325,7 +325,7 @@ msgstr ""
 msgid "Add date overrides"
 msgstr ""
 
-#: app/Services/TransStrings.php:255
+#: app/Services/TransStrings.php:257
 msgid "Add dates when your availability changes from your weekly hours"
 msgstr ""
 
@@ -333,15 +333,15 @@ msgstr ""
 msgid "Add guest"
 msgstr ""
 
-#: app/Services/TransStrings.php:678 app/Hooks/Handlers/FrontEndHandler.php:637
+#: app/Services/TransStrings.php:686 app/Hooks/Handlers/FrontEndHandler.php:637
 msgid "Add guests"
 msgstr ""
 
-#: app/Services/TransStrings.php:549
+#: app/Services/TransStrings.php:551
 msgid "Add Host"
 msgstr ""
 
-#: app/Services/TransStrings.php:232
+#: app/Services/TransStrings.php:234
 msgid "Add Location"
 msgstr ""
 
@@ -349,7 +349,7 @@ msgstr ""
 msgid "Add More"
 msgstr ""
 
-#: app/Services/TransStrings.php:162
+#: app/Services/TransStrings.php:164
 msgid "Add more item"
 msgstr ""
 
@@ -361,71 +361,71 @@ msgstr ""
 msgid "Add New Availability Schedule"
 msgstr ""
 
-#: app/Services/TransStrings.php:435
+#: app/Services/TransStrings.php:437
 msgid "Add New Booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:436
+#: app/Services/TransStrings.php:438
 msgid "Add New Calendar Host"
 msgstr ""
 
-#: app/Services/TransStrings.php:433
+#: app/Services/TransStrings.php:435
 msgid "Add New Host"
 msgstr ""
 
-#: app/Services/TransStrings.php:102
+#: app/Services/TransStrings.php:104
 msgid "Add New Integration"
 msgstr ""
 
-#: app/Services/TransStrings.php:618
+#: app/Services/TransStrings.php:620
 msgid "Add new option"
 msgstr ""
 
-#: app/Services/TransStrings.php:768
+#: app/Services/TransStrings.php:780
 msgid "Add New Schedule"
 msgstr ""
 
-#: app/Services/TransStrings.php:434
+#: app/Services/TransStrings.php:436
 msgid "Add New Team"
 msgstr ""
 
-#: app/Services/TransStrings.php:190
+#: app/Services/TransStrings.php:192
 msgid "Add New Webhook"
 msgstr ""
 
-#: app/Services/TransStrings.php:693
+#: app/Services/TransStrings.php:704
 msgid "Add New Zoom User Account"
 msgstr ""
 
-#: app/Services/TransStrings.php:551
+#: app/Services/TransStrings.php:553
 msgid "Add One-off Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:920
+#: app/Services/TransStrings.php:932
 msgid "Add Parameters"
 msgstr ""
 
-#: app/Services/TransStrings.php:206
+#: app/Services/TransStrings.php:208
 msgid "Add Question"
 msgstr ""
 
-#: app/Services/TransStrings.php:211
+#: app/Services/TransStrings.php:213
 msgid "Add Shortcodes"
 msgstr ""
 
-#: app/Services/TransStrings.php:437
+#: app/Services/TransStrings.php:439
 msgid "Add Single Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:550
+#: app/Services/TransStrings.php:552
 msgid "Add Team"
 msgstr ""
 
-#: app/Services/TransStrings.php:548
+#: app/Services/TransStrings.php:550
 msgid "Add Team Member"
 msgstr ""
 
-#: app/Services/TransStrings.php:425
+#: app/Services/TransStrings.php:427
 msgid "Add to Block"
 msgstr ""
 
@@ -433,17 +433,17 @@ msgstr ""
 msgid "Add to calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:256
+#: app/Services/TransStrings.php:258
 msgid ""
 "Add your available times for this event. At least one available time should "
 "be added."
 msgstr ""
 
-#: app/Services/TransStrings.php:885
+#: app/Services/TransStrings.php:897
 msgid "Add your FluentBooking to WordPress frontend / any Page via Shortcode."
 msgstr ""
 
-#: app/Services/TransStrings.php:219 app/Services/BookingFieldService.php:138
+#: app/Services/TransStrings.php:221 app/Services/BookingFieldService.php:138
 #: app/Services/BookingService.php:304 app/Services/Helper.php:1705
 #: app/Services/Helper.php:1770
 msgid "Additional Guests"
@@ -453,11 +453,11 @@ msgstr ""
 msgid "Additional Note"
 msgstr ""
 
-#: app/Services/TransStrings.php:218
+#: app/Services/TransStrings.php:220
 msgid "Additional Recipients"
 msgstr ""
 
-#: app/Services/TransStrings.php:653
+#: app/Services/TransStrings.php:655
 msgid "Additional Settings"
 msgstr ""
 
@@ -465,11 +465,11 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: app/Services/TransStrings.php:573
+#: app/Services/TransStrings.php:575
 msgid "Admin Email"
 msgstr ""
 
-#: app/Services/TransStrings.php:697
+#: app/Services/TransStrings.php:708
 msgid "Administrator"
 msgstr ""
 
@@ -477,7 +477,7 @@ msgstr ""
 msgid "Advanced Features & Addons"
 msgstr ""
 
-#: app/Services/TransStrings.php:916
+#: app/Services/TransStrings.php:928
 msgid "Advanced Modules"
 msgstr ""
 
@@ -485,47 +485,48 @@ msgstr ""
 msgid "Advanced Operators"
 msgstr ""
 
-#: app/Services/TransStrings.php:845
+#: app/Services/TransStrings.php:857
 #: app/Hooks/Handlers/AdminMenuHandler.php:741
 msgid "Advanced Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:349
+#: app/Services/TransStrings.php:351
 msgid "After Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:704 app/Services/Helper.php:1406
+#: app/Services/TransStrings.php:715 app/Services/Helper.php:1406
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:114
 msgid "All"
 msgstr ""
 
-#: app/Services/TransStrings.php:125
+#: app/Services/TransStrings.php:127
 msgid "All Active Booking Forms"
 msgstr ""
 
-#: app/Services/TransStrings.php:682
+#: app/Services/TransStrings.php:693
 msgid ""
 "All connected zoom accounts by you and your team members. You can review who "
 "connected their zoom account from Host Settings and manage from here for all "
 "of your team members."
 msgstr ""
 
-#: app/Services/TransStrings.php:178
+#: app/Services/TransStrings.php:180
 msgid "All Data"
 msgstr ""
 
-#: app/Services/TransStrings.php:706
+#: app/Services/TransStrings.php:717
 msgid "All dates are shown in"
 msgstr ""
 
-#: app/Services/TransStrings.php:526
+#: app/Services/TransStrings.php:528
 msgid "All Event Types"
 msgstr ""
 
-#: app/Services/TransStrings.php:525
+#: app/Services/TransStrings.php:527
 msgid "All Events"
 msgstr ""
 
-#: app/Services/TransStrings.php:528
+#: app/Services/TransStrings.php:530
 msgid "All Meetings"
 msgstr ""
 
@@ -533,26 +534,26 @@ msgstr ""
 msgid "All Schedules"
 msgstr ""
 
-#: app/Services/TransStrings.php:329
+#: app/Services/TransStrings.php:331
 msgid ""
 "Allow a user to book multiple different times for the same event in one "
 "transaction"
 msgstr ""
 
-#: app/Services/TransStrings.php:330
+#: app/Services/TransStrings.php:332
 msgid ""
 "Allow a user to book the same event for multiple attendees at the same time"
 msgstr ""
 
-#: app/Services/TransStrings.php:811
+#: app/Services/TransStrings.php:823
 msgid "Allow attendee to select duration"
 msgstr ""
 
-#: app/Services/TransStrings.php:338
+#: app/Services/TransStrings.php:340
 msgid "Allow Multiple Booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:819
+#: app/Services/TransStrings.php:831
 msgid "Already assigned"
 msgstr ""
 
@@ -564,7 +565,7 @@ msgstr ""
 msgid "AM"
 msgstr ""
 
-#: app/Services/TransStrings.php:766
+#: app/Services/TransStrings.php:778
 msgid "am"
 msgstr ""
 
@@ -572,7 +573,7 @@ msgstr ""
 msgid "Amber"
 msgstr ""
 
-#: app/Services/TransStrings.php:376
+#: app/Services/TransStrings.php:378
 msgid "Amount"
 msgstr ""
 
@@ -583,16 +584,16 @@ msgstr ""
 msgid "An Automated double-optin email will be sent for new subscribers"
 msgstr ""
 
-#: app/Services/TransStrings.php:130
+#: app/Services/TransStrings.php:132
 msgid "API Error:"
 msgstr ""
 
-#: app/Services/TransStrings.php:908
+#: app/Services/TransStrings.php:920
 #: app/Hooks/Handlers/AdminMenuHandler.php:529
 msgid "Apple Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:261
+#: app/Services/TransStrings.php:263
 msgid "Apply"
 msgstr ""
 
@@ -612,19 +613,19 @@ msgstr ""
 msgid "Appointment Date & Time is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:740
+#: app/Services/TransStrings.php:751
 msgid "Apr"
 msgstr ""
 
-#: app/Services/TransStrings.php:753
+#: app/Services/TransStrings.php:764
 msgid "April"
 msgstr ""
 
-#: app/Services/TransStrings.php:624
+#: app/Services/TransStrings.php:626
 msgid "Are you sure to delete this Feed?"
 msgstr ""
 
-#: app/Services/TransStrings.php:191
+#: app/Services/TransStrings.php:193
 msgid "Are you sure to delete this webhook?"
 msgstr ""
 
@@ -632,55 +633,55 @@ msgstr ""
 msgid "Are you sure to delete this?"
 msgstr ""
 
-#: app/Services/TransStrings.php:375
+#: app/Services/TransStrings.php:377
 msgid "Are you sure to disconnect this account?"
 msgstr ""
 
-#: app/Services/TransStrings.php:621
+#: app/Services/TransStrings.php:623
 msgid "Are you sure you want to delete this availability?"
 msgstr ""
 
-#: app/Services/TransStrings.php:664
+#: app/Services/TransStrings.php:666
 msgid ""
 "Are you sure you want to delete this booking type? All the associate "
 "bookings and data will be deleted"
 msgstr ""
 
-#: app/Services/TransStrings.php:272
+#: app/Services/TransStrings.php:274
 msgid ""
 "Are you sure you want to delete this booking type? All the associate "
 "bookings and data will be deleted."
 msgstr ""
 
-#: app/Services/TransStrings.php:512
+#: app/Services/TransStrings.php:514
 msgid "Are you sure you want to delete this booking?"
 msgstr ""
 
-#: app/Services/TransStrings.php:660
+#: app/Services/TransStrings.php:662
 msgid ""
 "Are you sure you want to delete this calendar? All the associate bookings "
 "and data will be deleted"
 msgstr ""
 
-#: app/Services/TransStrings.php:629
+#: app/Services/TransStrings.php:631
 msgid ""
 "Are you sure you want to disconnect this calendar? This action can't be "
 "undone."
 msgstr ""
 
-#: app/Services/TransStrings.php:657
+#: app/Services/TransStrings.php:659
 msgid "Are you sure you want to disconnect this integration?"
 msgstr ""
 
-#: app/Services/TransStrings.php:680
+#: app/Services/TransStrings.php:691
 msgid "as group booking type"
 msgstr ""
 
-#: app/Services/TransStrings.php:537
+#: app/Services/TransStrings.php:539
 msgid "Assign Member"
 msgstr ""
 
-#: app/Services/TransStrings.php:536
+#: app/Services/TransStrings.php:538
 #: app/Hooks/Handlers/AdminMenuHandler.php:657
 msgid "Assignment"
 msgstr ""
@@ -691,15 +692,15 @@ msgid ""
 "selecting the appropriate form field from the list."
 msgstr ""
 
-#: app/Services/TransStrings.php:291
+#: app/Services/TransStrings.php:293
 msgid "Attendee address"
 msgstr ""
 
-#: app/Services/TransStrings.php:346
+#: app/Services/TransStrings.php:348
 msgid "Attendee Cannot Cancel"
 msgstr ""
 
-#: app/Services/TransStrings.php:347
+#: app/Services/TransStrings.php:349
 msgid "Attendee Cannot Reschedule"
 msgstr ""
 
@@ -707,32 +708,32 @@ msgstr ""
 msgid "Attendee Data"
 msgstr ""
 
-#: app/Services/TransStrings.php:279 app/Services/LocationService.php:56
-#: app/Models/CalendarSlot.php:732 app/Hooks/Handlers/FrontEndHandler.php:622
+#: app/Services/TransStrings.php:281 app/Services/LocationService.php:56
+#: app/Models/CalendarSlot.php:728 app/Hooks/Handlers/FrontEndHandler.php:622
 msgid "Attendee Phone Number"
 msgstr ""
 
-#: app/Services/TransStrings.php:292
+#: app/Services/TransStrings.php:294
 msgid "Attendee phone number (with country code)"
 msgstr ""
 
-#: app/Services/TransStrings.php:289
+#: app/Services/TransStrings.php:291
 msgid "Attendee's Email"
 msgstr ""
 
-#: app/Services/TransStrings.php:288
+#: app/Services/TransStrings.php:290
 msgid "Attendee's Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:290
+#: app/Services/TransStrings.php:292
 msgid "Attendee's Timezone"
 msgstr ""
 
-#: app/Services/TransStrings.php:744
+#: app/Services/TransStrings.php:755
 msgid "Aug"
 msgstr ""
 
-#: app/Services/TransStrings.php:756
+#: app/Services/TransStrings.php:767
 msgid "August"
 msgstr ""
 
@@ -747,23 +748,28 @@ msgstr ""
 msgid "Availability"
 msgstr ""
 
-#: app/Services/TransStrings.php:360
+#: app/Services/TransStrings.php:362
 msgid "Availability Range"
 msgstr ""
 
-#: app/Services/TransStrings.php:856
+#: app/Services/TransStrings.php:868
 msgid "Availability Timezone"
 msgstr ""
 
-#: app/Services/TransStrings.php:809
+#: app/Services/TransStrings.php:821
 msgid "Available Durations"
 msgstr ""
 
-#: app/Services/TransStrings.php:862
+#: app/Services/TransStrings.php:874
 msgid "Available Times"
 msgstr ""
 
-#: app/Services/TransStrings.php:97
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:216
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:198
+msgid "Avatar Radius"
+msgstr ""
+
+#: app/Services/TransStrings.php:99
 msgid "Back"
 msgstr ""
 
@@ -779,15 +785,15 @@ msgstr ""
 msgid "Back to team"
 msgstr ""
 
-#: app/Services/TransStrings.php:348
+#: app/Services/TransStrings.php:350
 msgid "Before Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:533
+#: app/Services/TransStrings.php:535
 msgid "beta"
 msgstr ""
 
-#: app/Services/TransStrings.php:157
+#: app/Services/TransStrings.php:159
 msgid "Billing Address"
 msgstr ""
 
@@ -800,19 +806,19 @@ msgstr ""
 msgid "Book Now"
 msgstr ""
 
-#: app/Services/TransStrings.php:672
+#: app/Services/TransStrings.php:674
 msgid "Booked"
 msgstr ""
 
-#: app/Services/TransStrings.php:677
+#: app/Services/TransStrings.php:682
 msgid "booked a new meeting at"
 msgstr ""
 
-#: app/Services/TransStrings.php:478
+#: app/Services/TransStrings.php:480
 msgid "Booked At"
 msgstr ""
 
-#: app/Services/TransStrings.php:495
+#: app/Services/TransStrings.php:497
 msgid "Booked From"
 msgstr ""
 
@@ -852,7 +858,7 @@ msgstr ""
 msgid "Booking Cancellation URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:627
+#: app/Services/TransStrings.php:629
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:228
 #: app/Services/Integrations/FluentCRM/CancelBookingTrigger.php:34
 msgid "Booking Cancelled"
@@ -870,7 +876,7 @@ msgstr ""
 msgid "Booking Cancelled Funnel"
 msgstr ""
 
-#: app/Services/TransStrings.php:626
+#: app/Services/TransStrings.php:628
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:227
 #: app/Services/Integrations/FluentCRM/Bootstrap.php:196
 #: app/Services/Integrations/FluentCRM/BookingCompletedTrigger.php:32
@@ -889,8 +895,8 @@ msgstr ""
 msgid "Booking Confirmation Email to Organizer (You)"
 msgstr ""
 
-#: app/Services/TransStrings.php:625
-#: app/Http/Controllers/SchedulesController.php:482
+#: app/Services/TransStrings.php:627
+#: app/Http/Controllers/SchedulesController.php:489
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:226
 #: app/Services/Integrations/FluentCRM/Bootstrap.php:195
 msgid "Booking Confirmed"
@@ -908,8 +914,12 @@ msgstr ""
 msgid "Booking Declined by Organizer (email to Attendee)"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:291
+#: app/Http/Controllers/SchedulesController.php:297
 msgid "Booking Deleted Successfully!"
+msgstr ""
+
+#: app/Services/TransStrings.php:683
+msgid "Booking Details"
 msgstr ""
 
 #: app/Services/Helper.php:1720 app/Services/Helper.php:1785
@@ -917,7 +927,7 @@ msgstr ""
 msgid "Booking Details Admin URL"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:1076 app/Models/CalendarSlot.php:1083
+#: app/Models/CalendarSlot.php:1072 app/Models/CalendarSlot.php:1079
 msgid "Booking Fee"
 msgstr ""
 
@@ -934,7 +944,7 @@ msgstr ""
 msgid "Booking has been confirmed"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:483
+#: app/Http/Controllers/SchedulesController.php:490
 msgid "Booking has been confirmed by "
 msgstr ""
 
@@ -958,20 +968,20 @@ msgstr ""
 msgid "Booking ID"
 msgstr ""
 
-#: app/Services/TransStrings.php:631
+#: app/Services/TransStrings.php:633
 msgid "Booking Payment Items"
 msgstr ""
 
-#: app/Services/TransStrings.php:285
+#: app/Services/TransStrings.php:287
 msgid "Booking Questions"
 msgstr ""
 
-#: app/Services/TransStrings.php:841
+#: app/Services/TransStrings.php:853
 msgid "Booking Rejected"
 msgstr ""
 
 #. Name of the user who rejected the booking
-#: app/Models/Booking.php:649
+#: app/Models/Booking.php:663
 #, php-format
 msgid "Booking request has been rejected by %s"
 msgstr ""
@@ -981,7 +991,7 @@ msgstr ""
 msgid "Booking Reschedule URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:840
+#: app/Services/TransStrings.php:852
 #: app/Services/Integrations/FluentCRM/BookingRescheduledTrigger.php:32
 msgid "Booking Rescheduled"
 msgstr ""
@@ -1006,7 +1016,7 @@ msgstr ""
 msgid "Booking Submission Confirmation (email to Attendee)"
 msgstr ""
 
-#: app/Services/TransStrings.php:842 app/Services/Helper.php:1704
+#: app/Services/TransStrings.php:854 app/Services/Helper.php:1704
 #: app/Services/Helper.php:1769
 msgid "Booking Title"
 msgstr ""
@@ -1015,23 +1025,29 @@ msgstr ""
 msgid "Booking Trends"
 msgstr ""
 
-#: app/Services/TransStrings.php:440
+#: app/Services/TransStrings.php:442
 msgid "Booking Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:649
+#: app/Services/TransStrings.php:651
 msgid "Booking Types"
 msgstr ""
 
-#: app/Services/TransStrings.php:475
+#: app/Services/TransStrings.php:477
 msgid "Booking URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:721 app/Hooks/Handlers/AdminMenuHandler.php:66
+#: app/Services/TransStrings.php:732 app/Hooks/Handlers/AdminMenuHandler.php:66
 #: app/Hooks/Handlers/AdminMenuHandler.php:67
 #: app/Hooks/Handlers/AdminMenuHandler.php:128
 #: app/Services/Integrations/FluentCRM/FluentCrmInit.php:69
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:27
 msgid "Bookings"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:190
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:175
+msgid "Border Color"
 msgstr ""
 
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:188
@@ -1046,7 +1062,11 @@ msgstr ""
 msgid "Caching Time"
 msgstr ""
 
-#: app/Services/TransStrings.php:718
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:30
+msgid "Calendar"
+msgstr ""
+
+#: app/Services/TransStrings.php:729
 msgid "Calendar Avatar"
 msgstr ""
 
@@ -1054,72 +1074,72 @@ msgstr ""
 msgid "Calendar could not be found. Please try again"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:406
+#: app/Services/DateTimeHelper.php:405
 msgctxt "calendar day full"
 msgid "Friday"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:402
+#: app/Services/DateTimeHelper.php:401
 msgctxt "calendar day full"
 msgid "Monday"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:407
+#: app/Services/DateTimeHelper.php:406
 msgctxt "calendar day full"
 msgid "Saturday"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:401
+#: app/Services/DateTimeHelper.php:400
 msgctxt "calendar day full"
 msgid "Sunday"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:405
+#: app/Services/DateTimeHelper.php:404
 msgctxt "calendar day full"
 msgid "Thursday"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:403
+#: app/Services/DateTimeHelper.php:402
 msgctxt "calendar day full"
 msgid "Tuesday"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:404
+#: app/Services/DateTimeHelper.php:403
 msgctxt "calendar day full"
 msgid "Wednesday"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:429
+#: app/Services/DateTimeHelper.php:428
 msgctxt "calendar day short"
 msgid "Fri"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:425
+#: app/Services/DateTimeHelper.php:424
 msgctxt "calendar day short"
 msgid "Mon"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:430
+#: app/Services/DateTimeHelper.php:429
 msgctxt "calendar day short"
 msgid "Sat"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:424
+#: app/Services/DateTimeHelper.php:423
 msgctxt "calendar day short"
 msgid "Sun"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:428
+#: app/Services/DateTimeHelper.php:427
 msgctxt "calendar day short"
 msgid "Thu"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:426
+#: app/Services/DateTimeHelper.php:425
 msgctxt "calendar day short"
 msgid "Tue"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:427
+#: app/Services/DateTimeHelper.php:426
 msgctxt "calendar day short"
 msgid "Wed"
 msgstr ""
@@ -1128,10 +1148,14 @@ msgstr ""
 msgid "Calendar Deleted Successfully!"
 msgstr ""
 
-#: app/Services/TransStrings.php:663 app/Services/Helper.php:1742
+#: app/Services/TransStrings.php:665 app/Services/Helper.php:1742
 #: app/Services/Helper.php:1807
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:108
 msgid "Calendar Description"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:27
+msgid "Calendar Event"
 msgstr ""
 
 #: app/Http/Controllers/CalendarController.php:900
@@ -1143,6 +1167,7 @@ msgid "Calendar Event not found"
 msgstr ""
 
 #: app/Hooks/Handlers/FrontEndHandler.php:63
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:337
 msgid "Calendar event not found"
 msgstr ""
 
@@ -1163,122 +1188,122 @@ msgstr ""
 msgid "Calendar imported successfully"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:413
+#: app/Services/DateTimeHelper.php:412
 msgctxt "calendar month name full"
 msgid "April"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:417
+#: app/Services/DateTimeHelper.php:416
 msgctxt "calendar month name full"
 msgid "August"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:421
+#: app/Services/DateTimeHelper.php:420
 msgctxt "calendar month name full"
 msgid "December"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:411
+#: app/Services/DateTimeHelper.php:410
 msgctxt "calendar month name full"
 msgid "February"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:410
+#: app/Services/DateTimeHelper.php:409
 msgctxt "calendar month name full"
 msgid "January"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:416
+#: app/Services/DateTimeHelper.php:415
 msgctxt "calendar month name full"
 msgid "July"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:415
+#: app/Services/DateTimeHelper.php:414
 msgctxt "calendar month name full"
 msgid "June"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:412
+#: app/Services/DateTimeHelper.php:411
 msgctxt "calendar month name full"
 msgid "March"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:414
+#: app/Services/DateTimeHelper.php:413
 msgctxt "calendar month name full"
 msgid "May"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:420
-msgctxt "calendar month name full"
-msgid "November"
 msgstr ""
 
 #: app/Services/DateTimeHelper.php:419
 msgctxt "calendar month name full"
-msgid "October"
+msgid "November"
 msgstr ""
 
 #: app/Services/DateTimeHelper.php:418
 msgctxt "calendar month name full"
+msgid "October"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:417
+msgctxt "calendar month name full"
 msgid "September"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:436
-msgctxt "calendar month name short"
-msgid "Apr"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:440
-msgctxt "calendar month name short"
-msgid "Aug"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:444
-msgctxt "calendar month name short"
-msgid "Dec"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:434
-msgctxt "calendar month name short"
-msgid "Feb"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:433
-msgctxt "calendar month name short"
-msgid "Jan"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:439
-msgctxt "calendar month name short"
-msgid "Jul"
-msgstr ""
-
-#: app/Services/DateTimeHelper.php:438
-msgctxt "calendar month name short"
-msgid "Jun"
 msgstr ""
 
 #: app/Services/DateTimeHelper.php:435
 msgctxt "calendar month name short"
-msgid "Mar"
+msgid "Apr"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:437
+#: app/Services/DateTimeHelper.php:439
 msgctxt "calendar month name short"
-msgid "May"
+msgid "Aug"
 msgstr ""
 
 #: app/Services/DateTimeHelper.php:443
 msgctxt "calendar month name short"
-msgid "Nov"
+msgid "Dec"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:433
+msgctxt "calendar month name short"
+msgid "Feb"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:432
+msgctxt "calendar month name short"
+msgid "Jan"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:438
+msgctxt "calendar month name short"
+msgid "Jul"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:437
+msgctxt "calendar month name short"
+msgid "Jun"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:434
+msgctxt "calendar month name short"
+msgid "Mar"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:436
+msgctxt "calendar month name short"
+msgid "May"
 msgstr ""
 
 #: app/Services/DateTimeHelper.php:442
 msgctxt "calendar month name short"
-msgid "Oct"
+msgid "Nov"
 msgstr ""
 
 #: app/Services/DateTimeHelper.php:441
+msgctxt "calendar month name short"
+msgid "Oct"
+msgstr ""
+
+#: app/Services/DateTimeHelper.php:440
 msgctxt "calendar month name short"
 msgid "Sep"
 msgstr ""
@@ -1289,17 +1314,17 @@ msgstr ""
 msgid "Calendar not found"
 msgstr ""
 
-#: app/Services/DateTimeHelper.php:446
+#: app/Services/DateTimeHelper.php:445
 msgctxt "calendar numeric system - Sequence must need to maintained"
 msgid "0_1_2_3_4_5_6_7_8_9"
 msgstr ""
 
-#: app/Services/TransStrings.php:390 app/Hooks/filters.php:30
+#: app/Services/TransStrings.php:392 app/Hooks/filters.php:30
 #: app/Hooks/Handlers/AdminMenuHandler.php:802
 msgid "Calendar Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:574
+#: app/Services/TransStrings.php:576
 msgid "Calendar start from"
 msgstr ""
 
@@ -1308,11 +1333,15 @@ msgstr ""
 msgid "Calendar Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:661
+#: app/Services/TransStrings.php:663
 msgid "Calendar Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:430 app/Hooks/Handlers/AdminMenuHandler.php:57
+#: app/Services/TransStrings.php:94
+msgid "Calendar View"
+msgstr ""
+
+#: app/Services/TransStrings.php:432 app/Hooks/Handlers/AdminMenuHandler.php:57
 #: app/Hooks/Handlers/AdminMenuHandler.php:58
 #: app/Hooks/Handlers/AdminMenuHandler.php:123
 msgid "Calendars"
@@ -1334,7 +1363,7 @@ msgstr ""
 msgid "Cancel Booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:497
+#: app/Services/TransStrings.php:499
 msgid "Cancel Meeting"
 msgstr ""
 
@@ -1346,12 +1375,13 @@ msgstr ""
 msgid "Cancellation Reason"
 msgstr ""
 
-#: app/Services/TransStrings.php:458 app/Services/Helper.php:1405
-#: app/Models/Booking.php:487
+#: app/Services/TransStrings.php:460 app/Services/Helper.php:1405
+#: app/Models/Booking.php:501
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:117
 msgid "Cancelled"
 msgstr ""
 
-#: app/Services/TransStrings.php:460
+#: app/Services/TransStrings.php:462
 msgid "cancelled"
 msgstr ""
 
@@ -1359,7 +1389,7 @@ msgstr ""
 msgid "Cancelled Bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:486
+#: app/Services/TransStrings.php:488
 msgid "Card Last 4"
 msgstr ""
 
@@ -1379,7 +1409,7 @@ msgstr ""
 msgid "Checkbox Group"
 msgstr ""
 
-#: app/Services/TransStrings.php:788
+#: app/Services/TransStrings.php:800
 msgid "Checkout Method"
 msgstr ""
 
@@ -1387,7 +1417,7 @@ msgstr ""
 msgid "Chilean Peso"
 msgstr ""
 
-#: app/Services/TransStrings.php:817
+#: app/Services/TransStrings.php:829
 msgid "Choose a common schedule"
 msgstr ""
 
@@ -1395,7 +1425,11 @@ msgstr ""
 msgid "Choose File"
 msgstr ""
 
-#: app/Services/TransStrings.php:818
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:98
+msgid "Choose Header Image"
+msgstr ""
+
+#: app/Services/TransStrings.php:830
 msgid "Choose Host Schedules"
 msgstr ""
 
@@ -1409,20 +1443,20 @@ msgid ""
 "made or “Meeting Date” to set it relative to the scheduled meeting date."
 msgstr ""
 
-#: app/Services/TransStrings.php:593
+#: app/Services/TransStrings.php:595
 msgid "Click here"
 msgstr ""
 
-#: app/Services/TransStrings.php:592
+#: app/Services/TransStrings.php:594
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:450
 msgid "click here"
 msgstr ""
 
-#: app/Services/TransStrings.php:590
+#: app/Services/TransStrings.php:592
 msgid "Click Here to Renew your License"
 msgstr ""
 
-#: app/Services/TransStrings.php:472
+#: app/Services/TransStrings.php:474
 msgid "click to upload"
 msgstr ""
 
@@ -1434,56 +1468,61 @@ msgstr ""
 msgid "Clone"
 msgstr ""
 
-#: app/Services/TransStrings.php:833
+#: app/Services/TransStrings.php:845
 msgid "Clone Calendar Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:827
+#: app/Services/TransStrings.php:839
 msgid "Clone Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:826
+#: app/Services/TransStrings.php:838
 msgid "Clone from"
 msgstr ""
 
-#: app/Services/TransStrings.php:832
+#: app/Services/TransStrings.php:844
 msgid "Clone Integration Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:829
+#: app/Services/TransStrings.php:841
 msgid "Clone Notification Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:828
+#: app/Services/TransStrings.php:840
 msgid "Clone Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:830
+#: app/Services/TransStrings.php:842
 msgid "Clone SMS Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:831
+#: app/Services/TransStrings.php:843
 msgid "Clone Webhook Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:426
+#: app/Services/TransStrings.php:428
 msgid "Close"
 msgstr ""
 
-#: app/Services/TransStrings.php:814
+#: app/Services/TransStrings.php:826
 msgid "Collective"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:108
+msgid "Color Schema"
 msgstr ""
 
 #: app/Services/CurrenciesHelper.php:385
 msgid "Comorian Franc"
 msgstr ""
 
-#: app/Services/TransStrings.php:457 app/Services/Helper.php:1403
-#: app/Models/Booking.php:485
+#: app/Services/TransStrings.php:459 app/Services/Helper.php:1403
+#: app/Models/Booking.php:499
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:116
 msgid "Completed"
 msgstr ""
 
-#: app/Services/TransStrings.php:459
+#: app/Services/TransStrings.php:461
 msgid "completed"
 msgstr ""
 
@@ -1491,11 +1530,11 @@ msgstr ""
 msgid "Completed Bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:104
+#: app/Services/TransStrings.php:106
 msgid "Conditional Logics is a Pro Feature"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:698
+#: app/Models/CalendarSlot.php:694
 msgid "Conferencing"
 msgstr ""
 
@@ -1510,7 +1549,7 @@ msgstr ""
 msgid "Configure %s to sync your events"
 msgstr ""
 
-#: app/Services/TransStrings.php:911
+#: app/Services/TransStrings.php:923
 msgid "Configure Google Calendar/Meet to sync your events"
 msgstr ""
 
@@ -1522,11 +1561,11 @@ msgstr ""
 msgid "Configure Meeting Reminder to Organizer (You)"
 msgstr ""
 
-#: app/Services/TransStrings.php:912
+#: app/Services/TransStrings.php:924
 msgid "Configure Outlook Calendar to sync your events"
 msgstr ""
 
-#: app/Services/TransStrings.php:383
+#: app/Services/TransStrings.php:385
 msgid ""
 "Configure stripe to accept payments on your booking events and monetize your "
 "time slots"
@@ -1536,15 +1575,15 @@ msgstr ""
 msgid "Configure times when you are available for bookings."
 msgstr ""
 
-#: app/Services/TransStrings.php:905
+#: app/Services/TransStrings.php:917
 msgid "Configure Twilio to send SMS notifications"
 msgstr ""
 
-#: app/Services/TransStrings.php:583
+#: app/Services/TransStrings.php:585
 msgid "Configure your email settings for booking related emails"
 msgstr ""
 
-#: app/Services/TransStrings.php:585
+#: app/Services/TransStrings.php:587
 msgid "Configure your global payment settings for booking related payments"
 msgstr ""
 
@@ -1556,7 +1595,7 @@ msgstr ""
 msgid "Confirm and cancel the scheduled booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:131
+#: app/Services/TransStrings.php:133
 msgid "Confirm Disconnect"
 msgstr ""
 
@@ -1570,7 +1609,7 @@ msgstr ""
 msgid "Confirm Reschedule"
 msgstr ""
 
-#: app/Services/TransStrings.php:385
+#: app/Services/TransStrings.php:387
 msgid "Confirm, Disconnect"
 msgstr ""
 
@@ -1578,7 +1617,7 @@ msgstr ""
 msgid "Confirmation: "
 msgstr ""
 
-#: app/Services/TransStrings.php:439
+#: app/Services/TransStrings.php:441
 msgid "Congratulations!"
 msgstr ""
 
@@ -1600,39 +1639,39 @@ msgstr ""
 msgid "Connect with %s"
 msgstr ""
 
-#: app/Services/TransStrings.php:371
+#: app/Services/TransStrings.php:373
 msgid "Connect with stripe"
 msgstr ""
 
-#: app/Services/TransStrings.php:101
+#: app/Services/TransStrings.php:103
 msgid ""
 "Connect your favourite tools with your booking scheduled, completed or "
 "cancelled actions"
 msgstr ""
 
-#: app/Services/TransStrings.php:732
+#: app/Services/TransStrings.php:743
 msgid "Connect Your Stripe Account to your website to accept Payments"
 msgstr ""
 
-#: app/Services/TransStrings.php:144
+#: app/Services/TransStrings.php:146
 msgid "Connect Your Zoom Account"
 msgstr ""
 
-#: app/Services/TransStrings.php:143 app/Services/TransStrings.php:687
+#: app/Services/TransStrings.php:145 app/Services/TransStrings.php:698
 msgid ""
 "Connect your Zoom account to create dynamic meeting in zoom for your "
 "bookings."
 msgstr ""
 
-#: app/Services/TransStrings.php:141
+#: app/Services/TransStrings.php:143
 msgid "Connect your Zoom account to create meeting when a event is booked."
 msgstr ""
 
-#: app/Services/TransStrings.php:567
+#: app/Services/TransStrings.php:569
 msgid "Connected Zoom Account Email:"
 msgstr ""
 
-#: app/Services/TransStrings.php:692
+#: app/Services/TransStrings.php:703
 msgid "Connected Zoom Accounts"
 msgstr ""
 
@@ -1662,7 +1701,13 @@ msgstr ""
 msgid "contains"
 msgstr ""
 
-#: app/Services/TransStrings.php:442
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:71
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:74
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:71
+msgid "Content"
+msgstr ""
+
+#: app/Services/TransStrings.php:444
 msgid "Continue"
 msgstr ""
 
@@ -1670,19 +1715,19 @@ msgstr ""
 msgid "Continue to Payments"
 msgstr ""
 
-#: app/Services/TransStrings.php:416
+#: app/Services/TransStrings.php:418
 msgid "Copied to clipboard"
 msgstr ""
 
-#: app/Services/TransStrings.php:420
+#: app/Services/TransStrings.php:422
 msgid "Copy"
 msgstr ""
 
-#: app/Services/TransStrings.php:418
+#: app/Services/TransStrings.php:420
 msgid "Copy and use the shortcode Page/Post of your website"
 msgstr ""
 
-#: app/Services/TransStrings.php:421
+#: app/Services/TransStrings.php:423
 msgid "Copy link"
 msgstr ""
 
@@ -1695,51 +1740,51 @@ msgid ""
 "Create beautiful booking forms using Fluent Forms with your booking field"
 msgstr ""
 
-#: app/Services/TransStrings.php:431
+#: app/Services/TransStrings.php:433
 msgid "Create Booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:432
+#: app/Services/TransStrings.php:434
 msgid "Create Booking Manually"
 msgstr ""
 
-#: app/Services/TransStrings.php:135
+#: app/Services/TransStrings.php:137
 msgid "Create events on"
 msgstr ""
 
-#: app/Services/TransStrings.php:391
+#: app/Services/TransStrings.php:393
 msgid "Create New Event Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:193
+#: app/Services/TransStrings.php:195
 msgid "create one!"
 msgstr ""
 
-#: app/Services/TransStrings.php:441
+#: app/Services/TransStrings.php:443
 msgid "Create Your Availability"
 msgstr ""
 
-#: app/Services/TransStrings.php:668
+#: app/Services/TransStrings.php:670
 msgid "Create Your First Booking Event"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:383
+#: app/Http/Controllers/SchedulesController.php:389
 msgid "CRM Profile"
 msgstr ""
 
-#: app/Services/TransStrings.php:480 app/Services/Helper.php:1831
+#: app/Services/TransStrings.php:482 app/Services/Helper.php:1831
 msgid "Currency"
 msgstr ""
 
-#: app/Services/TransStrings.php:429
+#: app/Services/TransStrings.php:431
 msgid "Current DateTime:"
 msgstr ""
 
-#: app/Services/TransStrings.php:776
+#: app/Services/TransStrings.php:788
 msgid "Currently FluentBooking has integration with FluentCRM. After install"
 msgstr ""
 
-#: app/Services/Helper.php:1141 app/Models/CalendarSlot.php:751
+#: app/Services/Helper.php:1141 app/Models/CalendarSlot.php:747
 msgid "Custom"
 msgstr ""
 
@@ -1747,7 +1792,7 @@ msgstr ""
 msgid "Custom Icon"
 msgstr ""
 
-#: app/Services/TransStrings.php:637
+#: app/Services/TransStrings.php:639
 msgid "Custom Number"
 msgstr ""
 
@@ -1755,19 +1800,19 @@ msgstr ""
 msgid "Customer Details"
 msgstr ""
 
-#: app/Services/TransStrings.php:848
+#: app/Services/TransStrings.php:860
 msgid "Customize booking cancel and reschedule fields"
 msgstr ""
 
-#: app/Services/TransStrings.php:901
+#: app/Services/TransStrings.php:913
 msgid "Customize the email notifications sent to attendees and organizers"
 msgstr ""
 
-#: app/Services/TransStrings.php:847
+#: app/Services/TransStrings.php:859
 msgid "Customize the questions asked on the booking page"
 msgstr ""
 
-#: app/Services/TransStrings.php:904
+#: app/Services/TransStrings.php:916
 msgid "Customize the sms notifications sent to attendees and organizers"
 msgstr ""
 
@@ -1775,15 +1820,19 @@ msgstr ""
 msgid "Cyan"
 msgstr ""
 
-#: app/Services/TransStrings.php:578
+#: app/Services/TransStrings.php:580
 msgid "Daily"
 msgstr ""
 
-#: app/Services/TransStrings.php:799
+#: app/Services/TransStrings.php:811
 msgid "Dark"
 msgstr ""
 
-#: app/Services/TransStrings.php:855 app/Hooks/Handlers/AdminMenuHandler.php:48
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:113
+msgid "dark"
+msgstr ""
+
+#: app/Services/TransStrings.php:867 app/Hooks/Handlers/AdminMenuHandler.php:48
 #: app/Hooks/Handlers/AdminMenuHandler.php:49
 #: app/Hooks/Handlers/AdminMenuHandler.php:118
 msgid "Dashboard"
@@ -1804,8 +1853,13 @@ msgstr ""
 msgid "Date & Time"
 msgstr ""
 
-#: app/Services/TransStrings.php:267
+#: app/Services/TransStrings.php:269
 msgid "Date Overrides"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:241
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:221
+msgid "Date Radius"
 msgstr ""
 
 #: app/Hooks/Handlers/FrontEndHandler.php:611
@@ -1822,28 +1876,29 @@ msgstr ""
 msgid "Date:"
 msgstr ""
 
-#: app/Services/Helper.php:1224 app/Hooks/Handlers/FrontEndHandler.php:596
+#: app/Services/TransStrings.php:680 app/Services/Helper.php:1224
+#: app/Hooks/Handlers/FrontEndHandler.php:596
 msgid "Day"
 msgstr ""
 
-#: app/Services/TransStrings.php:238 app/Services/Helper.php:1224
+#: app/Services/TransStrings.php:240 app/Services/Helper.php:1224
 #: app/Hooks/Handlers/FrontEndHandler.php:597
 msgid "Days"
 msgstr ""
 
-#: app/Services/TransStrings.php:216
+#: app/Services/TransStrings.php:218
 msgid "Days Before"
 msgstr ""
 
-#: app/Services/TransStrings.php:299
+#: app/Services/TransStrings.php:301
 msgid "Days into the future"
 msgstr ""
 
-#: app/Services/TransStrings.php:749
+#: app/Services/TransStrings.php:760
 msgid "Dec"
 msgstr ""
 
-#: app/Services/TransStrings.php:760
+#: app/Services/TransStrings.php:771
 msgid "December"
 msgstr ""
 
@@ -1855,16 +1910,20 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: app/Services/TransStrings.php:368
+#: app/Services/TransStrings.php:370
 msgid "Default Country for Phone Field"
 msgstr ""
 
-#: app/Services/TransStrings.php:810
+#: app/Services/TransStrings.php:822
 msgid "Default Duration"
 msgstr ""
 
 #: app/Http/Controllers/SettingsController.php:32
 msgid "Default Name that will be used to send email)"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:110
+msgid "Default Period"
 msgstr ""
 
 #: app/Http/Controllers/SettingsController.php:57
@@ -1883,15 +1942,15 @@ msgstr ""
 msgid "Default Schedule can not be deleted"
 msgstr ""
 
-#: app/Services/TransStrings.php:620
+#: app/Services/TransStrings.php:622
 msgid "Default Time Format"
 msgstr ""
 
-#: app/Services/TransStrings.php:872
+#: app/Services/TransStrings.php:884
 msgid "Default Value"
 msgstr ""
 
-#: app/Services/TransStrings.php:690
+#: app/Services/TransStrings.php:701
 msgid "Default Verified App (Recommended)"
 msgstr ""
 
@@ -1899,19 +1958,19 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: app/Services/TransStrings.php:622
+#: app/Services/TransStrings.php:624
 msgid "Delete Availability"
 msgstr ""
 
-#: app/Services/TransStrings.php:665
+#: app/Services/TransStrings.php:667
 msgid "Delete Booking Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:662
+#: app/Services/TransStrings.php:664
 msgid "Delete Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:511
+#: app/Services/TransStrings.php:513
 msgid "Delete Meeting"
 msgstr ""
 
@@ -1932,52 +1991,58 @@ msgstr ""
 msgid "Describe your task"
 msgstr ""
 
-#: app/Services/TransStrings.php:248
+#: app/Services/TransStrings.php:250
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:147
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:89
 msgid "Description"
 msgstr ""
 
-#: app/Services/TransStrings.php:411
+#: app/Services/TransStrings.php:413
 msgid "Disable"
 msgstr ""
 
-#: app/Services/TransStrings.php:406
+#: app/Services/TransStrings.php:408
 msgid "Disable Landing Page Feature"
 msgstr ""
 
-#: app/Services/TransStrings.php:263
+#: app/Services/TransStrings.php:265
 msgid "Disabled"
 msgstr ""
 
-#: app/Services/TransStrings.php:530
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:280
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:260
+msgid "Disabled Date Color"
+msgstr ""
+
+#: app/Services/TransStrings.php:532
 msgid "Discard"
 msgstr ""
 
-#: app/Services/TransStrings.php:377
+#: app/Services/TransStrings.php:379
 msgid "Disconnect"
 msgstr ""
 
-#: app/Services/TransStrings.php:630
+#: app/Services/TransStrings.php:632
 msgid "Disconnect Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:658
+#: app/Services/TransStrings.php:660
 msgid "Disconnect Integration"
 msgstr ""
 
-#: app/Services/TransStrings.php:274
+#: app/Services/TransStrings.php:276
 msgid "Display Description on booking page"
 msgstr ""
 
-#: app/Services/TransStrings.php:276
+#: app/Services/TransStrings.php:278
 msgid "Display Link on booking page"
 msgstr ""
 
-#: app/Services/TransStrings.php:275
+#: app/Services/TransStrings.php:277
 msgid "Display Phone number on booking page"
 msgstr ""
 
-#: app/Services/TransStrings.php:252
+#: app/Services/TransStrings.php:254
 msgid "Display remaining spots on booking page"
 msgstr ""
 
@@ -1989,19 +2054,19 @@ msgstr ""
 msgid "do not contains"
 msgstr ""
 
-#: app/Services/TransStrings.php:869
+#: app/Services/TransStrings.php:881
 msgid "Doc"
 msgstr ""
 
-#: app/Services/TransStrings.php:600
+#: app/Services/TransStrings.php:602
 msgid "Don't have a license key?"
 msgstr ""
 
-#: app/Services/TransStrings.php:503
+#: app/Services/TransStrings.php:505
 msgid "Don't Reject"
 msgstr ""
 
-#: app/Services/TransStrings.php:471
+#: app/Services/TransStrings.php:473
 msgid "Drop file here or"
 msgstr ""
 
@@ -2021,23 +2086,23 @@ msgstr ""
 msgid "Durations"
 msgstr ""
 
-#: app/Services/TransStrings.php:99
+#: app/Services/TransStrings.php:101
 msgid "Edit"
 msgstr ""
 
-#: app/Services/TransStrings.php:266
+#: app/Services/TransStrings.php:268
 msgid "Edit Availability"
 msgstr ""
 
-#: app/Services/TransStrings.php:231
+#: app/Services/TransStrings.php:233
 msgid "Edit Location"
 msgstr ""
 
-#: app/Services/TransStrings.php:264
+#: app/Services/TransStrings.php:266
 msgid "Edit Notification"
 msgstr ""
 
-#: app/Services/TransStrings.php:543
+#: app/Services/TransStrings.php:545
 msgid "Edit Team Member"
 msgstr ""
 
@@ -2046,19 +2111,19 @@ msgid ""
 "Edit the schedule below so that you can apply to your event/booking types"
 msgstr ""
 
-#: app/Services/TransStrings.php:156
+#: app/Services/TransStrings.php:158
 msgid "Edit Transaction"
 msgstr ""
 
-#: app/Services/TransStrings.php:675
+#: app/Services/TransStrings.php:681
 msgid "Edit:"
 msgstr ""
 
-#: app/Services/TransStrings.php:233
+#: app/Services/TransStrings.php:235
 msgid "eg: 4"
 msgstr ""
 
-#: app/Services/TransStrings.php:476 app/Services/Helper.php:1477
+#: app/Services/TransStrings.php:478 app/Services/Helper.php:1477
 #: app/Hooks/Handlers/FrontEndHandler.php:632
 msgid "Email"
 msgstr ""
@@ -2071,7 +2136,7 @@ msgstr ""
 msgid "email as per your domain/SMTP settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:210
+#: app/Services/TransStrings.php:212
 msgid "Email Body"
 msgstr ""
 
@@ -2079,7 +2144,7 @@ msgstr ""
 msgid "Email Footer for Booking related emails (Optional)"
 msgstr ""
 
-#: app/Services/TransStrings.php:367
+#: app/Services/TransStrings.php:369
 msgid "Email Frequency?"
 msgstr ""
 
@@ -2101,11 +2166,11 @@ msgstr ""
 msgid "Email Notification"
 msgstr ""
 
-#: app/Services/TransStrings.php:262
+#: app/Services/TransStrings.php:264
 msgid "Email Notification Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:366
+#: app/Services/TransStrings.php:368
 msgid "Email Notifications"
 msgstr ""
 
@@ -2118,7 +2183,7 @@ msgstr ""
 msgid "Email, Start Time and timezone are required to create a booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:582
+#: app/Services/TransStrings.php:584
 msgid "Emailing Settings"
 msgstr ""
 
@@ -2126,11 +2191,11 @@ msgstr ""
 msgid "Emerald Green"
 msgstr ""
 
-#: app/Services/TransStrings.php:792
+#: app/Services/TransStrings.php:804
 msgid "Enable"
 msgstr ""
 
-#: app/Services/TransStrings.php:575
+#: app/Services/TransStrings.php:577
 msgid "Enable Booking Summary Notification"
 msgstr ""
 
@@ -2144,49 +2209,49 @@ msgid ""
 "contact only)"
 msgstr ""
 
-#: app/Services/TransStrings.php:894
+#: app/Services/TransStrings.php:906
 msgid "Enable Frontend Portal"
 msgstr ""
 
-#: app/Services/TransStrings.php:386
+#: app/Services/TransStrings.php:388
 msgid "Enable Landing Page"
 msgstr ""
 
-#: app/Services/TransStrings.php:123
+#: app/Services/TransStrings.php:125
 msgid "Enable Landing Page Features for this calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:148
+#: app/Services/TransStrings.php:150
 msgid "Enable multiple payment options based on duration"
 msgstr ""
 
-#: app/Services/TransStrings.php:151
+#: app/Services/TransStrings.php:153
 msgid "Enable offline payment method"
 msgstr ""
 
-#: app/Services/TransStrings.php:160
+#: app/Services/TransStrings.php:162
 msgid "Enable Payment Module"
 msgstr ""
 
-#: app/Services/TransStrings.php:150
+#: app/Services/TransStrings.php:152
 msgid "Enable paypal payment method"
 msgstr ""
 
-#: app/Services/TransStrings.php:149
+#: app/Services/TransStrings.php:151
 msgid "Enable stripe payment method"
 msgstr ""
 
-#: app/Services/TransStrings.php:129
+#: app/Services/TransStrings.php:131
 msgid ""
 "Enable the calendars you want to check for conflicts to prevent double "
 "bookings."
 msgstr ""
 
-#: app/Services/TransStrings.php:412
+#: app/Services/TransStrings.php:414
 msgid "Enable this event"
 msgstr ""
 
-#: app/Services/TransStrings.php:147
+#: app/Services/TransStrings.php:149
 msgid "Enable this event as Paid and collect payment on booking"
 msgstr ""
 
@@ -2195,40 +2260,50 @@ msgstr ""
 msgid "Enable This feed"
 msgstr ""
 
-#: app/Services/TransStrings.php:361
+#: app/Services/TransStrings.php:363
 msgid ""
 "Enable this if you want to use a common schedule between hosts. When "
 "disabled, each host will be booked based on their default or chosen schedule."
 msgstr ""
 
-#: app/Services/TransStrings.php:222
+#: app/Services/TransStrings.php:224
 msgid "Enable this notification email"
 msgstr ""
 
-#: app/Services/TransStrings.php:643
+#: app/Services/TransStrings.php:645
 msgid "Enable this sms notification"
 msgstr ""
 
-#: app/Services/TransStrings.php:188
+#: app/Services/TransStrings.php:190
 msgid "Enable this webhook feed"
 msgstr ""
 
-#: app/Services/TransStrings.php:362
+#: app/Services/TransStrings.php:364
 msgid ""
 "Enable to reserve selected times for this event only. When disabled, times "
 "remain available and may disappear if booked by others."
 msgstr ""
 
-#: app/Services/TransStrings.php:700
+#: app/Services/TransStrings.php:711
 msgid "Enable/Disable FluentBooking Advanced features or integrations."
 msgstr ""
 
-#: app/Services/TransStrings.php:914
+#: app/Services/TransStrings.php:926
 msgid "Enable/Disable Nextcloud Calendar to sync your events"
 msgstr ""
 
-#: app/Services/TransStrings.php:793
+#: app/Services/TransStrings.php:805
 msgid "Enabled"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:260
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:240
+msgid "Enabled Date Background"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:271
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:251
+msgid "Enabled Date Color"
 msgstr ""
 
 #: app/Services/TransStrings.php:16
@@ -2251,23 +2326,27 @@ msgstr ""
 msgid "Enter a value"
 msgstr ""
 
-#: app/Services/TransStrings.php:121
+#: app/Services/TransStrings.php:123
 msgid "Enter description for this person / calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:247
+#: app/Services/TransStrings.php:249
 msgid "Enter Description here"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:92
+msgid "Enter description here"
 msgstr ""
 
 #: app/Hooks/Handlers/FrontEndHandler.php:602
 msgid "Enter Details"
 msgstr ""
 
-#: app/Services/TransStrings.php:220
+#: app/Services/TransStrings.php:222
 msgid "Enter email addresses separated by commas"
 msgstr ""
 
-#: app/Services/TransStrings.php:246
+#: app/Services/TransStrings.php:248
 msgid "Enter Event Title"
 msgstr ""
 
@@ -2275,19 +2354,19 @@ msgstr ""
 msgid "Enter length in number"
 msgstr ""
 
-#: app/Services/TransStrings.php:185
+#: app/Services/TransStrings.php:187
 msgid "Enter Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:556
+#: app/Services/TransStrings.php:558
 msgid "Enter Name of this event calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:815
+#: app/Services/TransStrings.php:827
 msgid "Enter Name of this team"
 msgstr ""
 
-#: app/Services/TransStrings.php:639
+#: app/Services/TransStrings.php:641
 msgid "Enter number with country code"
 msgstr ""
 
@@ -2295,15 +2374,19 @@ msgstr ""
 msgid "Enter Schedule Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:116
+#: app/Services/TransStrings.php:118
 msgid "Enter the Host Phone Number"
 msgstr ""
 
-#: app/Services/TransStrings.php:892
+#: app/Services/TransStrings.php:904
 msgid "Enter the slug for the frontend portal"
 msgstr ""
 
-#: app/Services/TransStrings.php:176
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:83
+msgid "Enter title here"
+msgstr ""
+
+#: app/Services/TransStrings.php:178
 msgid "Enter Value"
 msgstr ""
 
@@ -2311,7 +2394,7 @@ msgstr ""
 msgid "Enter Your Client ID"
 msgstr ""
 
-#: app/Services/TransStrings.php:605
+#: app/Services/TransStrings.php:607
 msgid "Enter Your name here"
 msgstr ""
 
@@ -2335,7 +2418,7 @@ msgstr ""
 msgid "Equal to Data Length"
 msgstr ""
 
-#: app/Services/TransStrings.php:734
+#: app/Services/TransStrings.php:745
 msgid "Error on integration settings"
 msgstr ""
 
@@ -2343,7 +2426,7 @@ msgstr ""
 msgid "Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:877
+#: app/Services/TransStrings.php:889
 msgid "event"
 msgstr ""
 
@@ -2355,7 +2438,7 @@ msgstr ""
 msgid "Event available durations is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:560
+#: app/Services/TransStrings.php:562
 msgid "Event Calendar Name"
 msgstr ""
 
@@ -2364,7 +2447,7 @@ msgstr ""
 msgid "Event Cancel Reason"
 msgstr ""
 
-#: app/Services/TransStrings.php:240
+#: app/Services/TransStrings.php:242
 msgid "Event Date"
 msgstr ""
 
@@ -2408,7 +2491,7 @@ msgstr ""
 msgid "Event Description"
 msgstr ""
 
-#: app/Services/TransStrings.php:241
+#: app/Services/TransStrings.php:243
 #: app/Hooks/Handlers/AdminMenuHandler.php:643
 msgid "Event Details"
 msgstr ""
@@ -2419,11 +2502,11 @@ msgstr ""
 msgid "Event duration field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:463
+#: app/Services/TransStrings.php:465
 msgid "Event Guests"
 msgstr ""
 
-#: app/Services/TransStrings.php:559
+#: app/Services/TransStrings.php:561
 msgid "Event Hosts"
 msgstr ""
 
@@ -2475,8 +2558,12 @@ msgstr ""
 msgid "Event Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:245
+#: app/Services/TransStrings.php:247
 msgid "Event Name *"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/ElementorIntegration.php:129
+msgid "Event not found"
 msgstr ""
 
 #: app/Http/Controllers/CalendarController.php:734
@@ -2492,7 +2579,7 @@ msgstr ""
 msgid "Event schedule type field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:652
+#: app/Services/TransStrings.php:654
 msgid "Event Settings"
 msgstr ""
 
@@ -2515,7 +2602,7 @@ msgstr ""
 msgid "Event title field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:801
+#: app/Services/TransStrings.php:813
 msgid "Event Title is required"
 msgstr ""
 
@@ -2533,11 +2620,11 @@ msgstr ""
 msgid "Event trigger is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:187
+#: app/Services/TransStrings.php:189
 msgid "Event Triggers"
 msgstr ""
 
-#: app/Services/TransStrings.php:242
+#: app/Services/TransStrings.php:244
 msgid "Event Type"
 msgstr ""
 
@@ -2550,23 +2637,23 @@ msgstr ""
 msgid "Event weekly schedules field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:234
+#: app/Services/TransStrings.php:236
 msgid "ex: 60"
 msgstr ""
 
-#: app/Services/TransStrings.php:859
+#: app/Services/TransStrings.php:871
 msgid "Expires"
 msgstr ""
 
-#: app/Services/TransStrings.php:469
+#: app/Services/TransStrings.php:471
 msgid "Export"
 msgstr ""
 
-#: app/Services/TransStrings.php:470
+#: app/Services/TransStrings.php:472
 msgid "Export Hosts"
 msgstr ""
 
-#: app/Models/Booking.php:501
+#: app/Services/TransStrings.php:775 app/Models/Booking.php:515
 msgid "Failed"
 msgstr ""
 
@@ -2574,19 +2661,19 @@ msgstr ""
 msgid "Failed to create booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:384
+#: app/Services/TransStrings.php:386
 msgid "Failed to load this integration. Please reload this page and try again."
 msgstr ""
 
-#: app/Services/TransStrings.php:719
+#: app/Services/TransStrings.php:730
 msgid "Featured Image"
 msgstr ""
 
-#: app/Services/TransStrings.php:738
+#: app/Services/TransStrings.php:749
 msgid "Feb"
 msgstr ""
 
-#: app/Services/TransStrings.php:751
+#: app/Services/TransStrings.php:762
 msgid "February"
 msgstr ""
 
@@ -2599,27 +2686,27 @@ msgstr ""
 msgid "Feed name is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:588
+#: app/Services/TransStrings.php:590
 msgid "Fetching License Information Please wait"
 msgstr ""
 
-#: app/Services/TransStrings.php:182
+#: app/Services/TransStrings.php:184
 msgid "Field"
 msgstr ""
 
-#: app/Services/TransStrings.php:735
+#: app/Services/TransStrings.php:746
 msgid "Field Label"
 msgstr ""
 
-#: app/Services/TransStrings.php:183
+#: app/Services/TransStrings.php:185
 msgid "Field Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:633
+#: app/Services/TransStrings.php:635
 msgid "Field Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:184
+#: app/Services/TransStrings.php:186
 msgid "Field Value"
 msgstr ""
 
@@ -2631,15 +2718,20 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-#: app/Services/TransStrings.php:873
+#: app/Services/Integrations/Elementor/ElementorIntegration.php:154
+#, php-format
+msgid "File not found: %s"
+msgstr ""
+
+#: app/Services/TransStrings.php:885
 msgid "File Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:395
+#: app/Services/TransStrings.php:397
 msgid "Filter"
 msgstr ""
 
-#: app/Services/TransStrings.php:933
+#: app/Services/TransStrings.php:945
 msgid "Filter By Calendar Type"
 msgstr ""
 
@@ -2675,6 +2767,7 @@ msgid ""
 msgstr ""
 
 #: app/Services/LandingPage/LandingPageHelper.php:70
+#: app/Services/Integrations/Elementor/ElementorIntegration.php:67
 msgid "FluentBooking"
 msgstr ""
 
@@ -2692,7 +2785,7 @@ msgid ""
 "webinars, events, sales calls, and more."
 msgstr ""
 
-#: app/Services/TransStrings.php:688
+#: app/Services/TransStrings.php:699
 msgid ""
 "FluentBooking will use the official verified app to connect with your Google "
 "Calendar. You can connect your Google Calendar from your host settings."
@@ -2721,7 +2814,7 @@ msgstr ""
 msgid "FluentCRM Lists"
 msgstr ""
 
-#: app/Services/TransStrings.php:561
+#: app/Services/TransStrings.php:563
 msgid "for a scheduled event with"
 msgstr ""
 
@@ -2735,11 +2828,11 @@ msgctxt "for how many spots remaining for available booking"
 msgid "spots remaining"
 msgstr ""
 
-#: app/Services/TransStrings.php:685
+#: app/Services/TransStrings.php:696
 msgid "for step by step guide to know how connect zoom account."
 msgstr ""
 
-#: app/Services/TransStrings.php:696
+#: app/Services/TransStrings.php:707
 msgid ""
 "for step by step guide to know how you can get api credentials from Zoom "
 "Account"
@@ -2749,15 +2842,15 @@ msgstr ""
 msgid "Form Field"
 msgstr ""
 
-#: app/Services/TransStrings.php:837
+#: app/Services/TransStrings.php:849
 msgid "Format"
 msgstr ""
 
-#: app/Services/TransStrings.php:713
+#: app/Services/TransStrings.php:724
 msgid "fri"
 msgstr ""
 
-#: app/Services/TransStrings.php:728
+#: app/Services/TransStrings.php:739
 msgid "Friday"
 msgstr ""
 
@@ -2765,7 +2858,7 @@ msgstr ""
 msgid "From Email Address"
 msgstr ""
 
-#: app/Services/TransStrings.php:154
+#: app/Services/TransStrings.php:156
 msgid "from global settings."
 msgstr ""
 
@@ -2777,19 +2870,19 @@ msgstr ""
 msgid "From Name for emails"
 msgstr ""
 
-#: app/Services/TransStrings.php:785
+#: app/Services/TransStrings.php:797
 msgid "from the event end time"
 msgstr ""
 
-#: app/Services/TransStrings.php:887
+#: app/Services/TransStrings.php:899
 msgid "Frontend Panel Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:915
+#: app/Services/TransStrings.php:927
 msgid "Frontend Portal"
 msgstr ""
 
-#: app/Services/TransStrings.php:926
+#: app/Services/TransStrings.php:938
 msgid "Frontend Portal Settings"
 msgstr ""
 
@@ -2817,7 +2910,7 @@ msgstr ""
 msgid "Full Start Date Time (with host timezone)"
 msgstr ""
 
-#: app/Services/TransStrings.php:111
+#: app/Services/TransStrings.php:113
 msgid "General Host Settings"
 msgstr ""
 
@@ -2825,20 +2918,20 @@ msgstr ""
 msgid "General Operators"
 msgstr ""
 
-#: app/Services/TransStrings.php:571
+#: app/Services/TransStrings.php:573
 #: app/Hooks/Handlers/AdminMenuHandler.php:486
 msgid "General Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:925
+#: app/Services/TransStrings.php:937
 msgid "Generate booking link with URL parameters"
 msgstr ""
 
-#: app/Services/TransStrings.php:923
+#: app/Services/TransStrings.php:935
 msgid "Generate Link"
 msgstr ""
 
-#: app/Services/TransStrings.php:924
+#: app/Services/TransStrings.php:936
 msgid "Generated Link"
 msgstr ""
 
@@ -2846,61 +2939,61 @@ msgstr ""
 msgid "Getting Started"
 msgstr ""
 
-#: app/Services/TransStrings.php:699
+#: app/Services/TransStrings.php:710
 msgid "Global Feature Modules"
 msgstr ""
 
-#: app/Services/TransStrings.php:607
+#: app/Services/TransStrings.php:609
 msgid "Global Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:159
+#: app/Services/TransStrings.php:161
 msgid "Go to Stripe Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:398
+#: app/Services/TransStrings.php:400
 msgid "Good for: coffee chats, 1:1 interviews, etc."
 msgstr ""
 
-#: app/Services/TransStrings.php:400
+#: app/Services/TransStrings.php:402
 msgid "Good for: distributing incoming sales leads."
 msgstr ""
 
-#: app/Services/TransStrings.php:401
+#: app/Services/TransStrings.php:403
 msgid "Good for: higher priority meetings."
 msgstr ""
 
-#: app/Services/TransStrings.php:403
+#: app/Services/TransStrings.php:405
 msgid "Good for: Panel interviews, group sales calls, etc."
 msgstr ""
 
-#: app/Services/TransStrings.php:402
+#: app/Services/TransStrings.php:404
 msgid "Good for: reservation or ticketing system"
 msgstr ""
 
-#: app/Services/TransStrings.php:399
+#: app/Services/TransStrings.php:401
 msgid "Good for: webinars, online classes, etc."
 msgstr ""
 
-#: app/Models/Booking.php:1130
+#: app/Models/Booking.php:1156
 msgid "Google Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:909
+#: app/Services/TransStrings.php:921
 #: app/Hooks/Handlers/AdminMenuHandler.php:506
 msgid "Google Calendar / Meet"
 msgstr ""
 
-#: app/Services/TransStrings.php:282 app/Services/LocationService.php:23
-#: app/Models/Booking.php:391 app/Hooks/Handlers/FrontEndHandler.php:623
+#: app/Services/TransStrings.php:284 app/Services/LocationService.php:23
+#: app/Models/Booking.php:405 app/Hooks/Handlers/FrontEndHandler.php:623
 msgid "Google Meet"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:701
+#: app/Models/CalendarSlot.php:697
 msgid "Google Meet (Pro)"
 msgstr ""
 
-#: app/Services/TransStrings.php:535
+#: app/Services/TransStrings.php:537
 msgid ""
 "Grant Team Members Access to FluentBookings for Calendar and Booking "
 "Management."
@@ -2922,19 +3015,23 @@ msgstr ""
 msgid "Greater than to Data Length"
 msgstr ""
 
-#: app/Services/TransStrings.php:244
+#: app/Services/TransStrings.php:246
 msgid "Group"
 msgstr ""
 
-#: app/Services/TransStrings.php:553
+#: app/Services/TransStrings.php:555
 msgid "Group Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:397
+#: app/Services/TransStrings.php:399
 msgid "Group of invitees"
 msgstr ""
 
-#: app/Services/TransStrings.php:96 app/Services/Helper.php:1692
+#: app/Services/TransStrings.php:684
+msgid "Guest"
+msgstr ""
+
+#: app/Services/TransStrings.php:98 app/Services/Helper.php:1692
 #: app/Services/Helper.php:1756
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:82
 msgid "Guest Email"
@@ -2979,7 +3076,11 @@ msgstr ""
 msgid "Guest Timezone"
 msgstr ""
 
-#: app/Services/TransStrings.php:679
+#: app/Services/TransStrings.php:685
+msgid "Guests"
+msgstr ""
+
+#: app/Services/TransStrings.php:688
 msgid "guests with"
 msgstr ""
 
@@ -2987,23 +3088,23 @@ msgstr ""
 msgid "Guinean Franc"
 msgstr ""
 
-#: app/Models/Booking.php:464
+#: app/Models/Booking.php:478
 msgid "Happening Now"
 msgstr ""
 
-#: app/Services/TransStrings.php:591
+#: app/Services/TransStrings.php:593
 msgid "Have a new license Key?"
 msgstr ""
 
-#: app/Services/TransStrings.php:175
+#: app/Services/TransStrings.php:177
 msgid "Header Key"
 msgstr ""
 
-#: app/Services/TransStrings.php:173
+#: app/Services/TransStrings.php:175
 msgid "Header Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:174
+#: app/Services/TransStrings.php:176
 msgid "Header Value"
 msgstr ""
 
@@ -3011,23 +3112,30 @@ msgstr ""
 msgid "Hello There,"
 msgstr ""
 
-#: app/Services/TransStrings.php:836
+#: app/Services/TransStrings.php:848
 msgid "Help Message"
 msgstr ""
 
-#: app/Services/TransStrings.php:423
+#: app/Services/TransStrings.php:425
 msgid "here"
 msgstr ""
 
-#: app/Services/TransStrings.php:293 app/Services/Helper.php:1525
+#: app/Services/TransStrings.php:295 app/Services/Helper.php:1525
 msgid "Hidden"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:128
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:139
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:108
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:99
+msgid "Hide"
 msgstr ""
 
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:306
 msgid "High"
 msgstr ""
 
-#: app/Services/TransStrings.php:876 app/Models/Booking.php:356
+#: app/Services/TransStrings.php:888 app/Models/Booking.php:370
 msgid "Host"
 msgstr ""
 
@@ -3040,34 +3148,38 @@ msgstr ""
 msgid "Host Email"
 msgstr ""
 
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:105
+msgid "Host Info"
+msgstr ""
+
 #: app/Services/Helper.php:1729 app/Services/Helper.php:1794
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:102
 msgid "Host Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:115
+#: app/Services/TransStrings.php:117
 msgid "Host Name / Calendar Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:635
+#: app/Services/TransStrings.php:637
 msgid "Host Number"
 msgstr ""
 
-#: app/Services/TransStrings.php:117
+#: app/Services/TransStrings.php:119
 msgid "Host Phone (with country code)"
 msgstr ""
 
-#: app/Services/TransStrings.php:659
+#: app/Services/TransStrings.php:661
 msgid "Host Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:636 app/Services/Helper.php:1731
+#: app/Services/TransStrings.php:638 app/Services/Helper.php:1731
 #: app/Services/Helper.php:1796
 #: app/Services/Integrations/FluentCRM/CrmSmartCode.php:104
 msgid "Host Timezone"
 msgstr ""
 
-#: app/Services/TransStrings.php:563
+#: app/Services/TransStrings.php:565
 msgid "hosts"
 msgstr ""
 
@@ -3075,20 +3187,20 @@ msgstr ""
 msgid "Hour"
 msgstr ""
 
-#: app/Services/TransStrings.php:237 app/Services/Helper.php:1229
+#: app/Services/TransStrings.php:239 app/Services/Helper.php:1229
 #: app/Hooks/Handlers/FrontEndHandler.php:599
 msgid "Hours"
 msgstr ""
 
-#: app/Services/TransStrings.php:215
+#: app/Services/TransStrings.php:217
 msgid "Hours Before"
 msgstr ""
 
-#: app/Services/TransStrings.php:302
+#: app/Services/TransStrings.php:304
 msgid "How do you want to offer your availability for this event type?"
 msgstr ""
 
-#: app/Services/TransStrings.php:576
+#: app/Services/TransStrings.php:578
 msgid "How often to send summary email?"
 msgstr ""
 
@@ -3096,7 +3208,7 @@ msgstr ""
 msgid "HTML Response"
 msgstr ""
 
-#: app/Services/TransStrings.php:325
+#: app/Services/TransStrings.php:327
 msgid "https://example.com/redirect-to-my-success-page"
 msgstr ""
 
@@ -3119,20 +3231,20 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
-#: app/Services/TransStrings.php:784
+#: app/Services/TransStrings.php:796
 msgid "if customer does not complete the payment for paid events."
 msgstr ""
 
-#: app/Services/TransStrings.php:932
+#: app/Services/TransStrings.php:944
 msgid "If no date is set, current date will be used as the maximum date."
 msgstr ""
 
-#: app/Services/TransStrings.php:931
+#: app/Services/TransStrings.php:943
 msgid ""
 "If no date is set, default date 1900-01-01 will be used as the minimum date."
 msgstr ""
 
-#: app/Services/TransStrings.php:825
+#: app/Services/TransStrings.php:837
 msgid "If not selected, the system will select one based on their availability"
 msgstr ""
 
@@ -3151,46 +3263,46 @@ msgid ""
 "will delete the existing automation flow and start new"
 msgstr ""
 
-#: app/Services/TransStrings.php:516
+#: app/Services/TransStrings.php:518
 msgid "Ignore Availability"
 msgstr ""
 
-#: app/Services/TransStrings.php:465
+#: app/Services/TransStrings.php:467
 msgid "Import"
 msgstr ""
 
-#: app/Services/TransStrings.php:466
+#: app/Services/TransStrings.php:468
 msgid "Import Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:467
+#: app/Services/TransStrings.php:469
 msgid "Import Calendar Host"
 msgstr ""
 
-#: app/Services/TransStrings.php:468
+#: app/Services/TransStrings.php:470
 msgid "Import your exported calendar JSON file"
 msgstr ""
 
 #: app/Services/LocationService.php:38 app/Services/LocationService.php:48
-#: app/Models/CalendarSlot.php:718
+#: app/Models/CalendarSlot.php:714
 msgid "In Person"
 msgstr ""
 
-#: app/Services/TransStrings.php:277 app/Services/LocationService.php:39
-#: app/Models/CalendarSlot.php:721 app/Hooks/Handlers/FrontEndHandler.php:620
+#: app/Services/TransStrings.php:279 app/Services/LocationService.php:39
+#: app/Models/CalendarSlot.php:717 app/Hooks/Handlers/FrontEndHandler.php:620
 msgid "In Person (Attendee Address)"
 msgstr ""
 
-#: app/Services/TransStrings.php:278 app/Services/LocationService.php:52
-#: app/Models/CalendarSlot.php:724 app/Hooks/Handlers/FrontEndHandler.php:621
+#: app/Services/TransStrings.php:280 app/Services/LocationService.php:52
+#: app/Models/CalendarSlot.php:720 app/Hooks/Handlers/FrontEndHandler.php:621
 msgid "In Person (Organizer Address)"
 msgstr ""
 
-#: app/Services/TransStrings.php:580
+#: app/Services/TransStrings.php:582
 msgid "In which day to send the email?"
 msgstr ""
 
-#: app/Services/TransStrings.php:655
+#: app/Services/TransStrings.php:657
 msgid "Inactive"
 msgstr ""
 
@@ -3198,11 +3310,11 @@ msgstr ""
 msgid "Include ICS file attachment in booking confirmation emails"
 msgstr ""
 
-#: app/Services/TransStrings.php:301
+#: app/Services/TransStrings.php:303
 msgid "Indefinitely into the future"
 msgstr ""
 
-#: app/Services/TransStrings.php:794
+#: app/Services/TransStrings.php:806
 msgid "Install"
 msgstr ""
 
@@ -3211,7 +3323,7 @@ msgstr ""
 msgid "Integration"
 msgstr ""
 
-#: app/Services/TransStrings.php:733
+#: app/Services/TransStrings.php:744
 msgid "Integration Feed"
 msgstr ""
 
@@ -3219,19 +3331,28 @@ msgstr ""
 msgid "Integration successfully saved"
 msgstr ""
 
-#: app/Services/TransStrings.php:98 app/Hooks/Handlers/AdminMenuHandler.php:783
+#: app/Services/TransStrings.php:100
+#: app/Hooks/Handlers/AdminMenuHandler.php:783
 msgid "Integrations"
 msgstr ""
 
-#: app/Services/TransStrings.php:107
+#: app/Http/Controllers/CalendarIntegrationController.php:103
+msgid "Integrations has been successfully cloned."
+msgstr ""
+
+#: app/Http/Controllers/CalendarIntegrationController.php:92
+msgid "Integrations not found"
+msgstr ""
+
+#: app/Services/TransStrings.php:109
 msgid "Interest Group is a Pro Feature"
 msgstr ""
 
-#: app/Services/TransStrings.php:496
+#: app/Services/TransStrings.php:498
 msgid "Internal Note"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:153
+#: app/Http/Controllers/SchedulesController.php:159
 msgid "Invalid column"
 msgstr ""
 
@@ -3239,7 +3360,7 @@ msgstr ""
 msgid "Invalid date range"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:158
+#: app/Http/Controllers/SchedulesController.php:164
 msgid "Invalid email address"
 msgstr ""
 
@@ -3248,7 +3369,7 @@ msgstr ""
 msgid "Invalid file. Please provide a valid JSON file"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:332
+#: app/Http/Controllers/SchedulesController.php:338
 msgid "Invalid group id or the event is not a group event"
 msgstr ""
 
@@ -3256,7 +3377,7 @@ msgstr ""
 msgid "Invalid JSON Data"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:210
+#: app/Http/Controllers/SchedulesController.php:216
 msgid "Invalid payment status"
 msgstr ""
 
@@ -3264,7 +3385,7 @@ msgstr ""
 msgid "Invalid rescheduling request"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:167
+#: app/Http/Controllers/SchedulesController.php:173
 msgid "Invalid status"
 msgstr ""
 
@@ -3276,49 +3397,49 @@ msgstr ""
 msgid "Invalid User ID"
 msgstr ""
 
-#: app/Services/TransStrings.php:623
+#: app/Services/TransStrings.php:625
 msgid "Invalid Vue Element"
 msgstr ""
 
-#: app/Services/TransStrings.php:554
+#: app/Services/TransStrings.php:556
 msgid "Invite someone"
 msgstr ""
 
-#: app/Models/Booking.php:375
+#: app/Models/Booking.php:389
 msgid "Invitee Address:"
 msgstr ""
 
-#: app/Services/TransStrings.php:515
+#: app/Services/TransStrings.php:517
 msgid "Invitee Email"
 msgstr ""
 
-#: app/Services/TransStrings.php:514
+#: app/Services/TransStrings.php:516
 msgid "Invitee Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:517
+#: app/Services/TransStrings.php:519
 msgid "Invitee Timezone"
 msgstr ""
 
-#: app/Services/TransStrings.php:297
+#: app/Services/TransStrings.php:299
 msgid "Invitees can schedule..."
 msgstr ""
 
-#: app/Services/TransStrings.php:307
+#: app/Services/TransStrings.php:309
 msgid "Invitees can't schedule within..."
 msgstr ""
 
-#: app/Services/TransStrings.php:513
+#: app/Services/TransStrings.php:515
 msgid "Invitees Information"
 msgstr ""
 
-#: app/Services/TransStrings.php:850
+#: app/Services/TransStrings.php:862
 msgid ""
 "is not available with the free version. Please upgrade to get all the "
 "advanced features."
 msgstr ""
 
-#: app/Services/TransStrings.php:444
+#: app/Services/TransStrings.php:446
 msgid "is required"
 msgstr ""
 
@@ -3326,19 +3447,19 @@ msgstr ""
 msgid "Item"
 msgstr ""
 
-#: app/Services/TransStrings.php:632
+#: app/Services/TransStrings.php:634
 msgid "Item Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:736
+#: app/Services/TransStrings.php:747
 msgid "Jan"
 msgstr ""
 
-#: app/Services/TransStrings.php:737
+#: app/Services/TransStrings.php:748
 msgid "jan"
 msgstr ""
 
-#: app/Services/TransStrings.php:750
+#: app/Services/TransStrings.php:761
 msgid "January"
 msgstr ""
 
@@ -3346,39 +3467,39 @@ msgstr ""
 msgid "Japanese Yen"
 msgstr ""
 
-#: app/Models/Booking.php:400
+#: app/Models/Booking.php:414
 msgid "Join Meeting"
 msgstr ""
 
-#: app/Services/TransStrings.php:743
+#: app/Services/TransStrings.php:754
 msgid "Jul"
 msgstr ""
 
-#: app/Services/TransStrings.php:755
+#: app/Services/TransStrings.php:766
 msgid "July"
 msgstr ""
 
-#: app/Services/TransStrings.php:742
+#: app/Services/TransStrings.php:753
 msgid "Jun"
 msgstr ""
 
-#: app/Services/TransStrings.php:754
+#: app/Services/TransStrings.php:765
 msgid "June"
 msgstr ""
 
-#: app/Services/TransStrings.php:197
+#: app/Services/TransStrings.php:199
 msgid "Label"
 msgstr ""
 
-#: app/Services/TransStrings.php:196
+#: app/Services/TransStrings.php:198
 msgid "Label *"
 msgstr ""
 
-#: app/Services/TransStrings.php:634
+#: app/Services/TransStrings.php:636
 msgid "Label field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:419
+#: app/Services/TransStrings.php:421
 msgid "Landing Page"
 msgstr ""
 
@@ -3386,19 +3507,19 @@ msgstr ""
 msgid "Landing Page settings has been updated"
 msgstr ""
 
-#: app/Services/TransStrings.php:404
+#: app/Services/TransStrings.php:406
 msgid "Landing page URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:407
+#: app/Services/TransStrings.php:409
 msgid "Landing Page Visibility"
 msgstr ""
 
-#: app/Services/TransStrings.php:676
+#: app/Services/TransStrings.php:677
 msgid "Last 3 months"
 msgstr ""
 
-#: app/Services/TransStrings.php:674
+#: app/Services/TransStrings.php:676
 msgid "Last month"
 msgstr ""
 
@@ -3406,7 +3527,7 @@ msgstr ""
 msgid "Last Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:673
+#: app/Services/TransStrings.php:675
 msgid "Last week"
 msgstr ""
 
@@ -3414,12 +3535,16 @@ msgstr ""
 msgid "Latest Booked Meetings"
 msgstr ""
 
-#: app/Services/TransStrings.php:703
+#: app/Services/TransStrings.php:714
 msgid "Latest Bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:878
+#: app/Services/TransStrings.php:890
 msgid "Learn"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:82
+msgid "Left empty to show the bookings for all calendars"
 msgstr ""
 
 #: app/Services/TransStrings.php:35
@@ -3451,20 +3576,21 @@ msgstr ""
 msgid "Let's see how many events are booked in the last %d days."
 msgstr ""
 
-#: app/Services/TransStrings.php:608
+#: app/Services/TransStrings.php:610
 #: app/Hooks/Handlers/AdminMenuHandler.php:617
 msgid "License"
 msgstr ""
 
-#: app/Services/TransStrings.php:595
+#: app/Services/TransStrings.php:597
 msgid "License Key"
 msgstr ""
 
-#: app/Services/TransStrings.php:587
+#: app/Services/TransStrings.php:589
 msgid "License Management"
 msgstr ""
 
-#: app/Services/TransStrings.php:798
+#: app/Services/TransStrings.php:810
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:112
 msgid "Light"
 msgstr ""
 
@@ -3472,31 +3598,31 @@ msgstr ""
 msgid "Lime Green"
 msgstr ""
 
-#: app/Services/TransStrings.php:315
+#: app/Services/TransStrings.php:317
 msgid "Limit booking frequency"
 msgstr ""
 
-#: app/Services/TransStrings.php:319
+#: app/Services/TransStrings.php:321
 msgid "Limit future bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:320
+#: app/Services/TransStrings.php:322
 msgid "Limit how far in the future this event can be booked"
 msgstr ""
 
-#: app/Services/TransStrings.php:316
+#: app/Services/TransStrings.php:318
 msgid "Limit how many times this event can be booked"
 msgstr ""
 
-#: app/Services/TransStrings.php:318
+#: app/Services/TransStrings.php:320
 msgid "Limit total amount of time that this event can be booked"
 msgstr ""
 
-#: app/Services/TransStrings.php:317
+#: app/Services/TransStrings.php:319
 msgid "Limit total booking duration"
 msgstr ""
 
-#: app/Services/TransStrings.php:296
+#: app/Services/TransStrings.php:298
 #: app/Hooks/Handlers/AdminMenuHandler.php:685
 msgid "Limits"
 msgstr ""
@@ -3505,7 +3631,11 @@ msgstr ""
 msgid "Line Total"
 msgstr ""
 
-#: app/Services/TransStrings.php:919
+#: app/Services/TransStrings.php:95
+msgid "List View"
+msgstr ""
+
+#: app/Services/TransStrings.php:931
 msgid "Load FluentBooking in the frontend of the website"
 msgstr ""
 
@@ -3521,24 +3651,24 @@ msgstr ""
 msgid "Loading...."
 msgstr ""
 
-#: app/Services/TransStrings.php:448 app/Services/BookingFieldService.php:152
+#: app/Services/TransStrings.php:450 app/Services/BookingFieldService.php:152
 #: app/Services/BookingFieldService.php:158
 msgid "Location"
 msgstr ""
 
-#: app/Services/TransStrings.php:249
+#: app/Services/TransStrings.php:251
 msgid "Location *"
 msgstr ""
 
-#: app/Services/TransStrings.php:225
+#: app/Services/TransStrings.php:227
 msgid "Location Description"
 msgstr ""
 
-#: app/Services/TransStrings.php:226
+#: app/Services/TransStrings.php:228
 msgid "Location Description *"
 msgstr ""
 
-#: app/Services/TransStrings.php:447
+#: app/Services/TransStrings.php:449
 msgid "Location Description is required"
 msgstr ""
 
@@ -3546,19 +3676,19 @@ msgstr ""
 msgid "location options"
 msgstr ""
 
-#: app/Services/TransStrings.php:224
+#: app/Services/TransStrings.php:226
 msgid "Location Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:223
+#: app/Services/TransStrings.php:225
 msgid "Location Title *"
 msgstr ""
 
-#: app/Services/TransStrings.php:446
+#: app/Services/TransStrings.php:448
 msgid "Location Title is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:445
+#: app/Services/TransStrings.php:447
 msgid "Location Type is required"
 msgstr ""
 
@@ -3566,24 +3696,24 @@ msgstr ""
 msgid "Locations"
 msgstr ""
 
-#: app/Services/TransStrings.php:321
+#: app/Services/TransStrings.php:323
 msgid "Lock timezone on booking page"
 msgstr ""
 
-#: app/Services/TransStrings.php:686
+#: app/Services/TransStrings.php:697
 msgid ""
 "Looks like you did not connect FluentBooking with your Zoom Account yet!"
 msgstr ""
 
-#: app/Services/TransStrings.php:589
+#: app/Services/TransStrings.php:591
 msgid "Looks like your license has been expired"
 msgstr ""
 
-#: app/Services/TransStrings.php:270
+#: app/Services/TransStrings.php:272
 msgid "Looks like your remote connection for this location is disabled."
 msgstr ""
 
-#: app/Services/TransStrings.php:269
+#: app/Services/TransStrings.php:271
 msgid ""
 "Looks like your remote connection for this location is disabled. Please "
 "revise your location selection"
@@ -3593,7 +3723,7 @@ msgstr ""
 msgid "Low"
 msgstr ""
 
-#: app/Services/TransStrings.php:898
+#: app/Services/TransStrings.php:910
 msgid "Make organizer"
 msgstr ""
 
@@ -3605,11 +3735,11 @@ msgstr ""
 msgid "Manage All Availabilities"
 msgstr ""
 
-#: app/Services/TransStrings.php:773
+#: app/Services/TransStrings.php:785
 msgid "manage all bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:112
+#: app/Services/TransStrings.php:114
 msgid "Manage general settings for this calendar"
 msgstr ""
 
@@ -3617,11 +3747,11 @@ msgstr ""
 msgid "Manage only own Calendar, Events, Bookings & Availability"
 msgstr ""
 
-#: app/Services/TransStrings.php:775
+#: app/Services/TransStrings.php:787
 msgid "manage other availabilities"
 msgstr ""
 
-#: app/Services/TransStrings.php:771
+#: app/Services/TransStrings.php:783
 msgid "manage other calendars"
 msgstr ""
 
@@ -3629,11 +3759,11 @@ msgstr ""
 msgid "Manage Other Users Calendars"
 msgstr ""
 
-#: app/Services/TransStrings.php:769
+#: app/Services/TransStrings.php:781
 msgid "manage own calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:572
+#: app/Services/TransStrings.php:574
 msgid ""
 "Manage your settings related emails, notifications and other general settings"
 msgstr ""
@@ -3642,31 +3772,31 @@ msgstr ""
 msgid "Map Primary Fields"
 msgstr ""
 
-#: app/Services/TransStrings.php:739
+#: app/Services/TransStrings.php:750
 msgid "Mar"
 msgstr ""
 
-#: app/Services/TransStrings.php:752
+#: app/Services/TransStrings.php:763
 msgid "March"
 msgstr ""
 
-#: app/Services/TransStrings.php:490
+#: app/Services/TransStrings.php:492
 msgid "Mark As Completed"
 msgstr ""
 
-#: app/Services/TransStrings.php:491
+#: app/Services/TransStrings.php:493
 msgid "Mark As Paid"
 msgstr ""
 
-#: app/Services/TransStrings.php:787
+#: app/Services/TransStrings.php:799
 msgid "Mark booking as cancelled automatically after"
 msgstr ""
 
-#: app/Services/TransStrings.php:786
+#: app/Services/TransStrings.php:798
 msgid "Mark booking as completed automatically after"
 msgstr ""
 
-#: app/Services/TransStrings.php:260
+#: app/Services/TransStrings.php:262
 msgid "Mark to Unavailable"
 msgstr ""
 
@@ -3686,31 +3816,31 @@ msgstr ""
 msgid "Match Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:867
+#: app/Services/TransStrings.php:879
 msgid "Max File Size"
 msgstr ""
 
-#: app/Services/TransStrings.php:866
+#: app/Services/TransStrings.php:878
 msgid "Max Files Count"
 msgstr ""
 
-#: app/Services/TransStrings.php:251
+#: app/Services/TransStrings.php:253
 msgid "Max invitees in a spot"
 msgstr ""
 
-#: app/Services/TransStrings.php:821
+#: app/Services/TransStrings.php:833
 msgid "Maximum Booking Limit"
 msgstr ""
 
-#: app/Services/TransStrings.php:927
+#: app/Services/TransStrings.php:939
 msgid "Maximum Date"
 msgstr ""
 
-#: app/Services/TransStrings.php:820
+#: app/Services/TransStrings.php:832
 msgid "Maximum Guest Limit"
 msgstr ""
 
-#: app/Services/TransStrings.php:741
+#: app/Services/TransStrings.php:752
 msgid "May"
 msgstr ""
 
@@ -3726,11 +3856,11 @@ msgstr ""
 msgid "Meeting At"
 msgstr ""
 
-#: app/Services/TransStrings.php:681
+#: app/Services/TransStrings.php:692
 msgid "meeting between"
 msgstr ""
 
-#: app/Models/Booking.php:624
+#: app/Models/Booking.php:638
 msgid "Meeting Cancelled"
 msgstr ""
 
@@ -3738,12 +3868,12 @@ msgstr ""
 msgid "Meeting Date"
 msgstr ""
 
-#: app/Services/TransStrings.php:254
+#: app/Services/TransStrings.php:256
 #: app/Services/Integrations/FluentForms/BookingElement.php:229
 msgid "Meeting Duration"
 msgstr ""
 
-#: app/Services/TransStrings.php:253
+#: app/Services/TransStrings.php:255
 msgid "Meeting Duration *"
 msgstr ""
 
@@ -3752,7 +3882,7 @@ msgid "Meeting has been cancelled"
 msgstr ""
 
 #. Name of the user who cancelled the meeting
-#: app/Models/Booking.php:615 app/Models/Booking.php:626
+#: app/Models/Booking.php:629 app/Models/Booking.php:640
 #, php-format
 msgid "Meeting has been cancelled by %s"
 msgstr ""
@@ -3765,16 +3895,16 @@ msgid ""
 "(UTC)"
 msgstr ""
 
-#: app/Services/TransStrings.php:493
+#: app/Services/TransStrings.php:495
 #: app/Services/Integrations/FluentForms/BookingElement.php:233
 msgid "Meeting Host"
 msgstr ""
 
-#: app/Services/TransStrings.php:492
+#: app/Services/TransStrings.php:494
 msgid "Meeting Information"
 msgstr ""
 
-#: app/Services/TransStrings.php:645
+#: app/Services/TransStrings.php:647
 msgid "Meeting Link is required"
 msgstr ""
 
@@ -3782,23 +3912,23 @@ msgstr ""
 msgid "Meeting Rescheduled"
 msgstr ""
 
-#: app/Services/TransStrings.php:494
+#: app/Services/TransStrings.php:496
 msgid "Meeting Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:474
+#: app/Services/TransStrings.php:476
 msgid "Message"
 msgstr ""
 
-#: app/Models/Booking.php:1153
+#: app/Models/Booking.php:1179
 msgid "Microsoft Office"
 msgstr ""
 
-#: app/Services/TransStrings.php:928
+#: app/Services/TransStrings.php:940
 msgid "Minimum Date"
 msgstr ""
 
-#: app/Services/TransStrings.php:354
+#: app/Services/TransStrings.php:356
 msgid "Minimum Notice"
 msgstr ""
 
@@ -3806,32 +3936,36 @@ msgstr ""
 msgid "Minute"
 msgstr ""
 
-#: app/Services/TransStrings.php:235 app/Services/Helper.php:1234
+#: app/Services/TransStrings.php:237 app/Services/Helper.php:1234
 #: app/Hooks/Handlers/FrontEndHandler.php:601
 msgid "Minutes"
 msgstr ""
 
-#: app/Services/TransStrings.php:236
+#: app/Services/TransStrings.php:238
 msgid "minutes"
 msgstr ""
 
-#: app/Services/TransStrings.php:214
+#: app/Services/TransStrings.php:216
 msgid "Minutes Before"
 msgstr ""
 
-#: app/Services/TransStrings.php:698
+#: app/Services/TransStrings.php:709
 msgid "minutes meeting with"
 msgstr ""
 
-#: app/Services/TransStrings.php:709
+#: app/Services/TransStrings.php:720
 msgid "mon"
 msgstr ""
 
-#: app/Services/TransStrings.php:724
+#: app/Services/TransStrings.php:735
 msgid "Monday"
 msgstr ""
 
-#: app/Services/TransStrings.php:879
+#: app/Services/TransStrings.php:678
+msgid "Month"
+msgstr ""
+
+#: app/Services/TransStrings.php:891
 msgid "more"
 msgstr ""
 
@@ -3839,12 +3973,12 @@ msgstr ""
 msgid "More than last month"
 msgstr ""
 
-#: app/Services/TransStrings.php:283 app/Services/LocationService.php:26
-#: app/Models/Booking.php:394
+#: app/Services/TransStrings.php:285 app/Services/LocationService.php:26
+#: app/Models/Booking.php:408
 msgid "MS Teams"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:706
+#: app/Models/CalendarSlot.php:702
 msgid "MS Teams (Pro)"
 msgstr ""
 
@@ -3852,20 +3986,21 @@ msgstr ""
 msgid "Multi Select"
 msgstr ""
 
-#: app/Services/TransStrings.php:808
+#: app/Services/TransStrings.php:820
 msgid "Multiple Duration requires at least 1 option"
 msgstr ""
 
-#: app/Services/TransStrings.php:339
+#: app/Services/TransStrings.php:341
 msgid "Multiple hosts"
 msgstr ""
 
 #: app/Hooks/Handlers/BlockEditorHandler.php:200
 #: app/Hooks/Handlers/FrontEndHandler.php:308
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:92
 msgid "My Bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:527
+#: app/Services/TransStrings.php:529
 #: app/Http/Controllers/AdminController.php:117
 msgid "My Meetings"
 msgstr ""
@@ -3874,11 +4009,11 @@ msgstr ""
 msgid "My Schedules"
 msgstr ""
 
-#: app/Services/TransStrings.php:163 app/Hooks/Handlers/FrontEndHandler.php:631
+#: app/Services/TransStrings.php:165 app/Hooks/Handlers/FrontEndHandler.php:631
 msgid "Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:871
+#: app/Services/TransStrings.php:883
 msgid "Name Attribute"
 msgstr ""
 
@@ -3892,7 +4027,7 @@ msgstr ""
 msgid "Nevermind"
 msgstr ""
 
-#: app/Services/TransStrings.php:387
+#: app/Services/TransStrings.php:389
 msgid "New"
 msgstr ""
 
@@ -3904,7 +4039,7 @@ msgstr ""
 msgid "New Booking Confirmed Funnel"
 msgstr ""
 
-#: app/Services/TransStrings.php:388
+#: app/Services/TransStrings.php:390
 msgid "New Event Type"
 msgstr ""
 
@@ -3920,12 +4055,12 @@ msgstr ""
 msgid "Next Meetings"
 msgstr ""
 
-#: app/Services/TransStrings.php:907
+#: app/Services/TransStrings.php:919
 #: app/Hooks/Handlers/AdminMenuHandler.php:542
 msgid "Nextcloud Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:203
+#: app/Services/TransStrings.php:205
 msgid "No"
 msgstr ""
 
@@ -3947,12 +4082,17 @@ msgstr ""
 msgid "No availability in"
 msgstr ""
 
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:99
+msgid "No Booking Title"
+msgstr ""
+
 #: app/Hooks/Handlers/BlockEditorHandler.php:220
 #: app/Hooks/Handlers/FrontEndHandler.php:313
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:102
 msgid "No bookings found"
 msgstr ""
 
-#: app/Services/TransStrings.php:532
+#: app/Services/TransStrings.php:534
 msgid "No bookings found based on your filter"
 msgstr ""
 
@@ -3960,27 +4100,31 @@ msgstr ""
 msgid "No buffer time"
 msgstr ""
 
-#: app/Services/TransStrings.php:615
+#: app/Services/Integrations/Elementor/ElementorIntegration.php:106
+msgid "No calendar ID provided"
+msgstr ""
+
+#: app/Services/TransStrings.php:617
 msgid "No Calendars found"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:139
+#: app/Http/Controllers/SchedulesController.php:145
 msgid "No changes found"
 msgstr ""
 
-#: app/Services/TransStrings.php:790
+#: app/Services/TransStrings.php:802
 msgid "No Data"
 msgstr ""
 
-#: app/Services/TransStrings.php:612
+#: app/Services/TransStrings.php:614
 msgid "No Data Found"
 msgstr ""
 
-#: app/Services/TransStrings.php:789
+#: app/Services/TransStrings.php:801
 msgid "No Data match"
 msgstr ""
 
-#: app/Services/TransStrings.php:389
+#: app/Services/TransStrings.php:391
 msgid "No Event Found!"
 msgstr ""
 
@@ -3988,11 +4132,11 @@ msgstr ""
 msgid "No events are using this schedule"
 msgstr ""
 
-#: app/Services/TransStrings.php:171
+#: app/Services/TransStrings.php:173
 msgid "No Headers"
 msgstr ""
 
-#: app/Services/TransStrings.php:473
+#: app/Services/TransStrings.php:475
 msgid "No Host Found"
 msgstr ""
 
@@ -4000,42 +4144,47 @@ msgstr ""
 msgid "No Latest Booked Event Found"
 msgstr ""
 
-#: app/Services/TransStrings.php:570
+#: app/Services/TransStrings.php:572
 msgid "No Settings Found for this integration"
 msgstr ""
 
-#: app/Services/TransStrings.php:462
+#: app/Services/TransStrings.php:464
 msgid "No Show"
 msgstr ""
 
-#: app/Services/TransStrings.php:268
+#: app/Services/TransStrings.php:270
 msgid "No specific date overrides found for this schedule"
 msgstr ""
 
-#: app/Services/TransStrings.php:109
+#: app/Services/TransStrings.php:111
 msgid ""
 "No Template found. Please make sure you are using latest version of Fluent "
 "Forms"
 msgstr ""
 
-#: app/Services/TransStrings.php:501
+#: app/Services/TransStrings.php:503
 msgid "No, Don't cancel"
 msgstr ""
 
-#: app/Services/TransStrings.php:509
+#: app/Services/TransStrings.php:511
 msgid "No, Don't delete"
 msgstr ""
 
-#: app/Services/TransStrings.php:374
+#: app/Services/TransStrings.php:376
 msgid "No, Thanks"
 msgstr ""
 
-#: app/Services/TransStrings.php:839
+#: app/Services/TransStrings.php:851
 msgid "No_show"
 msgstr ""
 
-#: app/Services/TransStrings.php:720
+#: app/Services/TransStrings.php:731
 msgid "no_show"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/ElementorIntegration.php:101
+#: app/Services/Integrations/Elementor/ElementorIntegration.php:120
+msgid "Nonce verification failed"
 msgstr ""
 
 #: app/Services/TransStrings.php:41
@@ -4050,19 +4199,19 @@ msgstr ""
 msgid "not equal"
 msgstr ""
 
-#: app/Models/Booking.php:1039
+#: app/Models/Booking.php:1059
 msgid "Note: "
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:311
+#: app/Http/Controllers/SchedulesController.php:317
 msgid "Notification sending failed"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:315
+#: app/Http/Controllers/SchedulesController.php:321
 msgid "Notification sent successfully"
 msgstr ""
 
-#: app/Services/TransStrings.php:899
+#: app/Services/TransStrings.php:911
 msgid "Notification Settings"
 msgstr ""
 
@@ -4070,11 +4219,11 @@ msgstr ""
 msgid "Notifications has been saved"
 msgstr ""
 
-#: app/Services/TransStrings.php:747 app/Services/TransStrings.php:748
+#: app/Services/TransStrings.php:758 app/Services/TransStrings.php:759
 msgid "Nov"
 msgstr ""
 
-#: app/Services/TransStrings.php:759
+#: app/Services/TransStrings.php:770
 msgid "November"
 msgstr ""
 
@@ -4082,19 +4231,19 @@ msgstr ""
 msgid "Number"
 msgstr ""
 
-#: app/Services/TransStrings.php:689
+#: app/Services/TransStrings.php:700
 msgid "oAuth Application Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:746
+#: app/Services/TransStrings.php:757
 msgid "Oct"
 msgstr ""
 
-#: app/Services/TransStrings.php:758
+#: app/Services/TransStrings.php:769
 msgid "October"
 msgstr ""
 
-#: app/Services/TransStrings.php:239
+#: app/Services/TransStrings.php:241
 msgid "of an event start time"
 msgstr ""
 
@@ -4102,69 +4251,69 @@ msgstr ""
 msgid "Offline Payment"
 msgstr ""
 
-#: app/Services/TransStrings.php:393
+#: app/Services/TransStrings.php:395
 msgid "One host"
 msgstr ""
 
-#: app/Services/TransStrings.php:396
+#: app/Services/TransStrings.php:398
 msgid "One invitee"
 msgstr ""
 
-#: app/Services/TransStrings.php:816
+#: app/Services/TransStrings.php:828
 msgid "One rotating host"
 msgstr ""
 
-#: app/Services/TransStrings.php:243
+#: app/Services/TransStrings.php:245
 msgid "One to One"
 msgstr ""
 
-#: app/Services/TransStrings.php:555
+#: app/Services/TransStrings.php:557
 msgid "One-off Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:392
+#: app/Services/TransStrings.php:394
 msgid "One-to-One"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:740
+#: app/Models/CalendarSlot.php:736
 msgid "Online"
 msgstr ""
 
-#: app/Services/TransStrings.php:281 app/Services/LocationService.php:35
-#: app/Models/CalendarSlot.php:743 app/Models/Booking.php:392
+#: app/Services/TransStrings.php:283 app/Services/LocationService.php:35
+#: app/Models/CalendarSlot.php:739 app/Models/Booking.php:406
 #: app/Hooks/Handlers/FrontEndHandler.php:625
 msgid "Online Meeting"
 msgstr ""
 
-#: app/Services/TransStrings.php:229
+#: app/Services/TransStrings.php:231
 msgid "Online Meeting Link *"
 msgstr ""
 
-#: app/Services/TransStrings.php:451
+#: app/Services/TransStrings.php:453
 msgid "Only number in slug is not allowed"
 msgstr ""
 
-#: app/Services/TransStrings.php:126
+#: app/Services/TransStrings.php:128
 msgid "Only Selected Active Booking Types"
 msgstr ""
 
-#: app/Services/TransStrings.php:888
+#: app/Services/TransStrings.php:900
 msgid "Open link in a new tab"
 msgstr ""
 
-#: app/Services/TransStrings.php:902
+#: app/Services/TransStrings.php:914
 msgid "Optimize your email notifications for confirmations and declines"
 msgstr ""
 
-#: app/Services/TransStrings.php:903
+#: app/Services/TransStrings.php:915
 msgid "Optimize your sms notifications for confirmations and declines"
 msgstr ""
 
-#: app/Services/TransStrings.php:199
+#: app/Services/TransStrings.php:201
 msgid "Options *"
 msgstr ""
 
-#: app/Services/TransStrings.php:100
+#: app/Services/TransStrings.php:102
 #: app/Views/public/booking_confirmation.php:83
 msgid "or"
 msgstr ""
@@ -4173,21 +4322,21 @@ msgstr ""
 msgid "Order ID:"
 msgstr ""
 
-#: app/Services/TransStrings.php:897 app/Models/Booking.php:1107
+#: app/Services/TransStrings.php:909 app/Models/Booking.php:1129
 msgid "Organizer"
 msgstr ""
 
-#: app/Services/TransStrings.php:280 app/Models/CalendarSlot.php:735
+#: app/Services/TransStrings.php:282 app/Models/CalendarSlot.php:731
 #: app/Hooks/Handlers/FrontEndHandler.php:619
 msgid "Organizer Phone Number"
 msgstr ""
 
 #: app/Services/Helper.php:1735 app/Services/Helper.php:1800
-#: app/Models/CalendarSlot.php:748
+#: app/Models/CalendarSlot.php:744
 msgid "Other"
 msgstr ""
 
-#: app/Models/Booking.php:1166
+#: app/Models/Booking.php:1192
 msgid "Other Calendar"
 msgstr ""
 
@@ -4195,23 +4344,27 @@ msgstr ""
 msgid "Other Fields"
 msgstr ""
 
-#: app/Services/TransStrings.php:900
+#: app/Services/TransStrings.php:687
+msgid "other guests"
+msgstr ""
+
+#: app/Services/TransStrings.php:912
 msgid "Other Notifications"
 msgstr ""
 
-#: app/Services/TransStrings.php:922
+#: app/Services/TransStrings.php:934
 msgid "Other Page"
 msgstr ""
 
-#: app/Services/TransStrings.php:205
+#: app/Services/TransStrings.php:207
 msgid "Other Questions"
 msgstr ""
 
-#: app/Models/Booking.php:1140
+#: app/Models/Booking.php:1166
 msgid "Outlook"
 msgstr ""
 
-#: app/Services/TransStrings.php:910
+#: app/Services/TransStrings.php:922
 #: app/Hooks/Handlers/AdminMenuHandler.php:516
 msgid "Outlook Calendar / MS Teams"
 msgstr ""
@@ -4220,7 +4373,7 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-#: app/Services/TransStrings.php:691
+#: app/Services/TransStrings.php:702
 msgid "Own App (Not Recommended)"
 msgstr ""
 
@@ -4228,15 +4381,15 @@ msgstr ""
 msgid "page"
 msgstr ""
 
-#: app/Services/TransStrings.php:921
+#: app/Services/TransStrings.php:933
 msgid "Page Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:763 app/Models/Booking.php:500
+#: app/Services/TransStrings.php:774 app/Models/Booking.php:514
 msgid "Paid"
 msgstr ""
 
-#: app/Services/TransStrings.php:762
+#: app/Services/TransStrings.php:773
 msgid "paid"
 msgstr ""
 
@@ -4244,19 +4397,19 @@ msgstr ""
 msgid "Paraguayan Guaraní"
 msgstr ""
 
-#: app/Models/Booking.php:503
+#: app/Models/Booking.php:517
 msgid "Partially Paid"
 msgstr ""
 
-#: app/Models/Booking.php:504
+#: app/Models/Booking.php:518
 msgid "Partially Refunded"
 msgstr ""
 
-#: app/Services/TransStrings.php:805
+#: app/Services/TransStrings.php:817
 msgid "Pass Field Data Via Query String"
 msgstr ""
 
-#: app/Services/TransStrings.php:705
+#: app/Services/TransStrings.php:716
 msgid "Past"
 msgstr ""
 
@@ -4277,19 +4430,19 @@ msgstr ""
 msgid "Payment Details"
 msgstr ""
 
-#: app/Services/TransStrings.php:479
+#: app/Services/TransStrings.php:481
 msgid "Payment History"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:461
+#: app/Http/Controllers/SchedulesController.php:468
 msgid "Payment marked as paid by "
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:472
+#: app/Http/Controllers/SchedulesController.php:479
 msgid "Payment marked as pending by "
 msgstr ""
 
-#: app/Services/TransStrings.php:484 app/Services/Helper.php:1830
+#: app/Services/TransStrings.php:486 app/Services/Helper.php:1830
 #: app/Hooks/Handlers/FrontEndHandler.php:606
 msgid "Payment Method"
 msgstr ""
@@ -4298,7 +4451,7 @@ msgstr ""
 msgid "Payment Method:"
 msgstr ""
 
-#: app/Services/TransStrings.php:586
+#: app/Services/TransStrings.php:588
 msgid ""
 "Payment Module has been disabled currently. No Payments will be processed "
 "and associated functions will be disabled"
@@ -4308,12 +4461,12 @@ msgstr ""
 msgid "Payment Receipt (HTML)"
 msgstr ""
 
-#: app/Services/TransStrings.php:145 app/Services/TransStrings.php:584
+#: app/Services/TransStrings.php:147 app/Services/TransStrings.php:586
 #: app/Hooks/Handlers/AdminMenuHandler.php:755
 msgid "Payment Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:488 app/Services/Helper.php:1829
+#: app/Services/TransStrings.php:490 app/Services/Helper.php:1829
 msgid "Payment Status"
 msgstr ""
 
@@ -4321,41 +4474,42 @@ msgstr ""
 msgid "Payment Status:"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:460
+#: app/Http/Controllers/SchedulesController.php:467
 msgid "Payment Successfully Completed"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:471
+#: app/Http/Controllers/SchedulesController.php:478
 msgid "Payment Successfully Marked as Pending"
 msgstr ""
 
-#: app/Services/TransStrings.php:378
+#: app/Services/TransStrings.php:380
 msgid "Payment Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:487 app/Services/Helper.php:1828
+#: app/Services/TransStrings.php:489 app/Services/Helper.php:1828
 msgid "Payment Total"
 msgstr ""
 
-#: app/Services/TransStrings.php:381
+#: app/Services/TransStrings.php:383
 #: app/Hooks/Handlers/AdminMenuHandler.php:591
 msgid "PayPal"
 msgstr ""
 
-#: app/Services/TransStrings.php:870
+#: app/Services/TransStrings.php:882
 msgid "PDF"
 msgstr ""
 
-#: app/Services/TransStrings.php:461 app/Services/Helper.php:1404
-#: app/Models/Booking.php:486 app/Models/Booking.php:499
+#: app/Services/TransStrings.php:463 app/Services/Helper.php:1404
+#: app/Models/Booking.php:500 app/Models/Booking.php:513
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:118
 msgid "Pending"
 msgstr ""
 
-#: app/Services/TransStrings.php:765
+#: app/Services/TransStrings.php:777
 msgid "pending"
 msgstr ""
 
-#: app/Services/TransStrings.php:350
+#: app/Services/TransStrings.php:352
 msgid "Per day"
 msgstr ""
 
@@ -4363,20 +4517,24 @@ msgstr ""
 msgid "per guest"
 msgstr ""
 
-#: app/Services/TransStrings.php:352
+#: app/Services/TransStrings.php:354
 msgid "Per month"
 msgstr ""
 
-#: app/Services/TransStrings.php:351
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:147
+msgid "Per Page"
+msgstr ""
+
+#: app/Services/TransStrings.php:353
 msgid "Per week"
 msgstr ""
 
-#: app/Services/TransStrings.php:547
+#: app/Services/TransStrings.php:549
 msgid "Permission Denied Message"
 msgstr ""
 
 #: app/Services/LocationService.php:55 app/Services/LocationService.php:58
-#: app/Services/Helper.php:1493 app/Models/CalendarSlot.php:729
+#: app/Services/Helper.php:1493 app/Models/CalendarSlot.php:725
 msgid "Phone"
 msgstr ""
 
@@ -4385,51 +4543,51 @@ msgstr ""
 msgid "Phone Call"
 msgstr ""
 
-#: app/Models/Booking.php:383 app/Models/Booking.php:385
+#: app/Models/Booking.php:397 app/Models/Booking.php:399
 msgid "Phone Call:"
 msgstr ""
 
-#: app/Services/TransStrings.php:449
+#: app/Services/TransStrings.php:451
 msgid "Phone Number is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:198
+#: app/Services/TransStrings.php:200
 msgid "Placeholder"
 msgstr ""
 
-#: app/Services/TransStrings.php:694
+#: app/Services/TransStrings.php:705
 msgid "Please"
 msgstr ""
 
-#: app/Services/TransStrings.php:886
+#: app/Services/TransStrings.php:898
 msgid "Please add this shortcode to your selected page:"
 msgstr ""
 
-#: app/Services/TransStrings.php:498
+#: app/Services/TransStrings.php:500
 msgid ""
 "Please confirm that you would like to cancel this event. A cancellation "
 "email will also go out to the invitee"
 msgstr ""
 
-#: app/Services/TransStrings.php:499
+#: app/Services/TransStrings.php:501
 msgid ""
 "Please confirm that you would like to reject this event. A rejection email "
 "will also go out to the invitee"
 msgstr ""
 
-#: app/Services/TransStrings.php:332
+#: app/Services/TransStrings.php:334
 msgid "Please ensure the cancel link is included in the confirmation email"
 msgstr ""
 
-#: app/Services/TransStrings.php:331
+#: app/Services/TransStrings.php:333
 msgid "Please ensure the cancel link is removed from the confirmation email"
 msgstr ""
 
-#: app/Services/TransStrings.php:334
+#: app/Services/TransStrings.php:336
 msgid "Please ensure the reschedule link is included in the confirmation email"
 msgstr ""
 
-#: app/Services/TransStrings.php:333
+#: app/Services/TransStrings.php:335
 msgid ""
 "Please ensure the reschedule link is removed from the confirmation email"
 msgstr ""
@@ -4470,15 +4628,15 @@ msgstr ""
 msgid "Please login to view your bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:602
+#: app/Services/TransStrings.php:604
 msgid "Please provide a license key"
 msgstr ""
 
-#: app/Services/TransStrings.php:599
+#: app/Services/TransStrings.php:601
 msgid "Please Provide a license key of"
 msgstr ""
 
-#: app/Services/TransStrings.php:443
+#: app/Services/TransStrings.php:445
 msgid "Please provide a location first"
 msgstr ""
 
@@ -4490,7 +4648,7 @@ msgstr ""
 msgid "Please provide a rescheduling reason"
 msgstr ""
 
-#: app/Services/TransStrings.php:450
+#: app/Services/TransStrings.php:452
 msgid "Please provide a slug first"
 msgstr ""
 
@@ -4535,7 +4693,7 @@ msgstr ""
 msgid "Please provide your phone number"
 msgstr ""
 
-#: app/Services/TransStrings.php:683
+#: app/Services/TransStrings.php:694
 msgid "Please read the documentation"
 msgstr ""
 
@@ -4548,7 +4706,7 @@ msgstr ""
 msgid "Please select a date and time"
 msgstr ""
 
-#: app/Services/TransStrings.php:644
+#: app/Services/TransStrings.php:646
 msgid "Please select a date first"
 msgstr ""
 
@@ -4557,15 +4715,23 @@ msgstr ""
 msgid "Please select a valid payment method"
 msgstr ""
 
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:326
+msgid "Please select an event"
+msgstr ""
+
 #: app/Hooks/Handlers/FrontEndHandler.php:706
 msgid "Please select location"
 msgstr ""
 
-#: app/Services/TransStrings.php:565
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:590
+msgid "Please Select the Event(s)"
+msgstr ""
+
+#: app/Services/TransStrings.php:567
 msgid "Please select the hosts you want to assign to this event"
 msgstr ""
 
-#: app/Services/TransStrings.php:893
+#: app/Services/TransStrings.php:905
 msgid "Please Select the page where you want to show"
 msgstr ""
 
@@ -4577,19 +4743,19 @@ msgstr ""
 msgid "Please select timezone first"
 msgstr ""
 
-#: app/Services/TransStrings.php:127
+#: app/Services/TransStrings.php:129
 msgid "Please select which Booking Forms to show in the page?"
 msgstr ""
 
-#: app/Services/TransStrings.php:638
+#: app/Services/TransStrings.php:640
 msgid "Please set the host phone number from"
 msgstr ""
 
-#: app/Services/TransStrings.php:852
+#: app/Services/TransStrings.php:864
 msgid "Please upgrade to get all the advanced features."
 msgstr ""
 
-#: app/Services/TransStrings.php:105
+#: app/Services/TransStrings.php:107
 msgid "Please upgrade to pro to unlock this feature."
 msgstr ""
 
@@ -4601,7 +4767,7 @@ msgstr ""
 msgid "Plugin is being installed in the background"
 msgstr ""
 
-#: app/Services/TransStrings.php:701
+#: app/Services/TransStrings.php:712
 msgid "Plugins that will extend your Fluent Booking Functionalities"
 msgstr ""
 
@@ -4609,7 +4775,7 @@ msgstr ""
 msgid "PM"
 msgstr ""
 
-#: app/Services/TransStrings.php:767
+#: app/Services/TransStrings.php:779
 msgid "pm"
 msgstr ""
 
@@ -4621,9 +4787,14 @@ msgstr ""
 msgid "Powered By"
 msgstr ""
 
-#: app/Services/TransStrings.php:482
+#: app/Services/TransStrings.php:484
 #: app/Views/public/receipt/order-items-table.php:19
 msgid "Price"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:151
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:136
+msgid "Primary Color"
 msgstr ""
 
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:134
@@ -4642,11 +4813,11 @@ msgstr ""
 msgid "Processing..."
 msgstr ""
 
-#: app/Services/TransStrings.php:382
+#: app/Services/TransStrings.php:384
 msgid "Product"
 msgstr ""
 
-#: app/Services/TransStrings.php:603
+#: app/Services/TransStrings.php:605
 msgid "Profile"
 msgstr ""
 
@@ -4658,15 +4829,15 @@ msgstr ""
 msgid "Provide Valid Email Address that will be used to send emails"
 msgstr ""
 
-#: app/Services/TransStrings.php:221
+#: app/Services/TransStrings.php:223
 msgid "Provided email addresses will set as CC to this email notification"
 msgstr ""
 
-#: app/Services/TransStrings.php:405
+#: app/Services/TransStrings.php:407
 msgid "Publicly Accessible"
 msgstr ""
 
-#: app/Services/TransStrings.php:601
+#: app/Services/TransStrings.php:603
 msgid "Purchase one here"
 msgstr ""
 
@@ -4674,12 +4845,12 @@ msgstr ""
 msgid "Purple"
 msgstr ""
 
-#: app/Services/TransStrings.php:481
+#: app/Services/TransStrings.php:483
 #: app/Views/public/receipt/order-items-table.php:18
 msgid "Quantity"
 msgstr ""
 
-#: app/Services/TransStrings.php:204
+#: app/Services/TransStrings.php:206
 #: app/Hooks/Handlers/AdminMenuHandler.php:699
 msgid "Question Settings"
 msgstr ""
@@ -4704,35 +4875,35 @@ msgstr ""
 msgid "Read Access to All Bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:774
+#: app/Services/TransStrings.php:786
 msgid "read all bookings"
 msgstr ""
 
-#: app/Services/TransStrings.php:770
+#: app/Services/TransStrings.php:782
 msgid "read and use other availabilities"
 msgstr ""
 
-#: app/Services/TransStrings.php:610
+#: app/Services/TransStrings.php:612
 msgid "Read More"
 msgstr ""
 
-#: app/Services/TransStrings.php:772
+#: app/Services/TransStrings.php:784
 msgid "read other calendars"
 msgstr ""
 
-#: app/Services/TransStrings.php:684
+#: app/Services/TransStrings.php:695
 msgid "Read the documentation"
 msgstr ""
 
-#: app/Services/TransStrings.php:695
+#: app/Services/TransStrings.php:706
 msgid "read the documentation here"
 msgstr ""
 
-#: app/Services/TransStrings.php:500 app/Services/BookingFieldService.php:110
+#: app/Services/TransStrings.php:502 app/Services/BookingFieldService.php:110
 msgid "Reason for cancellation"
 msgstr ""
 
-#: app/Services/TransStrings.php:507
+#: app/Services/TransStrings.php:509
 msgid "Reason for rejection"
 msgstr ""
 
@@ -4740,23 +4911,23 @@ msgstr ""
 msgid "Reason for reschedule"
 msgstr ""
 
-#: app/Services/TransStrings.php:812
+#: app/Services/TransStrings.php:824
 msgid "Rebook"
 msgstr ""
 
-#: app/Services/TransStrings.php:717
+#: app/Services/TransStrings.php:728
 msgid "Receiver *"
 msgstr ""
 
-#: app/Models/Booking.php:472
+#: app/Models/Booking.php:486
 msgid "Recently Happened"
 msgstr ""
 
-#: app/Services/TransStrings.php:113
+#: app/Services/TransStrings.php:115
 msgid "Recommended Image Size: 600x600. Square Orientation"
 msgstr ""
 
-#: app/Services/TransStrings.php:917
+#: app/Services/TransStrings.php:929
 msgid "Recommended Plugins and Addons"
 msgstr ""
 
@@ -4764,19 +4935,19 @@ msgstr ""
 msgid "Red-Orange"
 msgstr ""
 
-#: app/Services/TransStrings.php:804
+#: app/Services/TransStrings.php:816
 msgid "Redirect After Booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:803
+#: app/Services/TransStrings.php:815
 msgid "Redirect Query String"
 msgstr ""
 
-#: app/Services/TransStrings.php:807
+#: app/Services/TransStrings.php:819
 msgid "Redirect Query String field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:324
+#: app/Services/TransStrings.php:326
 msgid "Redirect to a custom URL after a successful booking"
 msgstr ""
 
@@ -4784,19 +4955,19 @@ msgstr ""
 msgid "Redirect URI"
 msgstr ""
 
-#: app/Services/TransStrings.php:802
+#: app/Services/TransStrings.php:814
 msgid "Redirect URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:806
+#: app/Services/TransStrings.php:818
 msgid "Redirect URL field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:822
+#: app/Services/TransStrings.php:834
 msgid "Refund payment from stripe"
 msgstr ""
 
-#: app/Models/Booking.php:502
+#: app/Models/Booking.php:516
 msgid "Refunded"
 msgstr ""
 
@@ -4804,15 +4975,15 @@ msgstr ""
 msgid "Regex Match"
 msgstr ""
 
-#: app/Services/TransStrings.php:504 app/Services/Helper.php:1676
+#: app/Services/TransStrings.php:506 app/Services/Helper.php:1676
 msgid "Reject"
 msgstr ""
 
-#: app/Services/TransStrings.php:506
+#: app/Services/TransStrings.php:508
 msgid "Reject Booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:505 app/Models/Booking.php:488
+#: app/Services/TransStrings.php:507 app/Models/Booking.php:502
 msgid "Rejected"
 msgstr ""
 
@@ -4841,7 +5012,7 @@ msgstr ""
 msgid "Reminder email sent to %s."
 msgstr ""
 
-#: app/Services/TransStrings.php:132
+#: app/Services/TransStrings.php:134
 msgid "Remote Calendar Sync Settings"
 msgstr ""
 
@@ -4849,7 +5020,7 @@ msgstr ""
 msgid "Remote Calendars"
 msgstr ""
 
-#: app/Services/TransStrings.php:200
+#: app/Services/TransStrings.php:202
 msgid "Remove"
 msgstr ""
 
@@ -4857,7 +5028,7 @@ msgstr ""
 msgid "Remove Contact Tags"
 msgstr ""
 
-#: app/Services/TransStrings.php:524
+#: app/Services/TransStrings.php:526
 msgid "Reorder Events"
 msgstr ""
 
@@ -4873,49 +5044,49 @@ msgstr ""
 msgid "Reply to Name (Optional)"
 msgstr ""
 
-#: app/Services/TransStrings.php:177
+#: app/Services/TransStrings.php:179
 msgid "Request Body"
 msgstr ""
 
-#: app/Services/TransStrings.php:180
+#: app/Services/TransStrings.php:182
 msgid "Request Fields"
 msgstr ""
 
-#: app/Services/TransStrings.php:168
+#: app/Services/TransStrings.php:170
 msgid "Request Format"
 msgstr ""
 
-#: app/Services/TransStrings.php:169
+#: app/Services/TransStrings.php:171
 msgid "Request Header"
 msgstr ""
 
-#: app/Services/TransStrings.php:170
+#: app/Services/TransStrings.php:172
 msgid "Request Headers"
 msgstr ""
 
-#: app/Services/TransStrings.php:167
+#: app/Services/TransStrings.php:169
 msgid "Request Method"
 msgstr ""
 
-#: app/Services/TransStrings.php:165
+#: app/Services/TransStrings.php:167
 msgid "Request URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:286
+#: app/Services/TransStrings.php:288
 msgid "Required"
 msgstr ""
 
-#: app/Services/TransStrings.php:343 app/Hooks/Handlers/FrontEndHandler.php:649
+#: app/Services/TransStrings.php:345 app/Hooks/Handlers/FrontEndHandler.php:649
 msgid "Requires Confirmation"
 msgstr ""
 
-#: app/Services/TransStrings.php:508 app/Services/Helper.php:1555
+#: app/Services/TransStrings.php:510 app/Services/Helper.php:1555
 #: app/Services/Helper.php:1573 app/Services/Helper.php:1631
 #: app/Services/Helper.php:1649 app/Views/public/booking_confirmation.php:85
 msgid "Reschedule"
 msgstr ""
 
-#: app/Models/Booking.php:484
+#: app/Models/Booking.php:498
 msgid "Rescheduled"
 msgstr ""
 
@@ -4929,35 +5100,35 @@ msgstr ""
 msgid "Rescheduling email %s to %s"
 msgstr ""
 
-#: app/Services/TransStrings.php:557
+#: app/Services/TransStrings.php:559
 msgid "Reserve spots"
 msgstr ""
 
-#: app/Services/TransStrings.php:860
+#: app/Services/TransStrings.php:872
 msgid "Reserve Times"
 msgstr ""
 
-#: app/Services/TransStrings.php:857
+#: app/Services/TransStrings.php:869
 msgid "Reserved"
 msgstr ""
 
-#: app/Services/TransStrings.php:858
+#: app/Services/TransStrings.php:870
 msgid "reserved"
 msgstr ""
 
-#: app/Services/TransStrings.php:896
+#: app/Services/TransStrings.php:908
 msgid "Reserved slot of"
 msgstr ""
 
-#: app/Services/TransStrings.php:861
+#: app/Services/TransStrings.php:873
 msgid "Reserved Times"
 msgstr ""
 
-#: app/Services/TransStrings.php:865
+#: app/Services/TransStrings.php:877
 msgid "Reset All"
 msgstr ""
 
-#: app/Services/TransStrings.php:813
+#: app/Services/TransStrings.php:825
 msgid "Round Robin"
 msgstr ""
 
@@ -4978,43 +5149,43 @@ msgstr ""
 msgid "Same as last month"
 msgstr ""
 
-#: app/Services/TransStrings.php:326
+#: app/Services/TransStrings.php:328
 msgid "Sample: email={{guest.email}}&phone={{booking.phone}}"
 msgstr ""
 
-#: app/Services/TransStrings.php:714
+#: app/Services/TransStrings.php:725
 msgid "sat"
 msgstr ""
 
-#: app/Services/TransStrings.php:729
+#: app/Services/TransStrings.php:740
 msgid "Saturday"
 msgstr ""
 
-#: app/Services/TransStrings.php:619
+#: app/Services/TransStrings.php:621
 msgid "Save"
 msgstr ""
 
-#: app/Services/TransStrings.php:569
+#: app/Services/TransStrings.php:571
 msgid "Save & Validate Credentials"
 msgstr ""
 
-#: app/Services/TransStrings.php:606
+#: app/Services/TransStrings.php:608
 msgid "Save Changes"
 msgstr ""
 
-#: app/Services/TransStrings.php:265
+#: app/Services/TransStrings.php:267
 msgid "Save Email"
 msgstr ""
 
-#: app/Services/TransStrings.php:110
+#: app/Services/TransStrings.php:112
 msgid "Save Feed"
 msgstr ""
 
-#: app/Services/TransStrings.php:128
+#: app/Services/TransStrings.php:130
 msgid "Save Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:647
+#: app/Services/TransStrings.php:649
 msgid "Save SMS"
 msgstr ""
 
@@ -5034,11 +5205,11 @@ msgstr ""
 msgid "Schedule has been updated successfully"
 msgstr ""
 
-#: app/Services/TransStrings.php:843 app/Hooks/Handlers/FrontEndHandler.php:990
+#: app/Services/TransStrings.php:855 app/Hooks/Handlers/FrontEndHandler.php:990
 msgid "Schedule Meeting"
 msgstr ""
 
-#: app/Services/TransStrings.php:295
+#: app/Services/TransStrings.php:297
 msgid "Schedule Settings"
 msgstr ""
 
@@ -5050,19 +5221,19 @@ msgstr ""
 msgid "Schedule title has been updated successfully"
 msgstr ""
 
-#: app/Services/TransStrings.php:356
+#: app/Services/TransStrings.php:358
 msgid "Schedule Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:671 app/Models/Booking.php:483
+#: app/Services/TransStrings.php:673 app/Models/Booking.php:497
 msgid "Scheduled"
 msgstr ""
 
-#: app/Services/TransStrings.php:670
+#: app/Services/TransStrings.php:672
 msgid "scheduled"
 msgstr ""
 
-#: app/Services/TransStrings.php:364
+#: app/Services/TransStrings.php:366
 msgid "Scheduling conditions"
 msgstr ""
 
@@ -5070,15 +5241,15 @@ msgstr ""
 msgid "Seamlessly create tasks in Fluent Boards using your booking field"
 msgstr ""
 
-#: app/Services/TransStrings.php:702
+#: app/Services/TransStrings.php:713
 msgid "Search & Select Product"
 msgstr ""
 
-#: app/Services/TransStrings.php:523
+#: app/Services/TransStrings.php:525
 msgid "Search and Select Time"
 msgstr ""
 
-#: app/Services/TransStrings.php:518
+#: app/Services/TransStrings.php:520
 msgid "Search Booking"
 msgstr ""
 
@@ -5086,15 +5257,15 @@ msgstr ""
 msgid "Search contact"
 msgstr ""
 
-#: app/Services/TransStrings.php:853
+#: app/Services/TransStrings.php:865
 msgid "Search Events"
 msgstr ""
 
-#: app/Services/TransStrings.php:464
+#: app/Services/TransStrings.php:466
 msgid "Search Host"
 msgstr ""
 
-#: app/Services/TransStrings.php:609
+#: app/Services/TransStrings.php:611
 msgid "Search host and select"
 msgstr ""
 
@@ -5110,40 +5281,40 @@ msgstr ""
 msgid "Select"
 msgstr ""
 
-#: app/Services/TransStrings.php:308
+#: app/Services/TransStrings.php:310
 msgid ""
 "Select a calendar event from another calendar to clone it into your calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:312
+#: app/Services/TransStrings.php:314
 msgid ""
 "Select a calendar event to clone all integration settings into this event."
 msgstr ""
 
-#: app/Services/TransStrings.php:311
+#: app/Services/TransStrings.php:313
 msgid "Select a calendar event to clone all webhook settings into this event."
 msgstr ""
 
-#: app/Services/TransStrings.php:309
+#: app/Services/TransStrings.php:311
 msgid ""
 "Select a calendar event to clone the notification settings into this event."
 msgstr ""
 
-#: app/Services/TransStrings.php:310
+#: app/Services/TransStrings.php:312
 msgid ""
 "Select a calendar event to clone the sms notification settings into this "
 "event."
 msgstr ""
 
-#: app/Services/TransStrings.php:95
+#: app/Services/TransStrings.php:97
 msgid "Select a Field"
 msgstr ""
 
-#: app/Services/TransStrings.php:137
+#: app/Services/TransStrings.php:139
 msgid "Select a Remote Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:864
+#: app/Services/TransStrings.php:876
 msgid "Select All"
 msgstr ""
 
@@ -5166,18 +5337,23 @@ msgstr ""
 #: app/Services/Integrations/FluentCRM/NewBookingTrigger.php:73
 #: app/Services/Integrations/FluentCRM/CancelBookingTrigger.php:75
 #: app/Services/Integrations/FluentCRM/BookingCompletedTrigger.php:73
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:117
 msgid "Select Calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:834
+#: app/Services/TransStrings.php:846
 msgid "Select Calendar Event"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:78
+msgid "Select Calendars"
 msgstr ""
 
 #: app/Services/TransStrings.php:55
 msgid "Select Condition"
 msgstr ""
 
-#: app/Services/TransStrings.php:369
+#: app/Services/TransStrings.php:371
 msgid "Select Country"
 msgstr ""
 
@@ -5185,24 +5361,29 @@ msgstr ""
 msgid "Select data source and operator first"
 msgstr ""
 
-#: app/Services/TransStrings.php:22 app/Services/TransStrings.php:929
+#: app/Services/TransStrings.php:22 app/Services/TransStrings.php:941
 msgid "Select Date"
 msgstr ""
 
-#: app/Services/TransStrings.php:581
+#: app/Services/TransStrings.php:583
 msgid "Select Day"
 msgstr ""
 
-#: app/Services/TransStrings.php:520
+#: app/Services/TransStrings.php:522
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:79
 msgid "Select Event"
 msgstr ""
 
-#: app/Services/TransStrings.php:558
+#: app/Services/TransStrings.php:560
 msgid "Select Event Hosts"
 msgstr ""
 
-#: app/Services/TransStrings.php:519
+#: app/Services/TransStrings.php:521
 msgid "Select Event Types"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:127
+msgid "Select Events"
 msgstr ""
 
 #: app/Services/Integrations/FluentCRM/Bootstrap.php:149
@@ -5218,23 +5399,23 @@ msgid ""
 "may lower the value"
 msgstr ""
 
-#: app/Services/TransStrings.php:838
+#: app/Services/TransStrings.php:850
 msgid "Select Format"
 msgstr ""
 
-#: app/Services/TransStrings.php:577
+#: app/Services/TransStrings.php:579
 msgid "Select Frequency"
 msgstr ""
 
-#: app/Services/TransStrings.php:613
+#: app/Services/TransStrings.php:615
 msgid "Select Guest Email Field"
 msgstr ""
 
-#: app/Services/TransStrings.php:614
+#: app/Services/TransStrings.php:616
 msgid "Select Guest Name Field"
 msgstr ""
 
-#: app/Services/TransStrings.php:666
+#: app/Services/TransStrings.php:668
 msgid "Select Host"
 msgstr ""
 
@@ -5248,7 +5429,7 @@ msgstr ""
 msgid "Select Labels"
 msgstr ""
 
-#: app/Services/TransStrings.php:566
+#: app/Services/TransStrings.php:568
 msgid "Select Member"
 msgstr ""
 
@@ -5256,7 +5437,7 @@ msgstr ""
 msgid "Select on the Next Step"
 msgstr ""
 
-#: app/Services/TransStrings.php:880
+#: app/Services/TransStrings.php:892
 msgid "Select Page"
 msgstr ""
 
@@ -5264,12 +5445,12 @@ msgstr ""
 msgid "Select Priority"
 msgstr ""
 
-#: app/Services/TransStrings.php:136
+#: app/Services/TransStrings.php:138
 msgid ""
 "Select remote calendar in where to add new events to when you're booked."
 msgstr ""
 
-#: app/Services/TransStrings.php:305
+#: app/Services/TransStrings.php:307
 msgid "Select Schedule"
 msgstr ""
 
@@ -5278,7 +5459,7 @@ msgstr ""
 msgid "Select Stage"
 msgstr ""
 
-#: app/Services/TransStrings.php:521
+#: app/Services/TransStrings.php:523
 #: app/Services/Integrations/FluentCRM/BookingRescheduledTrigger.php:82
 #: app/Services/Integrations/FluentCRM/NewBookingTrigger.php:82
 #: app/Services/Integrations/FluentCRM/CancelBookingTrigger.php:84
@@ -5294,11 +5475,11 @@ msgstr ""
 msgid "Select Tags (remove from contact)"
 msgstr ""
 
-#: app/Services/TransStrings.php:854
+#: app/Services/TransStrings.php:866
 msgid "Select Team Members"
 msgstr ""
 
-#: app/Services/TransStrings.php:363
+#: app/Services/TransStrings.php:365
 msgid "Select the available date range"
 msgstr ""
 
@@ -5306,27 +5487,27 @@ msgstr ""
 msgid "Select the FluentCRM Lists you would like to add your contacts to."
 msgstr ""
 
-#: app/Services/TransStrings.php:849
+#: app/Services/TransStrings.php:861
 msgid "Select the members you want to assign to this team"
 msgstr ""
 
-#: app/Services/TransStrings.php:522
+#: app/Services/TransStrings.php:524
 msgid "Select Time"
 msgstr ""
 
-#: app/Services/TransStrings.php:427
+#: app/Services/TransStrings.php:429
 msgid "Select Timezone"
 msgstr ""
 
-#: app/Services/TransStrings.php:195
+#: app/Services/TransStrings.php:197
 msgid "Select Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:213
+#: app/Services/TransStrings.php:215
 msgid "Select Unit"
 msgstr ""
 
-#: app/Services/TransStrings.php:186
+#: app/Services/TransStrings.php:188
 msgid "Select Value"
 msgstr ""
 
@@ -5344,28 +5525,28 @@ msgstr ""
 msgid "Selected Calendar could not be found"
 msgstr ""
 
-#: app/Services/TransStrings.php:179
+#: app/Services/TransStrings.php:181
 msgid "Selected Fields"
 msgstr ""
 
-#: app/Services/TransStrings.php:271
+#: app/Services/TransStrings.php:273
 msgid ""
 "Selected location seems disabled. Please revise your location selections"
 msgstr ""
 
-#: app/Services/TransStrings.php:642
+#: app/Services/TransStrings.php:644
 msgid "Send *"
 msgstr ""
 
-#: app/Services/TransStrings.php:918
+#: app/Services/TransStrings.php:930
 msgid "Send Confirmation Email"
 msgstr ""
 
-#: app/Services/TransStrings.php:745
+#: app/Services/TransStrings.php:756
 msgid "Sep"
 msgstr ""
 
-#: app/Services/TransStrings.php:757
+#: app/Services/TransStrings.php:768
 msgid "September"
 msgstr ""
 
@@ -5373,7 +5554,7 @@ msgstr ""
 msgid "Set as Default"
 msgstr ""
 
-#: app/Services/TransStrings.php:306
+#: app/Services/TransStrings.php:308
 msgid "Set Custom Hours"
 msgstr ""
 
@@ -5385,7 +5566,7 @@ msgstr ""
 msgid "Set FluentCRM"
 msgstr ""
 
-#: app/Services/TransStrings.php:133
+#: app/Services/TransStrings.php:135
 msgid ""
 "Set the calendars to check for conflicts to prevent double bookings and add "
 "events to your remote calendar."
@@ -5398,11 +5579,11 @@ msgid ""
 "meeting date."
 msgstr ""
 
-#: app/Services/TransStrings.php:337
+#: app/Services/TransStrings.php:339
 msgid "Set the maximum number of bookings allowed in a single transaction"
 msgstr ""
 
-#: app/Services/TransStrings.php:650 app/Hooks/Handlers/AdminMenuHandler.php:84
+#: app/Services/TransStrings.php:652 app/Hooks/Handlers/AdminMenuHandler.php:84
 #: app/Hooks/Handlers/AdminMenuHandler.php:85
 #: app/Hooks/Handlers/AdminMenuHandler.php:141
 msgid "Settings"
@@ -5416,7 +5597,7 @@ msgstr ""
 msgid "Settings has been successfully saved."
 msgstr ""
 
-#: app/Services/TransStrings.php:161
+#: app/Services/TransStrings.php:163
 msgid "Settings Page"
 msgstr ""
 
@@ -5427,47 +5608,66 @@ msgstr ""
 msgid "Settings updated successfully"
 msgstr ""
 
-#: app/Services/TransStrings.php:656
+#: app/Services/TransStrings.php:658
 msgid "Settings updated!"
 msgstr ""
 
-#: app/Services/TransStrings.php:365
+#: app/Services/TransStrings.php:367
 msgid "Share"
 msgstr ""
 
-#: app/Services/TransStrings.php:158
+#: app/Services/TransStrings.php:160
 msgid "Shipping Address"
 msgstr ""
 
-#: app/Services/TransStrings.php:417
+#: app/Services/TransStrings.php:419
 msgid "Shortcode"
 msgstr ""
 
-#: app/Services/TransStrings.php:415
+#: app/Services/TransStrings.php:417
 msgid "Shortcode has been copied to your clipboard"
 msgstr ""
 
-#: app/Services/TransStrings.php:208
+#: app/Services/TransStrings.php:210
 msgid "Shortcodes"
 msgstr ""
 
-#: app/Services/TransStrings.php:119
+#: app/Services/TransStrings.php:121
 msgid "Should be same as the host name"
 msgstr ""
 
-#: app/Services/TransStrings.php:895
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:127
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:138
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:107
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:98
+msgid "Show"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:125
+msgid "Show Filter"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:96
+msgid "Show Host Info"
+msgstr ""
+
+#: app/Services/TransStrings.php:907
 msgid "Show in a standalone Frontend URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:611
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:136
+msgid "Show Pagination"
+msgstr ""
+
+#: app/Services/TransStrings.php:613
 msgid "Show Video"
 msgstr ""
 
-#: app/Services/TransStrings.php:529
+#: app/Services/TransStrings.php:531
 msgid "Single"
 msgstr ""
 
-#: app/Services/TransStrings.php:552
+#: app/Services/TransStrings.php:554
 msgid "Single Event"
 msgstr ""
 
@@ -5479,23 +5679,23 @@ msgstr ""
 msgid "Skip name update if existing contact have old data (per primary field)"
 msgstr ""
 
-#: app/Services/TransStrings.php:800
+#: app/Services/TransStrings.php:812
 msgid "Slug"
 msgstr ""
 
-#: app/Services/TransStrings.php:328
+#: app/Services/TransStrings.php:330
 msgid "Slug must be unique to avoid any conflicts with other events"
 msgstr ""
 
-#: app/Services/TransStrings.php:715
+#: app/Services/TransStrings.php:726
 msgid "SMS"
 msgstr ""
 
-#: app/Services/TransStrings.php:641
+#: app/Services/TransStrings.php:643
 msgid "SMS Body"
 msgstr ""
 
-#: app/Services/TransStrings.php:906
+#: app/Services/TransStrings.php:918
 #: app/Hooks/Handlers/AdminMenuHandler.php:565
 msgid "SMS by Twilio"
 msgstr ""
@@ -5504,11 +5704,11 @@ msgstr ""
 msgid "SMS Notification"
 msgstr ""
 
-#: app/Services/TransStrings.php:646
+#: app/Services/TransStrings.php:648
 msgid "SMS Notification Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:651
+#: app/Services/TransStrings.php:653
 msgid "SMS Notifications"
 msgstr ""
 
@@ -5524,11 +5724,11 @@ msgstr ""
 msgid "Sorry! meeting could not be found"
 msgstr ""
 
-#: app/Services/TransStrings.php:340 app/Models/Booking.php:961
+#: app/Services/TransStrings.php:342 app/Models/Booking.php:981
 msgid "Sorry! you can not cancel this"
 msgstr ""
 
-#: app/Services/TransStrings.php:341 app/Models/Booking.php:974
+#: app/Services/TransStrings.php:343 app/Models/Booking.php:994
 msgid "Sorry! you can not reschedule this"
 msgstr ""
 
@@ -5536,7 +5736,7 @@ msgstr ""
 msgid "Sorry! you can not reschedule to the same time."
 msgstr ""
 
-#: app/Services/TransStrings.php:342
+#: app/Services/TransStrings.php:344
 msgid "Sorry! you cannot remove the organizer"
 msgstr ""
 
@@ -5549,15 +5749,15 @@ msgstr ""
 msgid "Sorry, the host is not accepting any new bookings at the moment."
 msgstr ""
 
-#: app/Services/TransStrings.php:875
+#: app/Services/TransStrings.php:887
 msgid "Sort"
 msgstr ""
 
-#: app/Services/TransStrings.php:874
+#: app/Services/TransStrings.php:886
 msgid "Sort By Calendar Type"
 msgstr ""
 
-#: app/Services/TransStrings.php:761
+#: app/Services/TransStrings.php:772
 msgid "Sorted by booked at date time"
 msgstr ""
 
@@ -5565,11 +5765,11 @@ msgstr ""
 msgid "South Korean Won"
 msgstr ""
 
-#: app/Services/TransStrings.php:358
+#: app/Services/TransStrings.php:360
 msgid "Specific Dates & Hours (coming soon)"
 msgstr ""
 
-#: app/Services/TransStrings.php:250
+#: app/Services/TransStrings.php:252
 msgid "spots left"
 msgstr ""
 
@@ -5581,7 +5781,7 @@ msgstr ""
 msgid "Start date"
 msgstr ""
 
-#: app/Models/Booking.php:468
+#: app/Models/Booking.php:482
 msgid "Starting Soon"
 msgstr ""
 
@@ -5593,7 +5793,7 @@ msgstr ""
 msgid "starts with"
 msgstr ""
 
-#: app/Services/TransStrings.php:477
+#: app/Services/TransStrings.php:479
 #: app/Services/Integrations/FluentBoards/Bootstrap.php:205
 #: app/Services/Integrations/FluentCRM/FluentCrmInit.php:140
 #: app/Services/Integrations/FluentCRM/Bootstrap.php:221
@@ -5604,20 +5804,25 @@ msgstr ""
 msgid "Status has been updated successfully"
 msgstr ""
 
-#: app/Services/TransStrings.php:380
+#: app/Services/TransStrings.php:382
 #: app/Hooks/Handlers/AdminMenuHandler.php:578
 msgid "Stripe"
 msgstr ""
 
-#: app/Services/TransStrings.php:379
+#: app/Services/TransStrings.php:381
 msgid "Stripe Payments"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:145
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:130
+msgid "Style"
 msgstr ""
 
 #: app/Views/public/receipt/order-items-table.php:56
 msgid "Sub-Total"
 msgstr ""
 
-#: app/Services/TransStrings.php:209
+#: app/Services/TransStrings.php:211
 msgid "Subject"
 msgstr ""
 
@@ -5625,11 +5830,11 @@ msgstr ""
 msgid "Submission ID:"
 msgstr ""
 
-#: app/Services/TransStrings.php:531
+#: app/Services/TransStrings.php:533
 msgid "Submit"
 msgstr ""
 
-#: app/Services/TransStrings.php:844
+#: app/Services/TransStrings.php:856
 msgid "Submit Button Text"
 msgstr ""
 
@@ -5658,27 +5863,28 @@ msgstr ""
 msgid "Summary"
 msgstr ""
 
-#: app/Services/TransStrings.php:731
+#: app/Services/TransStrings.php:742
 msgid "Summary Email"
 msgstr ""
 
-#: app/Services/TransStrings.php:708
+#: app/Services/TransStrings.php:719
 msgid "sun"
 msgstr ""
 
-#: app/Services/TransStrings.php:730
+#: app/Services/TransStrings.php:741
 msgid "Sunday"
 msgstr ""
 
-#: app/Services/TransStrings.php:287
+#: app/Services/TransStrings.php:289
 msgid "System"
 msgstr ""
 
-#: app/Services/TransStrings.php:797
+#: app/Services/TransStrings.php:809
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendarEvent.php:114
 msgid "System Default"
 msgstr ""
 
-#: app/Services/TransStrings.php:791
+#: app/Services/TransStrings.php:803
 msgid "System Enabled"
 msgstr ""
 
@@ -5696,16 +5902,16 @@ msgstr ""
 msgid "Task Title"
 msgstr ""
 
-#: app/Services/TransStrings.php:534
+#: app/Services/TransStrings.php:536
 #: app/Hooks/Handlers/AdminMenuHandler.php:496
 msgid "Team"
 msgstr ""
 
-#: app/Services/TransStrings.php:541
+#: app/Services/TransStrings.php:543
 msgid "Team Avatar"
 msgstr ""
 
-#: app/Services/TransStrings.php:538
+#: app/Services/TransStrings.php:540
 msgid "Team Member"
 msgstr ""
 
@@ -5713,19 +5919,19 @@ msgstr ""
 msgid "Team Member "
 msgstr ""
 
-#: app/Services/TransStrings.php:539
+#: app/Services/TransStrings.php:541
 msgid "Team Members"
 msgstr ""
 
-#: app/Services/TransStrings.php:540
+#: app/Services/TransStrings.php:542
 msgid "Team Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:542 app/Hooks/filters.php:29
+#: app/Services/TransStrings.php:544 app/Hooks/filters.php:29
 msgid "Team Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:930 app/Services/Helper.php:1529
+#: app/Services/TransStrings.php:942 app/Services/Helper.php:1529
 msgid "Terms & Conditions"
 msgstr ""
 
@@ -5741,7 +5947,7 @@ msgstr ""
 msgid "Textarea"
 msgstr ""
 
-#: app/Services/TransStrings.php:667
+#: app/Services/TransStrings.php:669
 msgid "Thank You For Choosing FluentBooking. Let's -"
 msgstr ""
 
@@ -5751,19 +5957,19 @@ msgstr ""
 msgid "Thank you for using <a href=\"%s\">FluentBooking</a>."
 msgstr ""
 
-#: app/Services/TransStrings.php:568
+#: app/Services/TransStrings.php:570
 msgid "The above app secret key will be encrypted and stored securely."
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:191
+#: app/Http/Controllers/SchedulesController.php:197
 msgid "The booking has been cancelled"
 msgstr ""
 
-#: app/Http/Controllers/SchedulesController.php:199
+#: app/Http/Controllers/SchedulesController.php:205
 msgid "The booking has been rejected"
 msgstr ""
 
-#: app/Services/TransStrings.php:323
+#: app/Services/TransStrings.php:325
 msgid ""
 "The booking needs to be manually confirmed before it is pushed to the "
 "integrations and a confirmation mail is sent"
@@ -5779,7 +5985,7 @@ msgstr ""
 msgid "The date for %s cannot be later than %s."
 msgstr ""
 
-#: app/Services/TransStrings.php:846
+#: app/Services/TransStrings.php:858
 msgid "The default date format will be applied if no format is chosen."
 msgstr ""
 
@@ -5796,13 +6002,13 @@ msgstr ""
 msgid "The provided slug is not available. Please choose a different one"
 msgstr ""
 
-#: app/Services/TransStrings.php:155
+#: app/Services/TransStrings.php:157
 msgid ""
 "The selected product will be used for checkout in WooCommerce. The amount "
 "will be equal to the selected product pricing."
 msgstr ""
 
-#: app/Services/TransStrings.php:452
+#: app/Services/TransStrings.php:454
 msgid "The Slug need to be at least 4 characters"
 msgstr ""
 
@@ -5812,11 +6018,11 @@ msgid ""
 "The user already have a calendar. Please delete it first to create a new one"
 msgstr ""
 
-#: app/Services/TransStrings.php:882
+#: app/Services/TransStrings.php:894
 msgid "The value must be unique."
 msgstr ""
 
-#: app/Services/TransStrings.php:796
+#: app/Services/TransStrings.php:808
 msgid "Theme"
 msgstr ""
 
@@ -5824,7 +6030,7 @@ msgstr ""
 msgid "This action is not allowed"
 msgstr ""
 
-#: app/Models/Booking.php:593
+#: app/Models/Booking.php:607
 msgid "This booking is not cancellable."
 msgstr ""
 
@@ -5832,7 +6038,7 @@ msgstr ""
 msgid "This email has been generated by fluent booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:851
+#: app/Services/TransStrings.php:863
 msgid "This feature is available in FluentBooking Pro"
 msgstr ""
 
@@ -5880,27 +6086,27 @@ msgstr ""
 msgid "This Funnel will be initiated when a new booking has been confirmed."
 msgstr ""
 
-#: app/Services/TransStrings.php:108
+#: app/Services/TransStrings.php:110
 msgid "This is a Pro Feature"
 msgstr ""
 
-#: app/Services/TransStrings.php:194
+#: app/Services/TransStrings.php:196
 msgid "This is a system defined field. You can only edit labels"
 msgstr ""
 
-#: app/Services/TransStrings.php:883
+#: app/Services/TransStrings.php:895
 msgid "This label will only be visible for admin."
 msgstr ""
 
-#: app/Services/TransStrings.php:628
+#: app/Services/TransStrings.php:630
 msgid "This number will be used for sending sms notification"
 msgstr ""
 
-#: app/Services/TransStrings.php:795
+#: app/Services/TransStrings.php:807
 msgid "This only applies to your public landing pages"
 msgstr ""
 
-#: app/Services/TransStrings.php:884
+#: app/Services/TransStrings.php:896
 msgid "This portal can be accessed from"
 msgstr ""
 
@@ -5912,17 +6118,17 @@ msgid ""
 "a few seconds ago."
 msgstr ""
 
-#: app/Services/TransStrings.php:640
+#: app/Services/TransStrings.php:642
 msgid ""
 "This SMS will be sent to the attendee if phone number is provided during "
 "booking"
 msgstr ""
 
-#: app/Services/TransStrings.php:712
+#: app/Services/TransStrings.php:723
 msgid "thu"
 msgstr ""
 
-#: app/Services/TransStrings.php:727
+#: app/Services/TransStrings.php:738
 msgid "Thursday"
 msgstr ""
 
@@ -5930,15 +6136,15 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
-#: app/Services/TransStrings.php:355
+#: app/Services/TransStrings.php:357
 msgid "Time-slot intervals"
 msgstr ""
 
-#: app/Services/TransStrings.php:428 app/Hooks/Handlers/FrontEndHandler.php:595
+#: app/Services/TransStrings.php:430 app/Hooks/Handlers/FrontEndHandler.php:595
 msgid "Timezone"
 msgstr ""
 
-#: app/Services/TransStrings.php:707
+#: app/Services/TransStrings.php:718
 msgid "timezone"
 msgstr ""
 
@@ -5946,55 +6152,60 @@ msgstr ""
 msgid "Timezone:"
 msgstr ""
 
-#: app/Services/TransStrings.php:212
+#: app/Services/TransStrings.php:214
 msgid "Timing"
 msgstr ""
 
-#: app/Services/TransStrings.php:454
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:89
+#: app/Services/Integrations/Elementor/Widgets/FcalCalendar.php:81
+msgid "Title"
+msgstr ""
+
+#: app/Services/TransStrings.php:456
 msgid "Title Field is required"
 msgstr ""
 
-#: app/Services/TransStrings.php:783
+#: app/Services/TransStrings.php:795
 msgid "To"
 msgstr ""
 
-#: app/Services/TransStrings.php:152
+#: app/Services/TransStrings.php:154
 msgid "To accept payment for your bookings, please activate"
 msgstr ""
 
-#: app/Services/TransStrings.php:153
+#: app/Services/TransStrings.php:155
 msgid ""
 "To accept payment for your bookings, please enable payment from global "
 "settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:422
+#: app/Services/TransStrings.php:424
 msgid "To get the landing page url, please enable from"
 msgstr ""
 
-#: app/Services/TransStrings.php:322
+#: app/Services/TransStrings.php:324
 msgid "To lock the timezone on booking page, useful for in-person events"
 msgstr ""
 
-#: app/Services/TransStrings.php:562
+#: app/Services/TransStrings.php:564
 msgid "to pick a time to meet with"
 msgstr ""
 
-#: app/Services/TransStrings.php:139
+#: app/Services/TransStrings.php:141
 msgid "To use Remote Calendar Sync feature please configure your apps first"
 msgstr ""
 
-#: app/Services/TransStrings.php:138
+#: app/Services/TransStrings.php:140
 msgid ""
 "To use Remote Calendar Sync feature please connect with one of the following "
 "calendar providers"
 msgstr ""
 
-#: app/Services/TransStrings.php:778
+#: app/Services/TransStrings.php:790
 msgid "Today"
 msgstr ""
 
-#: app/Services/TransStrings.php:780
+#: app/Services/TransStrings.php:792
 msgid "Tomorrow"
 msgstr ""
 
@@ -6027,40 +6238,45 @@ msgstr ""
 msgid "Total Payment"
 msgstr ""
 
-#: app/Services/TransStrings.php:483
+#: app/Services/TransStrings.php:485
 #: app/Views/public/receipt/payment-info.php:29
 msgid "Total:"
 msgstr ""
 
-#: app/Services/TransStrings.php:485
+#: app/Services/TransStrings.php:487
 msgid "Transaction Details"
 msgstr ""
 
-#: app/Services/TransStrings.php:489
+#: app/Services/TransStrings.php:491
 msgid "Transaction ID"
 msgstr ""
 
-#: app/Services/TransStrings.php:710
+#: app/Services/TransStrings.php:721
 msgid "tue"
 msgstr ""
 
-#: app/Services/TransStrings.php:725
+#: app/Services/TransStrings.php:736
 msgid "Tuesday"
 msgstr ""
 
-#: app/Services/TransStrings.php:413
+#: app/Services/TransStrings.php:415
 msgid "Turn On"
+msgstr ""
+
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:93
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:103
+msgid "Type your title here"
 msgstr ""
 
 #: app/Services/TransStrings.php:92
 msgid "Unavailable"
 msgstr ""
 
-#: app/Services/TransStrings.php:824 app/Views/public/bookings.php:63
+#: app/Services/TransStrings.php:836 app/Views/public/bookings.php:63
 msgid "Unconfirmed"
 msgstr ""
 
-#: app/Services/TransStrings.php:823
+#: app/Services/TransStrings.php:835
 msgid "unconfirmed"
 msgstr ""
 
@@ -6073,11 +6289,12 @@ msgstr ""
 msgid "Unknown error"
 msgstr ""
 
-#: app/Services/TransStrings.php:764
+#: app/Services/TransStrings.php:776
 msgid "unpaid"
 msgstr ""
 
-#: app/Services/TransStrings.php:456 app/Services/Helper.php:1402
+#: app/Services/TransStrings.php:458 app/Services/Helper.php:1402
+#: app/Services/Integrations/Elementor/Widgets/FcalBookings.php:115
 msgid "Upcoming"
 msgstr ""
 
@@ -6085,36 +6302,36 @@ msgstr ""
 msgid "Update"
 msgstr ""
 
-#: app/Services/TransStrings.php:546
+#: app/Services/TransStrings.php:548
 msgid "Update Access Permissions"
 msgstr ""
 
-#: app/Services/TransStrings.php:410
+#: app/Services/TransStrings.php:412
 msgid "Update Info"
 msgstr ""
 
-#: app/Services/TransStrings.php:207
+#: app/Services/TransStrings.php:209
 msgid "Update Question"
 msgstr ""
 
-#: app/Services/TransStrings.php:146
+#: app/Services/TransStrings.php:148
 msgid "Update Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:327
+#: app/Services/TransStrings.php:329
 msgid "Update the slug to customize your event landing page URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:106
+#: app/Services/TransStrings.php:108
 #: app/Hooks/Handlers/AdminMenuHandler.php:149
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: app/Services/TransStrings.php:414
+#: app/Services/TransStrings.php:416
 msgid "URL has been copied to your clipboard"
 msgstr ""
 
-#: app/Services/TransStrings.php:890
+#: app/Services/TransStrings.php:902
 msgid "URL Slug for the frontend panel (eg: projects)"
 msgstr ""
 
@@ -6122,11 +6339,11 @@ msgstr ""
 msgid "Usages List"
 msgstr ""
 
-#: app/Services/TransStrings.php:891
+#: app/Services/TransStrings.php:903
 msgid "Use a pre - defined page via shortcode"
 msgstr ""
 
-#: app/Services/TransStrings.php:303
+#: app/Services/TransStrings.php:305
 msgid "Use an Existing Schedule"
 msgstr ""
 
@@ -6142,19 +6359,19 @@ msgstr ""
 msgid "Use host name as From Name for booking emails to guests"
 msgstr ""
 
-#: app/Services/TransStrings.php:782
+#: app/Services/TransStrings.php:794
 msgid "Use Native Payment Methods by FluentBooking"
 msgstr ""
 
-#: app/Services/TransStrings.php:913
+#: app/Services/TransStrings.php:925
 msgid "Use Outlook Calendar to sync your Fluent Booking events"
 msgstr ""
 
-#: app/Services/TransStrings.php:835
+#: app/Services/TransStrings.php:847
 msgid "Use this number for sending sms notification"
 msgstr ""
 
-#: app/Services/TransStrings.php:781
+#: app/Services/TransStrings.php:793
 msgid "Use WooCommerce Checkout"
 msgstr ""
 
@@ -6162,11 +6379,11 @@ msgstr ""
 msgid "User not found"
 msgstr ""
 
-#: app/Services/TransStrings.php:335
+#: app/Services/TransStrings.php:337
 msgid "User will see this if they attempt to cancel without permission"
 msgstr ""
 
-#: app/Services/TransStrings.php:336
+#: app/Services/TransStrings.php:338
 msgid "User will see this if they attempt to reschedule without permission"
 msgstr ""
 
@@ -6178,7 +6395,7 @@ msgstr ""
 msgid "Validation Failed! Please fill up required fields"
 msgstr ""
 
-#: app/Services/TransStrings.php:181
+#: app/Services/TransStrings.php:183
 msgid "Value"
 msgstr ""
 
@@ -6186,11 +6403,11 @@ msgstr ""
 msgid "Vanuatu Vatu"
 msgstr ""
 
-#: app/Services/TransStrings.php:596
+#: app/Services/TransStrings.php:598
 msgid "Verify License"
 msgstr ""
 
-#: app/Services/TransStrings.php:889
+#: app/Services/TransStrings.php:901
 msgid "Via Shortcode / Dedicated Page?"
 msgstr ""
 
@@ -6206,11 +6423,15 @@ msgstr ""
 msgid "View "
 msgstr ""
 
-#: app/Services/TransStrings.php:455
+#: app/Services/TransStrings.php:690
+msgid "View Booking"
+msgstr ""
+
+#: app/Services/TransStrings.php:457
 msgid "View Details"
 msgstr ""
 
-#: app/Services/TransStrings.php:94
+#: app/Services/TransStrings.php:96
 msgid "View Event"
 msgstr ""
 
@@ -6230,40 +6451,44 @@ msgstr ""
 msgid "Vivid Blue"
 msgstr ""
 
-#: app/Services/TransStrings.php:313
+#: app/Services/TransStrings.php:315
 msgid "Want to add buffer time before or after your events?"
 msgstr ""
 
-#: app/Services/TransStrings.php:598
+#: app/Services/TransStrings.php:600
 msgid "Want to deactivate this license?"
 msgstr ""
 
-#: app/Services/TransStrings.php:164
+#: app/Services/TransStrings.php:166
 msgid "WebHook Feed Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:189
+#: app/Services/TransStrings.php:191
 msgid "Webhook Feeds"
 msgstr ""
 
-#: app/Services/TransStrings.php:166
+#: app/Services/TransStrings.php:168
 msgid "WebHook URL"
 msgstr ""
 
-#: app/Services/TransStrings.php:370
+#: app/Services/TransStrings.php:372
 #: app/Hooks/Handlers/AdminMenuHandler.php:769
 msgid "Webhooks Feeds"
 msgstr ""
 
-#: app/Services/TransStrings.php:711
+#: app/Services/TransStrings.php:722
 msgid "wed"
 msgstr ""
 
-#: app/Services/TransStrings.php:726
+#: app/Services/TransStrings.php:737
 msgid "Wednesday"
 msgstr ""
 
-#: app/Services/TransStrings.php:579
+#: app/Services/TransStrings.php:679
+msgid "Week"
+msgstr ""
+
+#: app/Services/TransStrings.php:581
 msgid "Weekly"
 msgstr ""
 
@@ -6271,11 +6496,11 @@ msgstr ""
 msgid "Weekly Hours"
 msgstr ""
 
-#: app/Services/TransStrings.php:357
+#: app/Services/TransStrings.php:359
 msgid "Weekly Hours By Day"
 msgstr ""
 
-#: app/Services/TransStrings.php:359
+#: app/Services/TransStrings.php:361
 msgid "Weekly Hours Schedules"
 msgstr ""
 
@@ -6283,55 +6508,55 @@ msgstr ""
 msgid "West African Cfa Franc"
 msgstr ""
 
-#: app/Services/BookingService.php:285 app/Models/Booking.php:1098
+#: app/Services/BookingService.php:285 app/Models/Booking.php:1120
 msgid "What"
 msgstr ""
 
-#: app/Services/TransStrings.php:258
+#: app/Services/TransStrings.php:260
 msgid "What hours are you available?"
 msgstr ""
 
-#: app/Services/TransStrings.php:259 app/Services/BookingFieldService.php:99
+#: app/Services/TransStrings.php:261 app/Services/BookingFieldService.php:99
 msgid "What is this meeting about?"
 msgstr ""
 
-#: app/Services/TransStrings.php:716
+#: app/Services/TransStrings.php:727
 msgid "WhatsApp"
 msgstr ""
 
-#: app/Services/BookingService.php:289 app/Models/Booking.php:1102
+#: app/Services/BookingService.php:289 app/Models/Booking.php:1124
 msgid "When"
 msgstr ""
 
-#: app/Services/TransStrings.php:344
+#: app/Services/TransStrings.php:346
 msgid "When booking notice is less than"
 msgstr ""
 
-#: app/Services/TransStrings.php:345
+#: app/Services/TransStrings.php:347
 msgid "When meeting starts in less than"
 msgstr ""
 
-#: app/Services/BookingService.php:297 app/Models/Booking.php:1110
+#: app/Services/BookingService.php:297 app/Models/Booking.php:1132
 msgid "Where"
 msgstr ""
 
-#: app/Services/TransStrings.php:124
+#: app/Services/TransStrings.php:126
 msgid "Which Booking Forms to Show?"
 msgstr ""
 
-#: app/Services/TransStrings.php:616
+#: app/Services/TransStrings.php:618
 msgid "Which Schedule Do You Want to Use ?"
 msgstr ""
 
-#: app/Services/TransStrings.php:304
+#: app/Services/TransStrings.php:306
 msgid "Which Schedule Do You Want to Use?"
 msgstr ""
 
-#: app/Services/TransStrings.php:863
+#: app/Services/TransStrings.php:875
 msgid "Which slots are you available?"
 msgstr ""
 
-#: app/Services/BookingService.php:293 app/Models/Booking.php:1106
+#: app/Services/BookingService.php:293 app/Models/Booking.php:1128
 msgid "Who"
 msgstr ""
 
@@ -6343,29 +6568,33 @@ msgstr ""
 msgid "will be available soon"
 msgstr ""
 
-#: app/Services/TransStrings.php:114
+#: app/Services/TransStrings.php:116
 msgid "Will be shown on landing page social share meta or profile block"
 msgstr ""
 
-#: app/Services/TransStrings.php:122
+#: app/Services/TransStrings.php:124
 msgid "Will be shown on your calendar landing page / team block UI"
 msgstr ""
 
-#: app/Services/TransStrings.php:394
+#: app/Services/TransStrings.php:396
 #: app/Services/LandingPage/LandingPageHandler.php:227
 #: app/Services/LandingPage/LandingPageHandler.php:314
 msgid "with"
 msgstr ""
 
-#: app/Services/TransStrings.php:172
+#: app/Services/TransStrings.php:174
 msgid "With Headers"
 msgstr ""
 
-#: app/Services/TransStrings.php:300
+#: app/Services/TransStrings.php:689
+msgid "with you and"
+msgstr ""
+
+#: app/Services/TransStrings.php:302
 msgid "Within a date range"
 msgstr ""
 
-#: app/Services/TransStrings.php:298
+#: app/Services/TransStrings.php:300
 msgid "Within future days"
 msgstr ""
 
@@ -6373,23 +6602,23 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: app/Services/TransStrings.php:202
+#: app/Services/TransStrings.php:204
 msgid "Yes"
 msgstr ""
 
-#: app/Services/TransStrings.php:502
+#: app/Services/TransStrings.php:504
 msgid "Yes, Cancel"
 msgstr ""
 
-#: app/Services/TransStrings.php:510
+#: app/Services/TransStrings.php:512
 msgid "Yes, Delete"
 msgstr ""
 
-#: app/Services/TransStrings.php:779
+#: app/Services/TransStrings.php:791
 msgid "Yesterday"
 msgstr ""
 
-#: app/Services/TransStrings.php:564
+#: app/Services/TransStrings.php:566
 msgid "you"
 msgstr ""
 
@@ -6403,13 +6632,13 @@ msgstr ""
 msgid "You are scheduled with %s"
 msgstr ""
 
-#: app/Services/TransStrings.php:314
+#: app/Services/TransStrings.php:316
 msgid ""
 "You can select a different schedule for each host. Each host's default "
 "schedule is chosen by default."
 msgstr ""
 
-#: app/Services/TransStrings.php:648
+#: app/Services/TransStrings.php:650
 msgid "You didn't configure twilio yet. Please configure from"
 msgstr ""
 
@@ -6418,17 +6647,17 @@ msgstr ""
 msgid "You do not have permission to export data"
 msgstr ""
 
-#: app/Services/TransStrings.php:192
+#: app/Services/TransStrings.php:194
 msgid "You don't have any feeds configured. Let's go"
 msgstr ""
 
-#: app/Services/TransStrings.php:103
+#: app/Services/TransStrings.php:105
 msgid ""
 "You haven't added any integration feed yet. Add new integration to connect "
 "your favourite tools with your calendar"
 msgstr ""
 
-#: app/Services/TransStrings.php:597
+#: app/Services/TransStrings.php:599
 msgid "You license key is valid and activated"
 msgstr ""
 
@@ -6457,7 +6686,7 @@ msgstr ""
 msgid "Your booking has been submitted"
 msgstr ""
 
-#: app/Services/TransStrings.php:453
+#: app/Services/TransStrings.php:455
 msgid ""
 "Your booking slug only accepts alpha-numeric values. Please do not provide "
 "any space or special characters"
@@ -6473,15 +6702,15 @@ msgstr ""
 msgid "Your Feed Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:408
+#: app/Services/TransStrings.php:410
 msgid "Your First Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:409
+#: app/Services/TransStrings.php:411
 msgid "Your Last Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:594
+#: app/Services/TransStrings.php:596
 msgid "Your License Key"
 msgstr ""
 
@@ -6495,34 +6724,34 @@ msgstr ""
 msgid "Your meeting has been rescheduled"
 msgstr ""
 
-#: app/Services/TransStrings.php:230
+#: app/Services/TransStrings.php:232
 msgid "Your Meeting Link"
 msgstr ""
 
-#: app/Services/TransStrings.php:604 app/Services/BookingFieldService.php:73
+#: app/Services/TransStrings.php:606 app/Services/BookingFieldService.php:73
 #: app/Services/BookingFieldService.php:79
 msgid "Your Name"
 msgstr ""
 
-#: app/Services/TransStrings.php:228 app/Services/BookingFieldService.php:166
+#: app/Services/TransStrings.php:230 app/Services/BookingFieldService.php:166
 msgid "Your Phone Number"
 msgstr ""
 
-#: app/Services/TransStrings.php:227
+#: app/Services/TransStrings.php:229
 msgid "Your Phone Number * (with country code)"
 msgstr ""
 
-#: app/Services/TransStrings.php:372
+#: app/Services/TransStrings.php:374
 msgid "Your Stripe Account is connected"
 msgstr ""
 
-#: app/Services/TransStrings.php:142
+#: app/Services/TransStrings.php:144
 msgid ""
 "Your Zoom Account is connected. Please don't forget to set the meeting "
 "location as \"Zoom Video\" if you want to create meeting in zoom."
 msgstr ""
 
-#: app/Services/TransStrings.php:868
+#: app/Services/TransStrings.php:880
 msgid "Zip"
 msgstr ""
 
@@ -6534,18 +6763,18 @@ msgstr ""
 msgid "Zoom Integration"
 msgstr ""
 
-#: app/Services/TransStrings.php:140
+#: app/Services/TransStrings.php:142
 msgid "Zoom Integrations Settings"
 msgstr ""
 
-#: app/Services/TransStrings.php:284 app/Hooks/Handlers/FrontEndHandler.php:624
+#: app/Services/TransStrings.php:286 app/Hooks/Handlers/FrontEndHandler.php:624
 msgid "Zoom Meeting"
 msgstr ""
 
-#: app/Services/LocationService.php:29 app/Models/Booking.php:393
+#: app/Services/LocationService.php:29 app/Models/Booking.php:407
 msgid "Zoom Video"
 msgstr ""
 
-#: app/Models/CalendarSlot.php:711
+#: app/Models/CalendarSlot.php:707
 msgid "Zoom Video (Pro)"
 msgstr ""

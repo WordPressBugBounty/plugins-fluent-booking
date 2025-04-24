@@ -31,6 +31,7 @@ class ComposerAutoloaderInit78e842760d4b2c304f7701ee34fd8f8e
         require __DIR__ . '/autoload_static.php';
         call_user_func(\Composer\Autoload\ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e::getInitializer($loader));
 
+        $loader->setClassMapAuthoritative(true);
         $loader->register(true);
 
         return $loader;

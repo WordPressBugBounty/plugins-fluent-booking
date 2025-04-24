@@ -24,7 +24,7 @@ class FcalBookings extends \Elementor\Widget_Base
      */
     public function get_title()
     {
-        return esc_html__('Bookings', 'fluent-booking-pro');
+        return esc_html__('Bookings', 'fluent-booking');
     }
 
     /**
@@ -68,64 +68,64 @@ class FcalBookings extends \Elementor\Widget_Base
         $this->start_controls_section(
             'content_section',
             [
-                'label' => esc_html__('Content', 'fluent-booking-pro'),
+                'label' => esc_html__('Content', 'fluent-booking'),
                 'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
             ]
         );
         $this->add_control(
             'selected_calendars',
             [
-                'label'       => esc_html__('Select Calendars', 'fluent-booking-pro'),
+                'label'       => esc_html__('Select Calendars', 'fluent-booking'),
                 'type'        => \Elementor\Controls_Manager::SELECT2,
                 'label_block' => true,
                 'multiple'    => true,
-                'description' => esc_html__('Left empty to show the bookings for all calendars', 'fluent-booking-pro'),
+                'description' => esc_html__('Left empty to show the bookings for all calendars', 'fluent-booking'),
                 'options'     => $this->getCalendars(),
             ]
         );
         $this->add_control(
             'booking_title',
             [
-                'label'       => esc_html__('Title', 'fluent-booking-pro'),
+                'label'       => esc_html__('Title', 'fluent-booking'),
                 'type'        => \Elementor\Controls_Manager::TEXT,
                 'label_block' => true,
-                'default'     => esc_html__('My Bookings', 'fluent-booking-pro'),
-                'placeholder' => esc_html__('Type your title here', 'fluent-booking-pro'),
+                'default'     => esc_html__('My Bookings', 'fluent-booking'),
+                'placeholder' => esc_html__('Type your title here', 'fluent-booking'),
             ]
         );
         $this->add_control(
             'no_bookings_title',
             [
-                'label'       => esc_html__('No Booking Title', 'fluent-booking-pro'),
+                'label'       => esc_html__('No Booking Title', 'fluent-booking'),
                 'type'        => \Elementor\Controls_Manager::TEXT,
                 'label_block' => true,
-                'default'     => esc_html__('No bookings found', 'fluent-booking-pro'),
-                'placeholder' => esc_html__('Type your title here', 'fluent-booking-pro'),
+                'default'     => esc_html__('No bookings found', 'fluent-booking'),
+                'placeholder' => esc_html__('Type your title here', 'fluent-booking'),
             ]
         );
 
         $this->add_control(
             'default_period',
             [
-                'label'   => esc_html__('Default Period', 'fluent-booking-pro'),
+                'label'   => esc_html__('Default Period', 'fluent-booking'),
                 'type'    => \Elementor\Controls_Manager::SELECT,
                 'default' => 'all',
                 'options' => [
-                    'all'       => esc_html__('All', 'fluent-booking-pro'),
-                    'upcoming'  => esc_html__('Upcoming', 'fluent-booking-pro'),
-                    'completed' => esc_html__('Completed', 'fluent-booking-pro'),
-                    'cancelled' => esc_html__('Cancelled', 'fluent-booking-pro'),
-                    'pending'   => esc_html__('Pending', 'fluent-booking-pro')
+                    'all'       => esc_html__('All', 'fluent-booking'),
+                    'upcoming'  => esc_html__('Upcoming', 'fluent-booking'),
+                    'completed' => esc_html__('Completed', 'fluent-booking'),
+                    'cancelled' => esc_html__('Cancelled', 'fluent-booking'),
+                    'pending'   => esc_html__('Pending', 'fluent-booking')
                 ],
             ]
         );
         $this->add_control(
             'show_filter',
             [
-                'label'        => esc_html__('Show Filter', 'fluent-booking-pro'),
+                'label'        => esc_html__('Show Filter', 'fluent-booking'),
                 'type'         => \Elementor\Controls_Manager::SWITCHER,
-                'label_on'     => esc_html__('Show', 'fluent-booking-pro'),
-                'label_off'    => esc_html__('Hide', 'fluent-booking-pro'),
+                'label_on'     => esc_html__('Show', 'fluent-booking'),
+                'label_off'    => esc_html__('Hide', 'fluent-booking'),
                 'return_value' => 'yes',
                 'default'      => 'yes',
             ]
@@ -133,10 +133,10 @@ class FcalBookings extends \Elementor\Widget_Base
         $this->add_control(
             'show_pagination',
             [
-                'label'        => esc_html__('Show Pagination', 'fluent-booking-pro'),
+                'label'        => esc_html__('Show Pagination', 'fluent-booking'),
                 'type'         => \Elementor\Controls_Manager::SWITCHER,
-                'label_on'     => esc_html__('Show', 'fluent-booking-pro'),
-                'label_off'    => esc_html__('Hide', 'fluent-booking-pro'),
+                'label_on'     => esc_html__('Show', 'fluent-booking'),
+                'label_off'    => esc_html__('Hide', 'fluent-booking'),
                 'return_value' => 'yes',
                 'default'      => 'yes',
             ]
@@ -144,7 +144,7 @@ class FcalBookings extends \Elementor\Widget_Base
         $this->add_control(
             'per_page',
             [
-                'label'   => esc_html__('Per Page', 'fluent-booking-pro'),
+                'label'   => esc_html__('Per Page', 'fluent-booking'),
                 'type'    => \Elementor\Controls_Manager::SLIDER,
                 'range'   => [
                     'px' => [

@@ -220,6 +220,20 @@ class Booking extends Model
         return $query->where('end_time', '<', gmdate('Y-m-d H:i:s')); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
     }
 
+    public function scopeApplyDateRangeFilter($query, $range)
+    {
+        if (empty($range['start_date']) || empty($range['end_date'])) {
+            return $query;
+        }
+
+        if (!empty($range['time_zone']) && $range['time_zone'] != 'UTC') {
+            $range['start_date'] = date('Y-m-d H:i:s', strtotime($range['start_date'] . ' -1 day'));
+            $range['end_date'] = date('Y-m-d H:i:s', strtotime($range['end_date'] . ' +1 day'));
+        }
+
+        return $query->whereBetween('start_time', [$range['start_date'], $range['end_date']]);
+    }
+
     public function scopeApplyComputedStatus($query, $status)
     {
         $validStatuses = [
@@ -652,9 +666,15 @@ class Booking extends Model
         do_action('fluent_booking/booking_schedule_rejected', $this, $this->calendar_event);
     }
 
-    public function getRescheduleReason()
+    public function getRescheduleReason($html = false)
     {
-        return $this->getMeta('reschedule_reason', '');
+        $rescheduleReason = $this->getMeta('reschedule_reason', '');
+
+        if ($rescheduleReason && $html) {
+            return wp_unslash($rescheduleReason);
+        }
+
+        return $rescheduleReason;
     }
 
     private function generateBookingTitle($eventTitle, $authorName, $guestName)
@@ -1085,14 +1105,16 @@ class Booking extends Model
         return $html;
     }
 
-    public function getConfirmationData()
+    public function getConfirmationData($html = false)
     {
         $author = $this->getHostDetails(false);
 
         $guestName = trim($this->first_name . ' ' . $this->last_name);
         
         $bookingTitle = $this->getBookingTitle();
-        
+
+        $separator = $html ? '<br>' : PHP_EOL;
+
         $sections = [
             'what'  => [
                 'title'   => __('What', 'fluent-booking'),
@@ -1100,23 +1122,27 @@ class Booking extends Model
             ],
             'when'  => [
                 'title'   => __('When', 'fluent-booking'),
-                'content' => $this->getFullBookingDateTimeText($this->person_time_zone, true) . ' (' . $this->person_time_zone . ')',
+                'content' => $this->getFullBookingDateTimeText($this->person_time_zone, !$html) . ' (' . $this->person_time_zone . ')',
             ],
             'who'   => [
                 'title'   => __('Who', 'fluent-booking'),
-                'content' => $author['name'] . ' - ' . __('Organizer', 'fluent-booking') . PHP_EOL . $author['email'] . PHP_EOL . PHP_EOL . $guestName . PHP_EOL . $this->email
+                'content' => $author['name'] . ' - ' . __('Organizer', 'fluent-booking') . $separator . $author['email'] . $separator . $separator . $guestName . $separator . $this->email
             ],
             'where' => [
                 'title'   => __('Where', 'fluent-booking'),
                 'content' => $this->getLocationAsText()
             ],
         ];
-        
-        $lines = array_map(function ($section) {
-            return $section['title'] . ': ' . PHP_EOL . esc_html($section['content']);
+
+        if ($html) {
+            unset($sections['who']);
+        }
+
+        $lines = array_map(function ($section) use ($separator) {
+            return $section['title'] . ': ' . $separator . esc_html($section['content']);
         }, $sections);
-        
-        return implode(PHP_EOL . PHP_EOL, $lines) . PHP_EOL . PHP_EOL;
+
+        return implode($separator . $separator, $lines) . $separator . $separator;
     }
 
     public function getMeetingBookmarks($assetsUrl = '')

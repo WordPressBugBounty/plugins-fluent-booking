@@ -27,7 +27,7 @@ class FcalCalendar extends \Elementor\Widget_Base
      */
     public function get_title()
     {
-        return esc_html__('Calendar', 'fluent-booking-pro');
+        return esc_html__('Calendar', 'fluent-booking');
     }
 
     /**
@@ -71,41 +71,41 @@ class FcalCalendar extends \Elementor\Widget_Base
         $this->start_controls_section(
             'content_section',
             [
-                'label' => esc_html__('Content', 'fluent-booking-pro'),
+                'label' => esc_html__('Content', 'fluent-booking'),
                 'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
             ]
         );
         $this->add_control(
             'title',
             [
-                'label'       => esc_html__('Title', 'fluent-booking-pro'),
+                'label'       => esc_html__('Title', 'fluent-booking'),
                 'type'        => \Elementor\Controls_Manager::TEXT,
-                'placeholder' => esc_html__('Enter title here', 'fluent-booking-pro'),
+                'placeholder' => esc_html__('Enter title here', 'fluent-booking'),
             ]
         );
         $this->add_control(
             'description',
             [
-                'label'       => esc_html__('Description', 'fluent-booking-pro'),
+                'label'       => esc_html__('Description', 'fluent-booking'),
                 'type'        => \Elementor\Controls_Manager::TEXTAREA,
                 'rows'        => 4,
-                'placeholder' => esc_html__('Enter description here', 'fluent-booking-pro'),
+                'placeholder' => esc_html__('Enter description here', 'fluent-booking'),
             ]
         );
         $this->add_control(
             'header_image',
             [
-                'label'   => esc_html__('Choose Header Image', 'fluent-booking-pro'),
+                'label'   => esc_html__('Choose Header Image', 'fluent-booking'),
                 'type'    => \Elementor\Controls_Manager::MEDIA
             ]
         );
         $this->add_control(
             'show_host_info',
             [
-                'label'        => esc_html__('Host Info', 'fluent-booking-pro'),
+                'label'        => esc_html__('Host Info', 'fluent-booking'),
                 'type'         => \Elementor\Controls_Manager::SWITCHER,
-                'label_on'     => esc_html__('Show', 'fluent-booking-pro'),
-                'label_off'    => esc_html__('Hide', 'fluent-booking-pro'),
+                'label_on'     => esc_html__('Show', 'fluent-booking'),
+                'label_off'    => esc_html__('Hide', 'fluent-booking'),
                 'return_value' => 'yes',
                 'default'      => 'yes',
             ]
@@ -114,7 +114,7 @@ class FcalCalendar extends \Elementor\Widget_Base
         $this->add_control(
             'selected_cal_id',
             [
-                'label'       => esc_html__('Select Calendar', 'fluent-booking-pro'),
+                'label'       => esc_html__('Select Calendar', 'fluent-booking'),
                 'type'        => \Elementor\Controls_Manager::SELECT,
                 'label_block' => true,
                 'options'     => $this->getCalendars()
@@ -124,7 +124,7 @@ class FcalCalendar extends \Elementor\Widget_Base
         $this->add_control(
             'selected_event_ids',
             [
-                'label'       => esc_html__('Select Events', 'fluent-booking-pro'),
+                'label'       => esc_html__('Select Events', 'fluent-booking'),
                 'type'        => \Elementor\Controls_Manager::SELECT2,
                 'label_block' => true,
                 'multiple'    => true,
@@ -142,13 +142,13 @@ class FcalCalendar extends \Elementor\Widget_Base
         $this->start_controls_section(
             'content_style',
             [
-                'label' => esc_html__('Style', 'fluent-booking-pro'),
+                'label' => esc_html__('Style', 'fluent-booking'),
                 'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
             ]
         );
         $this->add_control('fcal_primary_color',
             [
-                'label'     => esc_html__('Primary Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Primary Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_date_wrapper .calendar .day .is-today,
@@ -187,7 +187,7 @@ class FcalCalendar extends \Elementor\Widget_Base
         );
         $this->add_control('fcal_border_color',
             [
-                'label'     => esc_html__('Border Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Border Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_side'  => 'border-right-color: {{VALUE}}',
@@ -213,7 +213,7 @@ class FcalCalendar extends \Elementor\Widget_Base
         $this->add_control(
             'avatar-radius',
             [
-                'label'      => esc_html__('Avatar Radius', 'fluent-booking-pro'),
+                'label'      => esc_html__('Avatar Radius', 'fluent-booking'),
                 'type'       => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', '%', 'em', 'rem', 'custom'],
                 'default'    => [
@@ -238,7 +238,7 @@ class FcalCalendar extends \Elementor\Widget_Base
         $this->add_control(
             'date-radius',
             [
-                'label'      => esc_html__('Date Radius', 'fluent-booking-pro'),
+                'label'      => esc_html__('Date Radius', 'fluent-booking'),
                 'type'       => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', '%', 'em', 'rem', 'custom'],
                 'default'    => [
@@ -257,7 +257,7 @@ class FcalCalendar extends \Elementor\Widget_Base
 
         $this->add_control('enabled_date_background',
             [
-                'label'     => esc_html__('Enabled Date Background', 'fluent-booking-pro'),
+                'label'     => esc_html__('Enabled Date Background', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_payment_items table thead th' => 'background-color: {{VALUE}}',
@@ -268,7 +268,7 @@ class FcalCalendar extends \Elementor\Widget_Base
         );
         $this->add_control('enabled_date_color',
             [
-                'label'     => esc_html__('Enabled Date Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Enabled Date Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_date_wrapper .calendar .day.day-enabled span' => 'color: {{VALUE}}',
@@ -277,7 +277,7 @@ class FcalCalendar extends \Elementor\Widget_Base
         );
         $this->add_control('disabled_date_color',
             [
-                'label'     => esc_html__('Disabled Date Color', 'fluent-booking-pro'),
+                'label'     => esc_html__('Disabled Date Color', 'fluent-booking'),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'selectors' => [
                     '{{WRAPPER}} .fcal_calendar_inner .fcal_date_wrapper .calendar .day.day-disabled' => 'color: {{VALUE}}',
@@ -587,7 +587,7 @@ class FcalCalendar extends \Elementor\Widget_Base
                         </div>
                     </div>
                 <?php else : ?>
-                    <div class="fcal_empty"><?php esc_html_e('Please Select the Event(s)', 'fluent-booking-pro'); ?></div>
+                    <div class="fcal_empty"><?php esc_html_e('Please Select the Event(s)', 'fluent-booking'); ?></div>
                 <?php endif; ?>
             </div>
         <?php else :

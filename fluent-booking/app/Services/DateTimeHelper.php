@@ -91,7 +91,6 @@ class DateTimeHelper
 
     public static function convertToUtc($dateTime, $timezone, $format = 'Y-m-d H:i:s')
     {
-
         $timezone = self::getValidatedTimeZone($timezone);
 
         $dateTime = new \DateTime($dateTime, new \DateTimeZone($timezone));

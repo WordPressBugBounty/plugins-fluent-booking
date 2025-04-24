@@ -89,7 +89,7 @@ class CalendarIntegrationController extends Controller
         
         if ($fromEventIntegrations->isEmpty()) {
             return $this->sendError([
-                'message' => __('Integrations not found', 'fluent-booking-pro')
+                'message' => __('Integrations not found', 'fluent-booking')
             ], 422);
         }
 
@@ -100,7 +100,7 @@ class CalendarIntegrationController extends Controller
         }
 
         return [
-            'message' => __('Integrations has been successfully cloned.', 'fluent-booking-pro')
+            'message' => __('Integrations has been successfully cloned.', 'fluent-booking')
         ];
     }
 
