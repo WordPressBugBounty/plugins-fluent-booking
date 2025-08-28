@@ -15,8 +15,10 @@ class DeactivationHandler
 
     public function handle()
     {
-        if(function_exists('as_unschedule_action')) {
-            as_unschedule_action('fluent_booking_five_minutes_tasks');
+        if(function_exists('\as_unschedule_all_actions')) {
+            \as_unschedule_all_actions('fluent_booking_five_minutes_tasks');
+            \as_unschedule_all_actions('fluent_booking_hourly_tasks');
+            \as_unschedule_all_actions('fluent_booking/daily_tasks');
         }
 
         wp_clear_scheduled_hook('fluent_booking_five_minutes_tasks');

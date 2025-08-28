@@ -101,7 +101,7 @@ class PermissionManager
         return apply_filters('fluent_booking/has_calendar_access', $hasAccess, $calendar);
     }
 
-    public static function currentUserHasAnyPemrmission()
+    public static function currentUserHasAnyPermission()
     {
         if (current_user_can('manage_options')) {
             return true;

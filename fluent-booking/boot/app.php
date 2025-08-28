@@ -22,5 +22,15 @@ return function ($file) {
 
     add_action('plugins_loaded', function () use ($app) {
         do_action('fluent_booking/loaded', $app);
+        if (defined('FLUENT_BOOKING_PRO_VERSION') && version_compare(FLUENT_BOOKING_MIN_PRO_VERSION, FLUENT_BOOKING_PRO_VERSION, '>')) {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+            add_filter('fluent_booking/dashboard_notices', function ($notices) {
+                $updateUrl = admin_url('plugins.php?s=fluent-booking&plugin_status=all&fluent-booking-pro-check-update=' . time());
+                $notices[] = '<div class="error">' . esc_html__('FluentBookingPro plugin needs to be updated to the latest version.', 'fluent-booking') . ' <a href="' . esc_url($updateUrl) . '">' . esc_html__('Click here to update', 'fluent-booking') . '</a></div>';
+                return $notices;
+            });
+        }
     });
 };

@@ -2,7 +2,6 @@
 
 namespace FluentBooking\App\Http\Policies;
 
-use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\Framework\Foundation\Policy;
 

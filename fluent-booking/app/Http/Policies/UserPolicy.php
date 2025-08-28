@@ -15,6 +15,6 @@ class UserPolicy extends Policy
      */
     public function verifyRequest(Request $request)
     {
-        return PermissionManager::currentUserHasAnyPemrmission();
+        return PermissionManager::currentUserHasAnyPermission();
     }
 }

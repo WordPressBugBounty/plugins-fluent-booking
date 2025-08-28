@@ -47,17 +47,20 @@ class GlobalNotificationHandler
         add_action('fluent_booking/after_booking_scheduled', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
         add_action('fluent_booking/booking_schedule_cancelled', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
         add_action('fluent_booking/booking_schedule_completed', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
-
+        add_action('fluent_booking/booking_schedule_rejected', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
+        add_action('fluent_booking/after_booking_rescheduled', [$this, 'checkGlobalIntegration'], 10, 3);
     }
 
-    public function maybeHandleGlobalIntegration($booking, $calendarSlot)
+    public function maybeHandleGlobalIntegration($booking, $calendarSlot, $status = null)
     {
-        $status = $booking->status;
+        $status = $status ?: $booking->status;
 
         $maps = [
-            'scheduled' => 'after_booking_scheduled',
-            'cancelled' => 'booking_schedule_cancelled',
-            'completed' => 'booking_schedule_completed'
+            'scheduled'   => 'after_booking_scheduled',
+            'cancelled'   => 'booking_schedule_cancelled',
+            'completed'   => 'booking_schedule_completed',
+            'rescheduled' => 'after_booking_rescheduled',
+            'rejected'    => 'booking_schedule_rejected'
         ];
 
         if (!isset($maps[$status])) {
@@ -90,7 +93,6 @@ class GlobalNotificationHandler
 
         // Now we have to filter the feeds which are enabled
         $enabledFeeds = $this->globalNotificationService->getEnabledFeeds($feeds, $booking);
-
         if (!$enabledFeeds) {
             return false;
         }
@@ -122,5 +124,10 @@ class GlobalNotificationHandler
         }
 
         return true;
+    }
+
+    public function checkGlobalIntegration($booking, $oldBooking, $calendarEvent)
+    {
+        return $this->maybeHandleGlobalIntegration($booking, $calendarEvent, 'rescheduled');
     }
 }

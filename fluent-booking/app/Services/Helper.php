@@ -715,6 +715,7 @@ class Helper
         static $index = 0;
 
         $index += 1;
+
         return $index;
     }
 
@@ -728,19 +729,12 @@ class Helper
 
         $settings = get_option('fluent_booking_global_payment_settings', []);
 
-        if (!$settings) {
-            $settings = [
-                'currency'  => 'USD',
-                'is_active' => 'no'
-            ];
-        }
-
         return $settings;
     }
 
     public static function isPaymentEnabled($calendarEvent = null)
     {
-        $settings = self::getGlobalPaymentSettings();
+        $settings = CurrenciesHelper::getGlobalCurrencySettings();
         if (Arr::get($settings, 'is_active') == 'yes') {
             return true;
         }
@@ -1628,7 +1622,7 @@ class Helper
                 'title'   => __('Booking Rescheduled by Organizer (email to Attendee)', 'fluent-booking'),
                 'email'   => [
                     'subject' => 'Your booking was rescheduled with {{host.name}}',
-                    'body'    => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $scheduleImage . '" alt="" width="60" height="60" /></p><h2 style="text-align: center;">Booking Rescheduled</h2><hr /><p>Your scheduled meeting has been rescheduled. Here are the details:</p><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{guest.full_name}}</p><p><strong>When</strong></p><p>New Time: {{booking.full_start_end_host_timezone}} <span style="color: #ff0000;"><strong>(new)</strong></span></p><p>Previous Time: {{booking.previous_meeting_time}}</p><p><strong>Rescheduling Reason</strong></p><p>{{booking.reschedule_reason}}</p><hr /><p style="text-align: center;">' . __('Need to make a change?', 'fluent-booking') . ' <a href="##booking.reschedule_url##">' . __('Reschedule', 'fluent-booking') . '</a> or <a href="##booking.cancelation_url##">' . __('Cancel', 'fluent-booking') . '</a></p><hr/>' . self::getAddToCalendarHtml($assetUrl)
+                    'body'    => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $scheduleImage . '" alt="" width="60" height="60" /></p><h2 style="text-align: center;">Booking Rescheduled</h2><hr /><p>Your scheduled meeting has been rescheduled. Here are the details:</p><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{guest.full_name}}</p><p><strong>When</strong></p><p>New Time: {{booking.full_start_end_host_timezone}} <span style="color: #ff0000;"><strong>(new)</strong></span></p><p>Previous Time: {{booking.previous_meeting_time_guest_timezone}}</p><p><strong>Rescheduling Reason</strong></p><p>{{booking.reschedule_reason}}</p><hr /><p style="text-align: center;">' . __('Need to make a change?', 'fluent-booking') . ' <a href="##booking.reschedule_url##">' . __('Reschedule', 'fluent-booking') . '</a> or <a href="##booking.cancelation_url##">' . __('Cancel', 'fluent-booking') . '</a></p><hr/>' . self::getAddToCalendarHtml($assetUrl)
                 ],
             ],
             'booking_request_host'     => [
@@ -1686,13 +1680,14 @@ class Helper
                     'title'      => __('Attendee Data', 'fluent-booking'),
                     'key'        => 'guest',
                     'shortcodes' => [
-                        '{{guest.first_name}}' => __('Guest First Name', 'fluent-booking'),
-                        '{{guest.last_name}}'  => __('Guest Last Name', 'fluent-booking'),
-                        '{{guest.full_name}}'  => __('Guest Full Name', 'fluent-booking'),
-                        '{{guest.email}}'      => __('Guest Email', 'fluent-booking'),
-                        '{{guest.note}}'       => __('Guest Note', 'fluent-booking'),
-                        '{{booking.phone}}'    => __('Guest Main Phone Number (if provided)', 'fluent-booking'),
-                        '{{guest.timezone}}'   => __('Guest Timezone', 'fluent-booking')
+                        '{{guest.first_name}}'  => __('Guest First Name', 'fluent-booking'),
+                        '{{guest.last_name}}'   => __('Guest Last Name', 'fluent-booking'),
+                        '{{guest.full_name}}'   => __('Guest Full Name', 'fluent-booking'),
+                        '{{guest.email}}'       => __('Guest Email', 'fluent-booking'),
+                        '{{guest.note}}'        => __('Guest Note', 'fluent-booking'),
+                        '{{booking.phone}}'     => __('Guest Main Phone Number (if provided)', 'fluent-booking'),
+                        '{{guest.timezone}}'    => __('Guest Timezone', 'fluent-booking'),
+                        '{{guest.total_guest}}' => __('Total Guest Count', 'fluent-booking')
                     ]
                 ],
                 'booking' => [
@@ -1719,7 +1714,9 @@ class Helper
                         '##booking.reschedule_url##'                            => __('Booking Reschedule URL', 'fluent-booking'),
                         '##booking.admin_booking_url##'                         => __('Booking Details Admin URL', 'fluent-booking'),
                         '{{booking.booking_hash}}'                              => __('Unique Booking Hash', 'fluent-booking'),
-                        '{{booking.reschedule_reason}}'                         => __('Event Reschedule Reason', 'fluent-booking')
+                        '{{booking.reschedule_reason}}'                         => __('Event Reschedule Reason', 'fluent-booking'),
+                        '{{booking.previous_meeting_date_time_host_timezone}}'  => __('Previous Meeting Date & Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.previous_meeting_date_time_guest_timezone}}' => __('Previous Meeting Date & Time (with guest timezone)', 'fluent-booking'),
                     ]
                 ],
                 'host'    => [
@@ -1757,6 +1754,7 @@ class Helper
                         '{{booking.phone}}'        => __('Guest Main Phone Number (if provided)', 'fluent-booking'),
                         '{{guest.note}}'           => __('Guest Note', 'fluent-booking'),
                         '{{guest.timezone}}'       => __('Guest Timezone', 'fluent-booking'),
+                        '{{guest.total_guest}}'    => __('Total Guest Count', 'fluent-booking'),
                         '{{guest.form_data_html}}' => __('Guest Form Submitted Data (HTML)', 'fluent-booking')
                     ]
                 ],
@@ -1784,7 +1782,9 @@ class Helper
                         '##booking.reschedule_url##'                            => __('Booking Reschedule URL', 'fluent-booking'),
                         '##booking.admin_booking_url##'                         => __('Booking Details Admin URL', 'fluent-booking'),
                         '{{booking.booking_hash}}'                              => __('Unique Booking Hash', 'fluent-booking'),
-                        '{{booking.reschedule_reason}}'                         => __('Event Reschedule Reason', 'fluent-booking')
+                        '{{booking.reschedule_reason}}'                         => __('Event Reschedule Reason', 'fluent-booking'),
+                        '{{booking.previous_meeting_date_time_host_timezone}}'  => __('Previous Meeting Date & Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.previous_meeting_date_time_guest_timezone}}' => __('Previous Meeting Date & Time (with guest timezone)', 'fluent-booking'),
                     ]
                 ],
                 'host'    => [
@@ -1959,11 +1959,7 @@ class Helper
             $settings = [];
         }
 
-        $paymentSettings = get_option('fluent_booking_global_payment_settings', []);
-
-        if ($paymentSettings) {
-            $settings['payments'] = $paymentSettings;
-        }
+        $settings['payments'] = CurrenciesHelper::getGlobalCurrencySettings();
 
         $settings = wp_parse_args($settings, $defaults);
 
@@ -2034,6 +2030,26 @@ class Helper
         $settings = self::getGlobalSettings();
         $format = Arr::get($settings, 'time_format', '24');
         return $format;
+    }
+
+    public static function getDefaultBookingFilters()
+    {
+        return apply_filters('fluent_booking/default_booking_filters', [
+            'period' => 'upcoming',
+            'author' => 'me', // me, all, calendar_id
+            'event' => 'all',
+            'event_type' => 'all'
+        ]);
+    }
+
+    public static function getDefaultPaginations()
+    {
+        return apply_filters('fluent_booking/default_paginations', [
+            'bookings'  => 10,
+            'calendars' => 10,
+            'coupons'   => 10,
+            'availabilities' => 10
+        ]);
     }
 
     public static function getVerifiedSenders()
@@ -2113,7 +2129,7 @@ class Helper
         return apply_filters('fluent_booking/author_photo', get_avatar_url($id_or_email), $args);
     }
 
-    public static function getPrefSettins($cached = true)
+    public static function getPrefSettings($cached = true)
     {
         static $pref = null;
 
@@ -2127,6 +2143,9 @@ class Helper
                 'slug'        => 'my-bookings',
                 'render_type' => 'standalone',
                 'page_id'     => ''
+            ],
+            'coupon' => [
+                'enabled'     => 'no'
             ]
         ];
 
@@ -2141,6 +2160,11 @@ class Helper
         $pref = $settings;
 
         return $settings;
+    }
+
+    public static function getPrefSettins($cached = true)
+    {
+        return self::getPrefSettings($cached);
     }
 
     public static function getActiveThemeName()

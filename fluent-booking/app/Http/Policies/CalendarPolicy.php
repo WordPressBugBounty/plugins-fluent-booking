@@ -43,7 +43,7 @@ class CalendarPolicy extends Policy
 
     public function getAllCalendars(Request $request)
     {
-        return !!PermissionManager::currentUserHasAnyPemrmission();
+        return !!PermissionManager::currentUserHasAnyPermission();
     }
 
     public function createCalendar(Request $request)

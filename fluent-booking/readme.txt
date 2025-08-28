@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.3
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,31 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 1.9.0 (Date: 28 Aug 2025)
+- Introduced Coupon Module
+- Introduced UTM Tracking for Bookings
+- Redesigned Payment Configuration
+- Added: Currency Format and Position Settings
+- Added: Total Guest Count Shortcode
+- Added: Previous Booking Time Shortcode for Rescheduled Booking
+- Added: Reschedule & Rejected Event Triggers for CRM Integration
+- Added: Support for Multiple Calendar Blocks on Same Page
+- Added: Multiple Team Blocks Support on Same Page
+- Added: Hook for Paginations
+- Added: Default Booking Filter Hook
+- Added: Spanish Language Files for FluentBookingPro
+- Added: Missing Translations
+- Applied Time Format in Manual Booking
+- Resolved: Multi Booking Issue with Remote Calendars
+- Fixed: Temp File for ICS Attachment Not Deleting
+- Fixed: Some Country Flags Not Displaying in Phone Field
+- Fixed: Issue with Missing Slots for Certain Availability Periods
+- Fixed: Issue with Stripe Refund
+- Fixed: Multiple Reminder Email for Group Event
+- Fixed: Date Format Issue with Shortcode
+- Fixed: Custom Date Field Format Issue
+- Fixed: Email Summary Sending Twice Issue
 
 = 1.8.0 (Date: 23 Apr 2025)
 - New: Introduced Calendar View

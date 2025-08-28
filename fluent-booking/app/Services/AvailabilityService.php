@@ -165,7 +165,7 @@ class AvailabilityService
     {
         $weeklySchedule = $weeklySchedule ? $weeklySchedule : Helper::getWeeklyScheduleSchema();
 
-        $dateOverrides = $dateOverrides ? SanitizeService::slotDateOverrides($dateOverrides, $fromTimezone, $toTimezone) : [];
+        $dateOverrides = $dateOverrides ? SanitizeService::slotDateOverrides($dateOverrides, $fromTimezone, $toTimezone, null, true) : [];
 
         $defaultSchedule = [
             'object_id' => $userId,
@@ -174,7 +174,7 @@ class AvailabilityService
                 'default'          => (bool)$default,
                 'timezone'         => sanitize_text_field($fromTimezone),
                 'date_overrides'   => $dateOverrides,
-                'weekly_schedules' => SanitizeService::weeklySchedules($weeklySchedule, $fromTimezone, $toTimezone),
+                'weekly_schedules' => SanitizeService::weeklySchedules($weeklySchedule, $fromTimezone, $toTimezone, true),
             ]
         ];
         return $defaultSchedule;

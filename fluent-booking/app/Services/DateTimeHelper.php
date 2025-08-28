@@ -186,6 +186,16 @@ class DateTimeHelper
         return date_i18n($dateFormat, strtotime($dateTime)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
     }
 
+    public static function getFormattedDate($date, $from = '', $to = 'Y-m-d')
+    {
+        if (!$from) {
+            $from = get_option('date_format');
+        }
+
+        $date = \DateTime::createFromFormat($from, $date);
+        return $date ? $date->format($to) : '';
+    }
+
     public static function getAvailableDateFormats()
     {
         $dateFormats = apply_filters('fluent_booking/available_date_formats', [

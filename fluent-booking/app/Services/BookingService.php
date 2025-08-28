@@ -35,7 +35,7 @@ class BookingService
 
         $bookingData['event_type'] = $calendarSlot->event_type;
 
-        $bookingData = apply_filters('fluent_booking/booking_data', $bookingData, $calendarSlot, $customFieldsData);
+        $bookingData = apply_filters('fluent_booking/booking_data', $bookingData, $calendarSlot, $customFieldsData, $data);
 
         if (is_wp_error($bookingData)) {
             return $bookingData;
@@ -60,9 +60,11 @@ class BookingService
 
         self::attachHosts($booking, $calendarSlot);
         self::updateParentInfo($booking, $bookingIds);
-        self::updateMetas($booking, $bookingData, $guests, $customFieldsData);
+        self::updateMetas($booking, $bookingData, $guests, $customFieldsData, $calendarSlot);
 
         $booking->load('calendar');
+
+        $bookingData = apply_filters('fluent_booking/after_booking_data', $bookingData, $booking, $calendarSlot, $customFieldsData);
 
         // this pre hook is for early actions that require for remote calendars and locations
         do_action('fluent_booking/pre_after_booking_' . $booking->status, $booking, $calendarSlot, $bookingData);
@@ -238,7 +240,7 @@ class BookingService
         return $event ? $event->group_id : null;
     }
 
-    private static function updateMetas($booking, $bookingData, $guests, $customFieldsData)
+    private static function updateMetas($booking, $bookingData, $guests, $customFieldsData, $calendarSlot)
     {
         if ($customFieldsData) {
             Helper::updateBookingMeta($booking->id, 'custom_fields_data', $customFieldsData);
@@ -251,6 +253,8 @@ class BookingService
         if ($quantity = Arr::get($bookingData, 'quantity')) {
             Helper::updateBookingMeta($booking->id, 'quantity', $quantity);
         }
+
+        do_action('fluent_booking/after_booking_meta_update', $booking, $bookingData, $customFieldsData, $calendarSlot);
     }
 
     private static function updateParentInfo($booking, $bookingIds)

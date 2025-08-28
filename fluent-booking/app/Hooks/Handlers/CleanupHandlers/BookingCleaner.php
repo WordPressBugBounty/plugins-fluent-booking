@@ -2,10 +2,7 @@
 
 namespace FluentBooking\App\Hooks\Handlers\CleanupHandlers;
 
-use FluentBooking\App\Models\Booking;
-use FluentBooking\App\Models\BookingActivity;
 use FluentBooking\App\Models\BookingHost;
-use FluentBooking\App\Models\BookingMeta;
 
 class BookingCleaner
 {
@@ -27,11 +24,27 @@ class BookingCleaner
                 ->where('parent_id', $booking->id)
                 ->first();
     
-            if ($order) {
-                do_action('fluent_booking/before_delete_order', $order, $booking);
-                $order->delete();
-                do_action('fluent_booking/after_delete_order', $order, $booking);
+            if (!$order) {
+                return;
             }
+
+            if ($order->items) {
+                $order->items()->delete();
+            }
+
+            if ($order->discounts) {
+                $order->discounts()->delete();
+            }
+
+            if ($order->transaction) {
+                $order->transaction()->delete();
+            }
+
+            do_action('fluent_booking/before_delete_order', $order, $booking);
+
+            $order->delete();
+
+            do_action('fluent_booking/after_delete_order', $order, $booking);
         }
     }
 }

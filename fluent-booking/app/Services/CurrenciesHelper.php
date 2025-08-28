@@ -6,15 +6,42 @@ use FluentBooking\Framework\Support\Arr;
 
 class CurrenciesHelper
 {
+    public static function getDefaultCurrencySettings()
+    {
+        return apply_filters('fluent_booking/default_currency_settings', [
+            'currency'          => 'USD',
+            'is_active'         => 'no',
+            'currency_sign'     => '$',
+            'currency_position' => 'left', // left, right, left_space, right_space
+            'number_format'     => 'comma_separated', // or dot_separated
+            'decimal_points'    => 2
+        ]);
+    }
+
+    public static function getGlobalCurrencySettings()
+    {
+        $defaultSettings = self::getDefaultCurrencySettings();
+
+        $globalSettings = Helper::getGlobalPaymentSettings();
+
+        $currencySettings = wp_parse_args($globalSettings, $defaultSettings);
+
+        $currencySettings['currency_sign'] = self::getCurrencySign($currencySettings['currency']);
+
+        return apply_filters('fluent_booking/global_currency_settings', $currencySettings);
+    }
+
     public static function getGlobalCurrency()
     {
-        $globalPaymentSettings = get_option('fluent_booking_global_payment_settings', ['currency' => 'USD']);
-        return Arr::get($globalPaymentSettings, 'currency', 'USD');
+        $globalCurrencySettings = self::getGlobalCurrencySettings();
+
+        return Arr::get($globalCurrencySettings, 'currency', 'USD');
     }
 
     public static function getGlobalCurrencySign()
     {
         $currency = static::getGlobalCurrency();
+
         return static::getCurrencySign($currency);
     }
 

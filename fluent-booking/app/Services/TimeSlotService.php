@@ -236,7 +236,7 @@ class TimeSlotService
         }
 
         $currentDate = strtotime($startDate);
-        $endDate = strtotime($endDate);
+        $endDate = strtotime($endDate) + 1; // add 1s in case end is 23:59:59
         $oneDay = 24 * 60 * 60;
 
         $dateArray = [];
@@ -648,7 +648,7 @@ class TimeSlotService
         }
 
         $convertedSpots = array_map(function ($spots) {
-            return array_values($spots);
+            return array_values(ksort($spots) ? $spots : $spots);
         }, $convertedSpots);
 
         return $convertedSpots;
@@ -1030,7 +1030,7 @@ class TimeSlotService
 
     protected function getMaxBookingTimestamp($fromDate, $toDate, $timeZone)
     {
-        $maxBookingTime = $this->calendarSlot->getMaxBookableDateTime($fromDate, $timeZone, 'Y-m-d H:i:s');
+        $maxBookingTime = $this->calendarSlot->getMaxBookableDateTime($toDate, $timeZone, 'Y-m-d H:i:s');
 
         return strtotime($maxBookingTime);
     }

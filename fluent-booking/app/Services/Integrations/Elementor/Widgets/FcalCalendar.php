@@ -5,7 +5,6 @@ namespace FluentBooking\App\Services\Integrations\Elementor\Widgets;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Hooks\Handlers\BlockEditorHandler;
 use FluentBooking\App\Models\CalendarSlot;
-use FluentBooking\App\Services\Helper;
 
 class FcalCalendar extends \Elementor\Widget_Base
 {

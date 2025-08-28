@@ -95,15 +95,19 @@ class EmailNotificationService
             wp_delete_file($attachment);
         }
 
-        $status = $result ? 'sent' : 'sending failed';
+        $actionTypeLabel = $actionType == 'request' ? __('request', 'fluent-booking') : __('scheduled', 'fluent-booking');
+        $recipientLabel = $emailTo == 'guest' ? __('guest', 'fluent-booking') : __('host', 'fluent-booking');
+        $statusLabel = $result ? __('sent', 'fluent-booking') : __('sending failed', 'fluent-booking');
+        $logType = $result ? 'activity' : 'error';
 
-        $title = sprintf(__('Booking %s email %s to %s', 'fluent-booking'), $actionType, $status, $emailTo);
+        $title = sprintf(
+            __('Booking %1$s email %2$s to %3$s', 'fluent-booking'),
+            $actionTypeLabel,
+            $statusLabel,
+            $recipientLabel
+        );
 
-        if ($result) {
-            self::addLog($title, $title, $booking->id);
-        } else {
-            self::addLog($title, $title, $booking->id, 'error');
-        }
+        self::addLog($title, $title, $booking->id, $logType);
 
         return $result;
     }
@@ -182,15 +186,21 @@ class EmailNotificationService
 
         $result = Mailer::send($to, $subject, $body, $headers);
 
-        if (!$result) {
-            return false;
-        }
+        $recipientLabel = $emailTo == 'guest' ? __('guest', 'fluent-booking') : __('host', 'fluent-booking');
+        $statusLabel = $result ? __('sent', 'fluent-booking') : __('sending failed', 'fluent-booking');
+        $logType = $result ? 'activity' : 'error';
 
-        $title = __('Reminder Email Sent', 'fluent-booking');
-        $description = sprintf(__('Reminder email sent to %s.', 'fluent-booking'), $emailTo);
-        self::addLog($title, $description, $booking->id);
+        $title = sprintf(
+            __('Booking reminder email %1$s to %2$s', 'fluent-booking'),
+            $statusLabel,
+            $recipientLabel
+        );
 
-        return true;
+        $description = sprintf(__('Reminder email %1$s to %2$s.', 'fluent-booking'), $statusLabel, $recipientLabel);
+
+        self::addLog($title, $description, $booking->id, $logType);
+
+        return $result;
     }
 
     /**
@@ -268,17 +278,19 @@ class EmailNotificationService
 
         $result = Mailer::send($to, $subject, $body, $headers);
 
-        $actionType = $actionType == 'reject' ? __('Rejection', 'fluent-booking') : __('Cancellation', 'fluent-booking');
+        $actionTypeLabel = $actionType == 'reject' ? __('Rejection', 'fluent-booking') : __('Cancellation', 'fluent-booking');
+        $recipientLabel = $emailTo == 'guest' ? __('guest', 'fluent-booking') : __('host', 'fluent-booking');
+        $statusLabel = $result ? __('sent', 'fluent-booking') : __('sending failed', 'fluent-booking');
+        $logType = $result ? 'activity' : 'error';
 
-        $status = $result ? 'sent' : 'sending failed';
+        $title = sprintf(
+            __('Booking %1$s email %2$s to %3$s', 'fluent-booking'),
+            $actionTypeLabel,
+            $statusLabel,
+            $recipientLabel
+        );
 
-        $title = sprintf(__('%s email %s to %s', 'fluent-booking'), $actionType, $status, $emailTo);
-
-        if ($result) {
-            self::addLog($title, $title, $booking->id);
-        } else {
-            self::addLog($title, $title, $booking->id, 'error');
-        }
+        self::addLog($title, $title, $booking->id, $logType);
 
         return $result;
     }
@@ -367,17 +379,19 @@ class EmailNotificationService
             wp_delete_file($attachments[0]);
         }
 
-        $status = $result ? 'sent' : 'sending failed';
+        $statusLabel = $result ? __('sent', 'fluent-booking') : __('sending failed', 'fluent-booking');
+        $recipientLabel = $emailTo == 'guest' ? __('guest', 'fluent-booking') : __('host', 'fluent-booking');
+        $logType = $result ? 'activity' : 'error';
 
-        $title = sprintf(__('Rescheduled booking email %s to %s', 'fluent-booking'), $status, $emailTo);
+        $title = sprintf(
+            __('Rescheduled booking email %1$s to %2$s', 'fluent-booking'),
+            $statusLabel,
+            $recipientLabel
+        );
 
-        $description = sprintf(__('Rescheduling email %s to %s', 'fluent-booking'), $status, $emailTo);
+        $description = sprintf(__('Rescheduling email %1$s to %2$s', 'fluent-booking'), $statusLabel, $recipientLabel);
 
-        if ($result) {
-            self::addLog($title, $description, $booking->id);
-        } else {
-            self::addLog($title, $description, $booking->id, 'error');
-        }
+        self::addLog($title, $description, $booking->id, $logType);
 
         return $result;
     }
@@ -424,8 +438,9 @@ class EmailNotificationService
 
         $icsContent = BookingService::generateBookingICS($booking);
     
-        $filePath = wp_tempnam(null, 'event') . '.ics';
-        
+        $icsFileName = 'fcal-' . md5(wp_generate_uuid4()) . '.ics';
+        $filePath = trailingslashit(wp_upload_dir()['path']) . $icsFileName;
+
         global $wp_filesystem;
         $wp_filesystem->put_contents($filePath, $icsContent);
 

@@ -96,6 +96,7 @@ class AdminMenuHandler
         }
 
         $this->changeFooter();
+
         $app = App::getInstance();
 
         $config = $app->config;
@@ -126,7 +127,7 @@ class AdminMenuHandler
             [
                 'key'       => 'scheduled-events',
                 'label'     => __('Bookings', 'fluent-booking'),
-                'permalink' => $baseUrl . 'scheduled-events?period=upcoming&author=me',
+                'permalink' => $baseUrl . 'scheduled-events',
             ],
             [
                 'key'       => 'availability',
@@ -162,6 +163,8 @@ class AdminMenuHandler
             'baseUrl'   => $baseUrl,
             'logo'      => $assets . 'images/logo.svg',
         ]);
+
+        do_action('fluent_booking/admin_app_rendering');
 
         $app->view->render('admin.menu', $portalVars);
     }
@@ -403,16 +406,21 @@ class AdminMenuHandler
             'i18'                    => [
                 'date_time_config' => DateTimeHelper::getI18nDateTimeConfig(),
             ],
-            'has_pro'                => defined('FLUENT_BOOKING_PRO_DIR_FILE'),
-            'require_upgrade'        => defined('FLUENT_BOOKING_PRO_DIR_FILE') && !defined('FLUENT_BOOKING_LITE'),
-            'dashboard_notices'      => apply_filters('fluent_booking/dashboard_notices', []),
-            'trans'                  => TransStrings::getStrings(),
-            'date_format'            => DateTimeHelper::getDateFormatter(true),
-            'time_format'            => DateTimeHelper::getTimeFormatter(true),
-            'date_time_formatter'    => DateTimeHelper::getDateFormatter(true) . ', ' . DateTimeHelper::getTimeFormatter(true),
-            'available_date_formats' => DateTimeHelper::getAvailableDateFormats(),
-            'admin_url'              => admin_url(),
-            'is_rtl'                 => Helper::fluentbooking_is_rtl()
+            'has_pro'                 => defined('FLUENT_BOOKING_PRO_DIR_FILE'),
+            'require_upgrade'         => defined('FLUENT_BOOKING_PRO_DIR_FILE') && !defined('FLUENT_BOOKING_LITE'),
+            'dashboard_notices'       => apply_filters('fluent_booking/dashboard_notices', []),
+            'payment_methods'         => apply_filters('fluent_booking/payment/get_all_methods', []),
+            'trans'                   => TransStrings::getStrings(),
+            'date_format'             => DateTimeHelper::getDateFormatter(true),
+            'time_format'             => DateTimeHelper::getTimeFormatter(true),
+            'date_time_formatter'     => DateTimeHelper::getDateFormatter(true) . ', ' . DateTimeHelper::getTimeFormatter(true),
+            'available_date_formats'  => DateTimeHelper::getAvailableDateFormats(),
+            'default_booking_filters' => Helper::getDefaultBookingFilters(),
+            'default_paginations'     => Helper::getDefaultPaginations(),
+            'pref_settings'           => Helper::getPrefSettings(),
+            'settings_menu_items'     => static::settingsMenuItems(),
+            'admin_url'               => admin_url(),
+            'is_rtl'                  => Helper::fluentbooking_is_rtl()
         ]);
     }
 
@@ -483,7 +491,7 @@ class AdminMenuHandler
 
         return apply_filters('fluent_booking/settings_menu_items', [
             'general_settings'    => [
-                'title'          => __('General Settings', 'fluent-booking'),
+                'title'          => __('General', 'fluent-booking'),
                 'disable'        => false,
                 'el_icon'        => 'Operation',
                 'component_type' => 'StandAloneComponent',
@@ -501,6 +509,42 @@ class AdminMenuHandler
                 'route'          => [
                     'name' => 'team_members'
                 ]
+            ],
+            'payment_settings'    => [
+                'title'          => __('Payment', 'fluent-booking'),
+                'disable'        => true,
+                'el_icon'        => 'Money',
+                'component_type' => 'PaymentSettingsComponent',
+                'class'          => 'payment_settings',
+                'route'          => [
+                    'name' => 'global_payment_settings',
+                ],
+                'children'       => [
+                    'payment_settings' => [
+                        'title'   => __('Settings', 'fluent-booking'),
+                        'disable' => true,
+                        'route'   => [
+                            'name' => 'global_payment_settings'
+                        ]
+                    ],
+                    'payment_methods' => [
+                        'title'   => __('Payment Methods', 'fluent-booking'),
+                        'disable' => true,
+                        'route'   => [
+                            'name' => 'payment_methods',
+                            'params' => [
+                                'settings_key' => 'stripe'
+                            ]
+                        ]
+                    ],
+                    'payment_coupons' => [
+                        'title'   => __('Coupons', 'fluent-booking'),
+                        'disable' => true,
+                        'route'   => [
+                            'name' => 'payment_coupons'
+                        ]
+                    ]
+                ],
             ],
             'google'              => [
                 'title'          => __('Google Calendar / Meet', 'fluent-booking'),
@@ -574,45 +618,6 @@ class AdminMenuHandler
                     ]
                 ]
             ],
-            'stripe'              => [
-                'title'          => __('Stripe', 'fluent-booking'),
-                'disable'        => true,
-                'icon_url'       => $urlAssets . 'images/payment-methods/stripe.svg',
-                'component_type' => 'GlobalSettingsComponent',
-                'class'          => 'stripe_payment',
-                'route'          => [
-                    'name'   => 'PaymentSettingsIndex',
-                    'params' => [
-                        'settings_key' => 'stripe'
-                    ]
-                ]
-            ],
-            'paypal'              => [
-                'title'          => __('PayPal', 'fluent-booking'),
-                'disable'        => true,
-                'icon_url'       => $urlAssets . 'images/payment-methods/paypal.svg',
-                'component_type' => 'GlobalSettingsComponent',
-                'class'          => 'paypal_payment',
-                'route'          => [
-                    'name'   => 'PaymentSettingsIndex',
-                    'params' => [
-                        'settings_key' => 'paypal'
-                    ]
-                ]
-            ],
-            'offline'             => [
-                'title'          => __('Offline Payment', 'fluent-booking'),
-                'disable'        => true,
-                'icon_url'       => $urlAssets . 'images/payment-methods/offline.svg',
-                'component_type' => 'GlobalSettingsComponent',
-                'class'          => 'offline_payment',
-                'route'          => [
-                    'name' => 'PaymentSettingsIndex',
-                    'params' => [
-                        'settings_key' => 'offline'
-                    ]
-                ]
-            ],
             'license'             => [
                 'title'          => __('License', 'fluent-booking'),
                 'disable'        => true,
@@ -622,7 +627,7 @@ class AdminMenuHandler
                 'route'          => [
                     'name' => 'license'
                 ]
-            ],
+            ]
         ]);
     }
 

@@ -31,40 +31,28 @@ if (!function_exists('dd')) {
 function fluentbookingFormattedAmount($amountInCents, $currencySettings)
 {
     $default = [
-        'currency_sign' => '',
+        'currency_sign'     => '',
         'currency_position' => 'left',
-        'decimal_separator' => '.',
-        'thousand_separator' => ',',
-        'currency_separator' => 'dot_comma',
-        'decimal_points' => 2,
+        'number_format'     => 'comma_separated', // dot_separated
+        'decimal_points'    => 2,
     ];
 
     $currencySettings = array_merge($default, $currencySettings);
 
-    $position =  $currencySettings['currency_position'];
-    $symbol = $currencySettings['currency_sign'];
-    $decimalPoints = $currencySettings['decimal_points'];
-    $decmalSeparator = $currencySettings['decimal_separator'];
-    $thousandSeparator = $currencySettings['thousand_separator'];
+    $symbol            = $currencySettings['currency_sign'];
+    $position          = $currencySettings['currency_position'];
+    $decimalPoints     = $currencySettings['decimal_points'];
+    $thousandSeparator = $currencySettings['number_format'] === 'comma_separated' ? ',' : '.';
+    $decimalSeparator  = $currencySettings['number_format'] === 'comma_separated' ? '.' : ',';
 
-    if ($currencySettings['currency_separator'] != 'dot_comma') {
-        $decmalSeparator = ',';
-        $thousandSeparator = '.';
-    }
-    if ($amountInCents % 100 == 0 && $currencySettings['decimal_points'] == 0) {
-        $decimalPoints = 0;
-    }
+    $amount = number_format($amountInCents / 100, $decimalPoints, $decimalSeparator, $thousandSeparator);
 
-    $amount = number_format($amountInCents / 100, $decimalPoints, $decmalSeparator, $thousandSeparator);
+    $formats = [
+        'left'        => fn() => $symbol . $amount,
+        'left_space'  => fn() => $symbol . ' ' . $amount,
+        'right'       => fn() => $amount . $symbol,
+        'right_space' => fn() => $amount . ' ' . $symbol,
+    ];
 
-    if ('left' === $position) {
-        return $symbol . $amount;
-    } elseif ('left_space' === $position) {
-        return $symbol . ' ' . $amount;
-    } elseif ('right' === $position) {
-        return $amount . $symbol;
-    } elseif ('right_space' === $position) {
-        return $amount . ' ' . $symbol;
-    }
-    return $amount;
+    return isset($formats[$position]) ? $formats[$position]() : $amount;
 }

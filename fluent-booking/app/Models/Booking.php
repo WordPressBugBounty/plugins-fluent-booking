@@ -175,6 +175,16 @@ class Booking extends Model
         return $additionalGuests;
     }
 
+    public function getTotalGuestCount()
+    {
+        $additionalGuests = $this->getAdditionalGuests();
+        $mainGuests = 1;
+        if ($this->isMultiGuestBooking()) {
+            $mainGuests = self::where('group_id', $this->group_id)->where('status', 'scheduled')->count();
+        }
+        return count($additionalGuests) + $mainGuests;
+    }
+
     public function getHostEmails($excludeHostId = null)
     {
         $hostIds = $this->getHostIds();
@@ -309,11 +319,24 @@ class Booking extends Model
         return $html;
     }
 
-    public function getShortBookingDateTime($timeZone = 'UTC')
+    public function getPreviousMeetingDateTimeText($timeZone = 'UTC')
     {
-        // date format for Fri Feb 10, 2023
-        $startDate = DateTimeHelper::convertFromUtc($this->start_time, $timeZone, 'D M d, Y');
-        $startTime = DateTimeHelper::convertFromUtc($this->start_time, $timeZone, 'h:ia');
+        $previousStartTime = $this->getMeta('previous_meeting_time');
+        $previousEndTime = gmdate('Y-m-d H:i:s', strtotime($previousStartTime) + ($this->slot_minutes * 60)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+
+        $startDateTime = DateTimeHelper::convertFromUtc($previousStartTime, $timeZone, 'Y-m-d H:i:s');
+        $endDateTime = DateTimeHelper::convertFromUtc($previousEndTime, $timeZone, 'Y-m-d H:i:s');
+
+        $text = DateTimeHelper::formatToLocale($startDateTime, 'time') . ' - ' . DateTimeHelper::formatToLocale($endDateTime, 'time') . ', ';
+        $text .= DateTimeHelper::formatToLocale($startDateTime, 'date');
+
+        return $text;
+    }
+
+    protected function formatBookingDateTime($dateTime, $timeZone = 'UTC')
+    {
+        $startDate = DateTimeHelper::convertFromUtc($dateTime, $timeZone, 'D M d, Y');
+        $startTime = DateTimeHelper::convertFromUtc($dateTime, $timeZone, 'h:ia');
 
         $localDate = date_i18n('D M d, Y', strtotime($startDate));
         $localTime = date_i18n('h:ia', strtotime($startTime));
@@ -321,13 +344,15 @@ class Booking extends Model
         return $localDate . ' ' . $localTime;
     }
 
+    public function getShortBookingDateTime($timeZone = 'UTC')
+    {
+        return $this->formatBookingDateTime($this->start_time, $timeZone);
+    }
+
     public function getPreviousMeetingTime($timeZone = 'UTC')
     {
         $previousMeetingTime = $this->getMeta('previous_meeting_time');
-        $html = DateTimeHelper::convertFromUtc($previousMeetingTime, $timeZone, 'D M d, Y');
-        $html .= ' ' . DateTimeHelper::convertFromUtc($previousMeetingTime, $timeZone, 'h:ia');
-
-        return $html;
+        return $this->formatBookingDateTime($previousMeetingTime, $timeZone);
     }
 
     public function getAttendeeStartTime($format = 'Y-m-d H:i:s')
@@ -347,6 +372,19 @@ class Booking extends Model
         return $otherBookings->map(function ($otherBooking) {
             return $otherBooking->getFullBookingDateTimeText($this->person_time_zone, true) . ' (' . $this->person_time_zone . ')';
         })->toArray();
+    }
+
+    public function getAllBookingShortTimes($timeZone = 'UTC')
+    {
+        $otherBookings = self::where('parent_id', $this->id)->get();
+
+        $otherTimes = $otherBookings->map(function ($otherBooking) use ($timeZone) {
+            return $otherBooking->formatBookingDateTime($otherBooking->start_time, $timeZone);
+        })->toArray();
+
+        return array_merge($otherTimes, [
+            $this->formatBookingDateTime($this->start_time, $timeZone)
+        ]);
     }
 
     public function getHostAndGuestDetailsHtml()

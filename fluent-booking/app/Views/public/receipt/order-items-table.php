@@ -5,11 +5,6 @@ defined( 'ABSPATH' ) || exit;
 if (!$order->items) {
     return '';
 }
-$currencySign = \FluentBooking\App\Services\CurrenciesHelper::getGlobalCurrencySign();
-
-$currencySetting = [
-        'currency_sign' => $currencySign,
-];
 
 ?>
     <table class="table fluent_booking_order_items_table fluent_booking_table table_bordered">
@@ -27,8 +22,8 @@ $currencySetting = [
                    <tr>
                        <td><?php echo esc_html($order_item['item_name']); ?></td>
                        <td><?php echo esc_html($order_item['quantity']); ?></td>
-                       <td><?php echo esc_attr(fluentbookingFormattedAmount($order_item['item_price'], $currencySetting)); ?></td>
-                       <td><?php echo esc_attr(fluentbookingFormattedAmount($order_item['item_total'], $currencySetting)); ?></td>
+                       <td><?php echo esc_attr(fluentbookingFormattedAmount($order_item['item_price'], $currency_settings)); ?></td>
+                       <td><?php echo esc_attr(fluentbookingFormattedAmount($order_item['item_total'], $currency_settings)); ?></td>
                    </tr>
                    <?php
                    $subTotal += $order_item['item_total'];
@@ -38,8 +33,8 @@ $currencySetting = [
                    <tr>
                        <td><?php echo esc_html($order_item->item_name); ?></td>
                        <td><?php echo esc_html($order_item->quantity); ?></td>
-                       <td><?php echo esc_html(fluentbookingFormattedAmount($order_item->item_price, $currencySetting)); ?></td>
-                       <td><?php echo esc_html(fluentbookingFormattedAmount($order_item->item_total, $currencySetting)); ?></td>
+                       <td><?php echo esc_html(fluentbookingFormattedAmount($order_item->item_price, $currency_settings)); ?></td>
+                       <td><?php echo esc_html(fluentbookingFormattedAmount($order_item->item_total, $currency_settings)); ?></td>
                    </tr>
                    <?php
                    $subTotal += $order_item->item_total;
@@ -51,19 +46,19 @@ $currencySetting = [
         </tbody>
         <tfoot>
         <?php $discountTotal = 0;
-        if (isset($order->discounts['applied']) && count($order->discounts['applied'])) : ?>
+        if (isset($order->discounts) && count($order->discounts)) : ?>
             <tr class="fluent_booking_total_row">
                 <th style="text-align: right" colspan="3"><?php esc_html_e('Sub-Total', 'fluent-booking'); ?></th>
-                <td><?php echo esc_html(fluentbookingFormattedAmount($subTotal, $currencySetting)); ?></td>
+                <td><?php echo esc_html(fluentbookingFormattedAmount($subTotal, $currency_settings)); ?></td>
             </tr>
             <?php
-            foreach ($order->discounts['applied'] as $discount) :
+            foreach ($order->discounts as $discount) :
                 $discountTotal += $discount->item_total;
                 ?>
                 <tr class="fluent_booking_discount_row">
                     <th style="text-align: right"
-                        colspan="3"><?php echo 'Discounts (' . esc_html($discount->item_name) . ' )'; ?></th>
-                    <td><?php echo '-' . esc_html(fluentbookingFormattedAmount($discount->item_total, $currencySetting)); ?></td>
+                        colspan="3"><?php printf(esc_html__('Discounts(%s)', 'fluent-booking'), esc_html($discount->item_name)); ?></th>
+                    <td><?php echo '-' . esc_html(fluentbookingFormattedAmount($discount->item_total, $currency_settings)); ?></td>
                 </tr>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -71,9 +66,9 @@ $currencySetting = [
             <th style="text-align: right" colspan="3"><?php esc_html_e('Total', 'fluent-booking'); ?></th>
             <td>
                 <?php if (isset($hasSubscription) && $hasSubscription) : ?> 
-                    <?php echo esc_attr(fluentbookingFormattedAmount($order->total_amount, $currencySetting)); ?>
+                    <?php echo esc_attr(fluentbookingFormattedAmount($order->total_amount, $currency_settings)); ?>
                 <?php else:  ?> 
-                    <?php echo esc_attr(fluentbookingFormattedAmount($order->total_amount - $discountTotal, $currencySetting)); ?>
+                    <?php echo esc_attr(fluentbookingFormattedAmount($order->total_amount, $currency_settings)); ?>
                 <?php endif; ?>
             </td>
         </tr>

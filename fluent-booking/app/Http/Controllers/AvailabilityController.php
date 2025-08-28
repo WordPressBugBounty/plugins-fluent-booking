@@ -5,12 +5,10 @@ namespace FluentBooking\App\Http\Controllers;
 use FluentBooking\App\Models\Availability;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
-use FluentBooking\App\Services\Helper;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\SanitizeService;
 use FluentBooking\App\Services\AvailabilityService;
-use FluentBooking\App\Services\DateTimeHelper;
 use FluentBooking\Framework\Support\Arr;
 
 class AvailabilityController extends Controller
@@ -184,8 +182,8 @@ class AvailabilityController extends Controller
         $scheduleData = [
             'default'          => Arr::isTrue($schedule, 'value.default'),
             'timezone'         => $timezone,
-            'date_overrides'   => SanitizeService::slotDateOverrides(Arr::get($data, 'schedule.settings.date_overrides', []), $timezone, 'UTC'),
-            'weekly_schedules' => SanitizeService::weeklySchedules(Arr::get($data, 'schedule.settings.weekly_schedules', []), $timezone, 'UTC'),
+            'date_overrides'   => SanitizeService::slotDateOverrides(Arr::get($data, 'schedule.settings.date_overrides', []), $timezone, 'UTC', null, true),
+            'weekly_schedules' => SanitizeService::weeklySchedules(Arr::get($data, 'schedule.settings.weekly_schedules', []), $timezone, 'UTC', true),
         ];
 
         $schedule->value = $scheduleData;

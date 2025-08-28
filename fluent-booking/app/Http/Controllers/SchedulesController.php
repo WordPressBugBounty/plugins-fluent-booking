@@ -19,22 +19,24 @@ class SchedulesController extends Controller
     {
         $filters = $request->get('filters', []);
 
-        $period = Arr::get($filters, 'period', 'upcoming');
+        $search = $request->getSafe('search', '');
 
         $eventId = Arr::get($filters, 'event');
 
-        $eventType = Arr::get($filters, 'event_type');
-
         $author = Arr::get($filters, 'author');
 
-        $range = Arr::get($filters, 'range');
+        $eventType = sanitize_text_field(Arr::get($filters, 'event_type'));
 
-        $search = Arr::get($filters, 'search');
+        $period = sanitize_text_field(Arr::get($filters, 'period', 'upcoming'));
+
+        $range = array_map('sanitize_text_field', Arr::get($filters, 'range', []));
 
         $query = Booking::with(['calendar_event']);
 
         if (is_numeric($author)) {
             $author = (int)$author;
+        } else {
+            $author = sanitize_text_field($author);
         }
 
         $currentHostId = get_current_user_id();
@@ -61,7 +63,7 @@ class SchedulesController extends Controller
             }
 
             if ($eventId && $eventId !== 'all') {
-                $query->where('event_id', $eventId);
+                $query->where('event_id', (int) $eventId);
             }
 
             if ($eventType && $eventType !== 'all') {
@@ -193,21 +195,20 @@ class SchedulesController extends Controller
             if ($value == 'cancelled') {
                 $cancelReason = sanitize_text_field($data['cancel_reason']);
                 $booking->cancelMeeting($cancelReason, 'host', get_current_user_id());
-                return [
-                    'message' => __('The booking has been cancelled', 'fluent-booking')
-                ];
             }
 
             if ($value == 'rejected') {
                 $rejectReason = sanitize_text_field($data['reject_reason']);
                 $booking->rejectMeeting($rejectReason, get_current_user_id());
-                return [
-                    'message' => __('The booking has been rejected', 'fluent-booking')
-                ];
             }
 
-            if ($booking->payment_method && Arr::get($data, 'refund_payment') == 'yes' && in_array($value, ['cancelled', 'rejected'])) {
-                do_action('fluent_booking/refund_payment_' . $booking->payment_method, $booking, $booking->calendar_event);
+            if (in_array($value, ['cancelled', 'rejected'])) {
+                if ($booking->payment_method && Arr::get($data, 'refund_payment') == 'yes') {
+                    do_action('fluent_booking/refund_payment_' . $booking->payment_method, $booking, $booking->calendar_event);
+                }
+                return [
+                    'message' => sprintf(__('The booking has been %s', 'fluent-booking'), $value)
+                ];
             }
         }
 
@@ -395,7 +396,11 @@ class SchedulesController extends Controller
         $order = null;
         if ($booking->payment_method && $booking->payment_order) {
             $order = $booking->payment_order;
-            $order->load(['items', 'transaction']);
+            $relations = ['items', 'transaction'];
+            if (method_exists($order, 'discounts')) {
+                $relations[] = 'discounts';
+            }
+            $order->load($relations);
             $order->currency_sign = CurrenciesHelper::getCurrencySign($order->currency);
         }
 

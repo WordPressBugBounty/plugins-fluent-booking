@@ -410,7 +410,7 @@ class BookingFieldService
                 $minDate = Arr::get($field, 'min_date');
                 $maxDate = Arr::get($field, 'max_date');
 
-                $fieldValue = date('Y-m-d', strtotime($fieldValue));
+                $fieldValue = DateTimeHelper::getFormattedDate($fieldValue, Arr::get($field, 'date_format'));
                 $minDate = date('Y-m-d', strtotime($minDate ?: '1900-01-01'));
                 $maxDate = date('Y-m-d', strtotime($maxDate ?: date('Y-12-31')));
 

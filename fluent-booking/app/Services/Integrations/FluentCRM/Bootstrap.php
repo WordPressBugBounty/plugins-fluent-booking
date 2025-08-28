@@ -195,6 +195,8 @@ class Bootstrap extends IntegrationManagerController
                     'after_booking_scheduled'    => __('Booking Confirmed', 'fluent-booking'),
                     'booking_schedule_completed' => __('Booking Completed', 'fluent-booking'),
                     'booking_schedule_cancelled' => __('Booking Canceled', 'fluent-booking'),
+                    'after_booking_rescheduled'  => __('Booking Rescheduled', 'fluent-booking'),
+                    'booking_schedule_rejected'  => __('Booking Rejected', 'fluent-booking'),
                 ],
                 'tips'           => __('Select in which booking stage you want to trigger this feed', 'fluent-booking'),
                 'label'          => __('Event Trigger', 'fluent-booking'),

@@ -15,6 +15,8 @@ use FluentBooking\App\Hooks\Handlers\TimeSlotServiceHandler;
 use FluentBooking\App\Services\CalendarEventService;
 use FluentBooking\App\Services\LocationService;
 use FluentBooking\App\Services\PermissionManager;
+use FluentBooking\App\Services\CurrenciesHelper;
+use FluentBooking\App\Services\SanitizeService;
 use FluentBooking\Framework\Support\Arr;
 
 class FrontEndHandler
@@ -257,7 +259,7 @@ class FrontEndHandler
 
     public function renderCalendarBlock($calendar, $headerConfig = [])
     {
-        $wrapperId = 'fcal_team_' . Helper::getNextIndex();
+        $wrapperId = 'fcal_calendar_' . Helper::getNextIndex();
         wp_enqueue_script('fluent-booking-calendar', App::getInstance('url.assets') . 'public/js/calendar_app.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
 
         $calendarHtml = (string)(string)\FluentBooking\App\App::getInstance('view')->make('landing.author_html', [
@@ -587,11 +589,11 @@ class FrontEndHandler
         $startDay = Arr::get($globalSettings, 'administration.start_day', 'mon');
 
         $data = [
-            'ajaxurl'        => admin_url('admin-ajax.php'),
-            'timezones'      => DateTimeHelper::getFlatGroupedTimeZones(),
-            'current_person' => $currentPerson,
-            'start_day'      => $startDay,
-            'i18'            => [
+            'ajaxurl'           => admin_url('admin-ajax.php'),
+            'timezones'         => DateTimeHelper::getFlatGroupedTimeZones(),
+            'current_person'    => $currentPerson,
+            'start_day'         => $startDay,
+            'i18'               => [
                 'Timezone'                      => __('Timezone', 'fluent-booking'),
                 'Day'                           => __('Day', 'fluent-booking'),
                 'Days'                          => __('Days', 'fluent-booking'),
@@ -648,7 +650,8 @@ class FrontEndHandler
                 'Something is wrong!'                  => __('Something is wrong!', 'fluent-booking'),
                 'Requires Confirmation'                => __('Requires Confirmation', 'fluent-booking'),
             ],
-            'theme'          => Arr::get(get_option('_fluent_booking_settings'), 'theme','system-default')
+            'theme'             => Arr::get(get_option('_fluent_booking_settings'), 'theme', 'system-default'),
+            'currency_settings' => CurrenciesHelper::getGlobalCurrencySettings()
         ];
 
         if (isset($_SERVER['HTTP_CF_IPCOUNTRY'])) {
@@ -816,7 +819,11 @@ class FrontEndHandler
             'status'           => 'scheduled',
             'source'           => 'web',
             'event_type'       => $calendarEvent->event_type,
-            'slot_minutes'     => $duration
+            'slot_minutes'     => $duration,
+            'utm_source'       => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_source', '')),
+            'utm_medium'       => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_medium', '')),
+            'utm_campaign'     => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_campaign', '')),
+            'utm_term'         => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_term', ''))
         ];
 
         if ($calendarEvent->isConfirmationRequired($startDateTime)) {
@@ -835,8 +842,12 @@ class FrontEndHandler
             $bookingData['source_url'] = sanitize_url($sourceUrl);
         }
 
+        if (!empty($postedData['coupon_codes'])) {
+            $bookingData['coupon_codes'] = array_map('sanitize_text_field', array_unique($postedData['coupon_codes']));
+        }
+
         if (!empty($postedData['payment_method'])) {
-            $customFieldsData['payment_method'] = $postedData['payment_method'];
+            $customFieldsData['payment_method'] = sanitize_text_field($postedData['payment_method']);
         }
 
         $timeSlotService = TimeSlotServiceHandler::initService($calendarEvent->calendar, $calendarEvent);

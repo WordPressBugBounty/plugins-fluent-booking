@@ -14,11 +14,17 @@ add_action('fluentform/loaded', function () {
 
 add_action('fluentcrm_loaded', function () {
     (new \FluentBooking\App\Services\Integrations\FluentCRM\FluentCrmInit());
-    (new \FluentBooking\App\Services\Integrations\FluentCRM\Bootstrap());
+
+    add_action('init', function () {
+        (new \FluentBooking\App\Services\Integrations\FluentCRM\Bootstrap());
+    });
+
 });
 
 add_action('fluent_boards_loaded', function () {
-    (new \FluentBooking\App\Services\Integrations\FluentBoards\Bootstrap());
+    add_action('init', function () {
+        (new \FluentBooking\App\Services\Integrations\FluentBoards\Bootstrap());
+    });
 });
 
 if (defined('ELEMENTOR_VERSION')) {

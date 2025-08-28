@@ -24,6 +24,13 @@ class SummaryReportService
         if ($status != 'yes' || ($frequency == 'weekly' && $sendingDay != $currentDay)) {
             return;
         }
+
+        $lastSend = get_option('fcom_last_summary_email_send');
+        $interval = ($frequency == 'daily') ? DAY_IN_SECONDS : WEEK_IN_SECONDS;
+        if ($lastSend && (current_time('timestamp') - strtotime($lastSend)) < $interval) {
+            return;
+        }
+
         $reportDays = $frequency == 'daily' ? 1 : 7;
 
         $reportDateFrom = gmdate('Y-m-d H:i:s', strtotime("-$reportDays days"));
@@ -49,13 +56,22 @@ class SummaryReportService
         ];
 
         $adminEmail = str_replace('{{wp.admin_email}}', get_option('admin_email'), $adminEmail);
-
         if(!$adminEmail) {
             return;
         }
 
+        update_option('fcom_last_summary_email_send', current_time('mysql'));
+
         // translators: %d is replaced with the number of days
-        $emailSubject = sprintf(esc_html__('Email Summary of Your Bookings (Last %d Days)', 'fluent-booking'), $reportDays);
+        $emailSubject = sprintf(
+            esc_html(_n(
+                'Email Summary of Your Bookings (Last %d Day)',
+                'Email Summary of Your Bookings (Last %d Days)',
+                $reportDays,
+                'fluent-booking'
+            )),
+            $reportDays
+        );
 
         $emailBody = (string)App::make('view')->make('emails.summary_report', $data);
 
