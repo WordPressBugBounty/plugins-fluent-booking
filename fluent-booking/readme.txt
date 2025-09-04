@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.3
-Stable tag: 1.9.0
+Stable tag: 1.9.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,18 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 1.9.10 (Date: 04 Sep 2025)
+- Added: Option to Delete Completed Bookings
+- Added: UTM Content Support in Booking Params
+- Added: UTM Tracking Fields Mapping with CRM
+- Added: Auto-Skip to Next Month if No Availability
+- Fixed: One-off Event UI Issue
+- Fixed: Availability Sorting Issue
+- Fixed: Deleted User Not Removed from Team
+- Fixed: Missing First Slot in First Month (New York)
+- Fixed: Coupon Usage Not Updating on Auto-Cancelled Bookings
+- Fixed: Custom Field Issue with Special Characters in Labels
 
 = 1.9.0 (Date: 28 Aug 2025)
 - Introduced Coupon Module

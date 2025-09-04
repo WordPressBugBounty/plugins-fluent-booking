@@ -202,7 +202,6 @@ class PermissionManager
 
     public static function getMetaPermissions($userId = null)
     {
-
         if ($userId === null) {
             $userId = get_current_user_id();
         }

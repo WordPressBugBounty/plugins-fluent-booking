@@ -22,6 +22,12 @@ class SanitizeService
 
             $schedule['enabled'] = true;
 
+            if ($fromUser) {
+                usort($schedule['slots'], function ($a, $b) {
+                    return strcmp($a['start'], $b['start']);
+                });
+            }
+
             $cleanedSlots = [];
             foreach ($schedule['slots'] as $slot) {
                 if ($fromUser) {
@@ -39,12 +45,6 @@ class SanitizeService
                 }
 
                 $cleanedSlots[] = $slot;
-            }
-
-            if ($fromUser) {
-                usort($cleanedSlots, function ($a, $b) {
-                    return strcmp($a['start'], $b['start']);
-                });
             }
 
             $schedule['slots'] = array_values($cleanedSlots);
@@ -70,6 +70,12 @@ class SanitizeService
             if (strtotime($date) < $todayTimeStamp) {
                 $isSkipped = true;
                 continue;
+            }
+
+            if ($fromUser) {
+                usort($slots, function ($a, $b) {
+                    return strcmp($a['start'], $b['start']);
+                });
             }
 
             $utcSlots = [];
@@ -99,12 +105,6 @@ class SanitizeService
 
             if (!$slots) {
                 continue;
-            }
-
-            if ($fromUser) {
-                usort($slots, function ($a, $b) {
-                    return strcmp($a['start'], $b['start']);
-                });
             }
 
             $validOverrides[$date] = array_values($slots);

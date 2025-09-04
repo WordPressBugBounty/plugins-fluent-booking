@@ -55,6 +55,7 @@ class BookingMigrator
                 `utm_medium` VARCHAR(192) NULL DEFAULT '',
                 `utm_campaign` VARCHAR(192) NULL DEFAULT '',
                 `utm_term` VARCHAR(192) NULL DEFAULT '',
+                `utm_content` VARCHAR(192) NULL DEFAULT '',
                 `created_at` TIMESTAMP NULL,
                 `updated_at` TIMESTAMP NULL,
                 KEY `fcal_b_parent_id` (`parent_id`),
@@ -69,6 +70,11 @@ class BookingMigrator
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
             dbDelta($sql);
+        } else {
+            $isUtmContentMigrated = $wpdb->get_col($wpdb->prepare("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND COLUMN_NAME='utm_content' AND TABLE_NAME=%s",$table));
+            if(!$isUtmContentMigrated) {
+                $wpdb->query("ALTER TABLE {$table} ADD COLUMN `utm_content` VARCHAR(192) NULL DEFAULT '' AFTER `utm_term`");
+            }
         }
     }
 }

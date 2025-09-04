@@ -61,14 +61,18 @@ class FiveMinuteScheduler
     {
         $autoCancelTimeOut = (int)Helper::getGlobalAdminSetting('auto_cancel_timing', 10) * 60; // 10 minutes
 
-        Booking::query()
+        $bookings = Booking::query()
             ->where('created_at', '<=', gmdate('Y-m-d H:i:s', time() - $autoCancelTimeOut)) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             ->where('status', 'pending')
             ->where('payment_status', 'pending')
-            ->update([
-                'status'     => 'cancelled',
-                'updated_at' => gmdate('Y-m-d H:i:s') // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-            ]);
+            ->get();
+
+        foreach ($bookings as $booking) {
+            $booking->status = 'cancelled';
+            $booking->updated_at = gmdate('Y-m-d H:i:s');
+            $booking->save();
+            do_action('fluent_booking/booking_schedule_auto_cancelled', $booking);
+        }
 
         return true;
     }

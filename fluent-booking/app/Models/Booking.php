@@ -55,7 +55,8 @@ class Booking extends Model
         'utm_source',
         'utm_medium',
         'utm_campaign',
-        'utm_term'
+        'utm_term',
+        'utm_content'
     ];
 
 

@@ -823,7 +823,8 @@ class FrontEndHandler
             'utm_source'       => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_source', '')),
             'utm_medium'       => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_medium', '')),
             'utm_campaign'     => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_campaign', '')),
-            'utm_term'         => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_term', ''))
+            'utm_term'         => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_term', '')),
+            'utm_content'      => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_content', ''))
         ];
 
         if ($calendarEvent->isConfirmationRequired($startDateTime)) {

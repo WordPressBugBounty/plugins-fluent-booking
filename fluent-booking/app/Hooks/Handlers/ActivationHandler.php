@@ -21,6 +21,8 @@ class ActivationHandler
         DBSeeder::run();
 
         $this->registerWpCron();
+
+        update_option('fluent_booking_db_version', FLUENT_BOOKING_DB_VERSION, 'no');
     }
 
     public function registerWpCron()

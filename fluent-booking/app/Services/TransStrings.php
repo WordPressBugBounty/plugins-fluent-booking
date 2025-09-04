@@ -1017,6 +1017,7 @@ class TransStrings
             'UTM Medium'                                                                       => __('UTM Medium', 'fluent-booking'),
             'UTM Campaign'                                                                     => __('UTM Campaign', 'fluent-booking'),
             'UTM Term'                                                                         => __('UTM Term', 'fluent-booking'),
+            'UTM Content'                                                                      => __('UTM Content', 'fluent-booking'),
             'Manage your payment coupons and create discount codes for your customers here.'   => __('Manage your payment coupons and create discount codes for your customers here.', 'fluent-booking'),
             'Select the events that this coupon can be applied to. Empty for all events'       => __('Select the events that this coupon can be applied to. Empty for all events', 'fluent-booking'),
             'Can this coupon code be used with other coupon code'                              => __('Can this coupon code be used with other coupon code', 'fluent-booking'),

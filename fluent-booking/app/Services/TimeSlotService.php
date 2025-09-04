@@ -570,12 +570,12 @@ class TimeSlotService
         $event    = $this->calendarSlot;
         $duration = $event->getDuration($duration);
 
-        $startDate = $this->adjustStartDate($startDate, $timeZone);
+        $adjustedDate = $this->adjustStartDate($startDate, $timeZone);
 
         $isDisplaySpots = $event->is_display_spots;
         $isMultiGuest   = $event->isMultiGuestEvent();
         $isMultiBooking = $event->isAdditionalGuestEnabled();
-        $endDate        = $event->getMaxBookableDateTime($startDate, $timeZone);
+        $endDate        = $event->getMaxBookableDateTime($adjustedDate, $timeZone);
         $startDate      = $event->getMinBookableDateTime($startDate, $timeZone);
 
         $maxBooking = false;
