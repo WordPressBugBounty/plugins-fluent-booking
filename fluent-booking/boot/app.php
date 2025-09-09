@@ -24,13 +24,11 @@ return function ($file) {
     add_action('plugins_loaded', function () use ($app) {
         do_action('fluent_booking/loaded', $app);
 
-        add_action('fluent_booking/admin_app_rendering', function () {
-            $currentDBVersion = get_option('fluent_booking_db_version');
-            if (!$currentDBVersion || version_compare($currentDBVersion, FLUENT_BOOKING_DB_VERSION, '<')) {
-                update_option('fluent_booking_db_version', FLUENT_BOOKING_DB_VERSION, 'no');
-                DBMigrator::run();
-            }
-        });
+        $currentDBVersion = get_option('fluent_booking_db_version');
+        if (!$currentDBVersion || version_compare($currentDBVersion, FLUENT_BOOKING_DB_VERSION, '<')) {
+            update_option('fluent_booking_db_version', FLUENT_BOOKING_DB_VERSION, 'no');
+            DBMigrator::run();
+        }
 
         if (defined('FLUENT_BOOKING_PRO_VERSION') && version_compare(FLUENT_BOOKING_MIN_PRO_VERSION, FLUENT_BOOKING_PRO_VERSION, '>')) {
             if (!current_user_can('manage_options')) {
