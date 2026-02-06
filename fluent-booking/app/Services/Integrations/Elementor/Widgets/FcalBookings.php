@@ -438,7 +438,7 @@ class FcalBookings extends \Elementor\Widget_Base
 
             <?php
         endif;
-        echo $shortcode_output;
+        echo $shortcode_output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     }
 
     public function content_template()

@@ -231,7 +231,7 @@ class ReportController extends Controller
 
     private function getAllBookingWidgetNumbers()
     {
-        $permissionAccess = PermissionManager::userCan(['read_all_bookings', 'manage_all_bookings', 'read_other_calendars', 'manage_other_calendars']);
+        $permissionAccess = PermissionManager::userCan(['manage_all_data', 'read_all_bookings', 'manage_all_bookings', 'read_other_calendars', 'manage_other_calendars']);
 
         if ($permissionAccess) {
             $totalBooked = Booking::count();
@@ -289,7 +289,7 @@ class ReportController extends Controller
 
         $current_user_email = null;
 
-        $cantSeeTotal = PermissionManager::userCan(['read_all_bookings', 'manage_all_bookings', 'read_other_calendars', 'manage_other_calendars']);
+        $cantSeeTotal = PermissionManager::userCan(['manage_all_data', 'read_all_bookings', 'manage_all_bookings', 'read_other_calendars', 'manage_other_calendars']);
 
         if (!$cantSeeTotal) {
             $current_user_email = wp_get_current_user()->user_email;

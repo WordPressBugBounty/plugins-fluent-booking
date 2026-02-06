@@ -107,7 +107,7 @@ class TimeSlotService
                 }
 
                 if ($isLastDay && strtotime($slot['end']) > $maxBookingTime) {
-                    continue;
+                    break;
                 }
 
                 $isSlotAvailable = $this->isSlotAvailable($slot, $currentBookedSlots, $bufferTime, $hostId);

@@ -237,6 +237,44 @@ class CalendarService
                 'enabled'  => Arr::isTrue($eventSettings, 'lock_timezone.enabled'),
                 'timezone' => sanitize_text_field(Arr::get($eventSettings, 'lock_timezone.timezone'))
             ],
+            'booking_title'         => sanitize_text_field(Arr::get($eventSettings, 'booking_title')),
+            'submit_button_text'    => sanitize_text_field(Arr::get($eventSettings, 'submit_button_text')),
+            'custom_redirect'       => [
+                'enabled'         => Arr::isTrue($eventSettings, 'custom_redirect.enabled'),
+                'redirect_url'    => sanitize_url(Arr::get($eventSettings, 'custom_redirect.redirect_url')),
+                'is_query_string' => Arr::get($eventSettings, 'custom_redirect.is_query_string') == 'yes' ? 'yes' : 'no',
+                'query_string'    => sanitize_text_field(Arr::get($eventSettings, 'custom_redirect.query_string')),
+            ],
+            'requires_confirmation' => [
+                'enabled'   => Arr::isTrue($eventSettings, 'requires_confirmation.enabled'),
+                'type'      => sanitize_text_field(Arr::get($eventSettings, 'requires_confirmation.type')),
+                'condition' => [
+                    'unit'  => sanitize_text_field(Arr::get($eventSettings, 'requires_confirmation.condition.unit')),
+                    'value' => intval(Arr::get($eventSettings, 'requires_confirmation.condition.value'))
+                ]
+            ],
+            'multiple_booking'    => [
+                'enabled'   => Arr::isTrue($eventSettings, 'multiple_booking.enabled'),
+                'limit'     => intval(Arr::get($eventSettings, 'multiple_booking.limit'))
+            ],
+            'can_not_cancel'       => [
+                'enabled'   => Arr::isTrue($eventSettings, 'can_not_cancel.enabled'),
+                'type'      => sanitize_text_field(Arr::get($eventSettings, 'can_not_cancel.type')),
+                'message'   => sanitize_text_field(Arr::get($eventSettings, 'can_not_cancel.message')),
+                'condition' => [
+                    'unit'  => sanitize_text_field(Arr::get($eventSettings, 'can_not_cancel.condition.unit')),
+                    'value' => intval(Arr::get($eventSettings, 'can_not_cancel.condition.value'))
+                ]
+            ],
+            'can_not_reschedule'   => [
+                'enabled'   => Arr::isTrue($eventSettings, 'can_not_reschedule.enabled'),
+                'type'      => sanitize_text_field(Arr::get($eventSettings, 'can_not_reschedule.type')),
+                'message'   => sanitize_text_field(Arr::get($eventSettings, 'can_not_reschedule.message')),
+                'condition' => [
+                    'unit'  => sanitize_text_field(Arr::get($eventSettings, 'can_not_reschedule.condition.unit')),
+                    'value' => intval(Arr::get($eventSettings, 'can_not_reschedule.condition.value'))
+                ]
+            ]
         ];
 
         return $preparedEventData;

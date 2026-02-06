@@ -35,7 +35,7 @@ if (!function_exists('fluentwp_scheduler_register') && function_exists('add_acti
     // Support usage in themes - load this version if no plugin has loaded a version yet.
     if (did_action('plugins_loaded') && !doing_action('plugins_loaded') && !class_exists('ActionScheduler', false)) {
         fluentwp_scheduler_initialize(); // WRCS: DEFINED_VERSION.
-        do_action('action_scheduler_pre_theme_init');
+        do_action('action_scheduler_pre_theme_init'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         ActionScheduler_Versions::initialize_latest_version();
     }
 }

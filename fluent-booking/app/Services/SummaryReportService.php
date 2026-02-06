@@ -62,8 +62,8 @@ class SummaryReportService
 
         update_option('fcom_last_summary_email_send', current_time('mysql'));
 
-        // translators: %d is replaced with the number of days
         $emailSubject = sprintf(
+            // translators: %d: number of days for which the summary is being reported
             esc_html(_n(
                 'Email Summary of Your Bookings (Last %d Day)',
                 'Email Summary of Your Bookings (Last %d Days)',

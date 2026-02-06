@@ -16,7 +16,7 @@ class CalendarEventPolicy extends Policy
      */
     public function verifyRequest(Request $request)
     {
-        if (current_user_can('manage_options') || PermissionManager::userCan('manage_other_calendars')) {
+        if (PermissionManager::userCan(['manage_all_data', 'manage_other_calendars'])) {
             return true;
         }
 
@@ -29,7 +29,7 @@ class CalendarEventPolicy extends Policy
         }
 
         if ($request->method() == 'GET') {
-            return PermissionManager::userCan('read_other_calendars');
+            return PermissionManager::userCan(['manage_all_data', 'read_other_calendars']);
         }
 
         return false;

@@ -10,6 +10,7 @@ use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\AvailabilityService;
 use FluentBooking\App\Services\SanitizeService;
 use FluentBooking\App\Services\CalendarService;
+use FluentBooking\App\Services\OnboardingService;
 use FluentBooking\App\Services\CalendarEventService;
 use FluentBooking\App\Services\BookingFieldService;
 use FluentBooking\App\Hooks\Handlers\AdminMenuHandler;
@@ -106,7 +107,8 @@ class CalendarController extends Controller
         }
 
         return [
-            'status' => true
+            'status'  => true,
+            'message' => __('The provided slug is available', 'fluent-booking')
         ];
     }
 
@@ -147,7 +149,7 @@ class CalendarController extends Controller
 
         do_action('fluent_booking/before_create_calendar', $data, $this);
 
-        if (!empty($data['user_id']) && PermissionManager::userCan('invite_team_members')) {
+        if (!empty($data['user_id']) && PermissionManager::userCan(['manage_all_data', 'invite_team_members'])) {
             $user = get_user_by('ID', $data['user_id']);
         } else {
             $user = get_user_by('ID', get_current_user_id());
@@ -157,6 +159,12 @@ class CalendarController extends Controller
             return $this->sendError([
                 'message' => __('User not found', 'fluent-booking')
             ], 422);
+        }
+
+        $onboardinFeatures = $request->get('features');
+        if (!empty($onboardinFeatures)) {
+            $installableAddons = SanitizeService::sanitizeAddons($onboardinFeatures);
+            OnboardingService::installAddons($installableAddons);
         }
 
         $type = sanitize_text_field(Arr::get($data, 'type', 'simple'));
@@ -288,6 +296,10 @@ class CalendarController extends Controller
 
         if (in_array('settings_menu', $request->get('with', []))) {
             $data['settings_menu'] = AdminMenuHandler::getCalendarSettingsMenuItems($calendar);
+        }
+
+        if (in_array('public_url', $request->get('with', []))) {
+            $data['public_url'] = $calendar->getLandingPageUrl();
         }
 
         return $data;
@@ -879,6 +891,30 @@ class CalendarController extends Controller
         return [
             'message' => __('Fields has been updated', 'fluent-booking')
         ];
+    }
+
+    public function getEventPaymentSettings($calendarId, $eventId)
+    {
+        $calendarEvent = CalendarSlot::where('calendar_id', $calendarId)->findOrFail($eventId);
+
+        $config = [
+            'native_enabled'     => Helper::isPaymentEnabled(),
+            'stripe_configured'  => Helper::isPaymentConfigured('stripe'),
+            'paypal_configured'  => Helper::isPaymentConfigured('paypal'),
+            'offline_configured' => Helper::isPaymentConfigured('offline'),
+            'native_config_link' => Helper::getAppBaseUrl('settings/payment-methods/stripe'),
+            'woo_config_link'    => Helper::getAppBaseUrl('settings/configure-integrations/global-modules'),
+            'has_cart'           => defined('FLUENTCART_VERSION'),
+            'has_woo'            => defined('WC_PLUGIN_FILE'),
+            'woo_enabled'        => defined('WC_PLUGIN_FILE') && Helper::isModuleEnabled('woo')
+        ];
+
+        $data = apply_filters('fluent_booking/payment/get_payment_settings', [
+            'settings' => $calendarEvent->getPaymentSettings(),
+            'config'   => $config
+        ], $calendarEvent);
+
+        return $data;
     }
 
     public function deleteCalendarEvent(Request $request, $calendarId, $calendarEventId)

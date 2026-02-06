@@ -7,8 +7,8 @@ use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\BookingActivity;
 use FluentBooking\App\Services\EmailNotificationService;
 use FluentBooking\App\Services\Helper;
-use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\Framework\Support\Arr;
+use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\CalendarService;
@@ -207,8 +207,23 @@ class SchedulesController extends Controller
                     do_action('fluent_booking/refund_payment_' . $booking->payment_method, $booking, $booking->calendar_event);
                 }
                 return [
+                    /* translators: %s: Booking status */
                     'message' => sprintf(__('The booking has been %s', 'fluent-booking'), $value)
                 ];
+            }
+
+            $updateAll = Arr::isTrue($data, 'update_all') && $booking->isMultiGuestBooking();
+
+            if ($updateAll && in_array($value, ['no_show', 'completed'])) {
+                Booking::where('event_id', $booking->event_id)
+                    ->where('group_id', $booking->group_id)
+                    ->update([
+                        'status' => $value
+                    ]);
+                    return [
+                        /* translators: %s: Booking status */
+                        'message' => sprintf(__('The booking has been %s', 'fluent-booking'), $value)
+                    ];
             }
         }
 
@@ -394,7 +409,7 @@ class SchedulesController extends Controller
         }
 
         $order = null;
-        if ($booking->payment_method && $booking->payment_order) {
+        if ($booking->payment_status && $booking->payment_order) {
             $order = $booking->payment_order;
             $relations = ['items', 'transaction'];
             if (method_exists($order, 'discounts')) {

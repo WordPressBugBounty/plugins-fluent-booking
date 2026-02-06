@@ -152,7 +152,7 @@ class BookingController extends Controller
         $startDateTime = DateTimeHelper::convertToUtc($postedData['event_time'], $timezone);
         $endDateTime   = gmdate('Y-m-d H:i:s', strtotime($startDateTime) + ($duration * 60));
 
-        $bookingData = [
+        $bookingData = apply_filters('fluent_booking/initialize_booking_data', [
             'person_time_zone' => sanitize_text_field($timezone),
             'start_time'       => $startDateTime,
             'name'             => sanitize_text_field($postedData['name']),
@@ -162,10 +162,10 @@ class BookingController extends Controller
             'address'          => sanitize_textarea_field(Arr::get($postedData, 'address', '')),
             'ip_address'       => Helper::getIp(),
             'status'           => sanitize_text_field($postedData['status']),
-            'source'           => 'admin',
+            'source'           => Arr::get($postedData, 'source') == 'admin' ? 'admin' : 'web',
             'event_type'       => $calendarEvent->event_type,
             'slot_minutes'     => $duration
-        ];
+        ], $postedData, $calendarEvent);
 
         $eventLocations = [];
         $locationSettings = $calendarEvent->location_settings;

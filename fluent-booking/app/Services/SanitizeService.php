@@ -118,7 +118,6 @@ class SanitizeService
         return $validOverrides;
     }
 
-
     public static function rangeDateBetween($range)
     {
         $range = array_filter($range);
@@ -196,5 +195,14 @@ class SanitizeService
         }
 
         return sanitize_text_field($value);
+    }
+
+    public static function sanitizeAddons($inputs)
+    {
+        return array_keys(array_filter([
+            'fluent-crm'  => Arr::get($inputs, 'install_fluentcrm', 'no') == 'yes',
+            'fluent-smtp' => Arr::get($inputs, 'install_fluentsmtp', 'no') == 'yes',
+            'fluent-cart' => Arr::get($inputs, 'install_fluentcart', 'no') == 'yes',
+        ]));
     }
 }

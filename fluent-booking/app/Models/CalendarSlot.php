@@ -118,6 +118,11 @@ class CalendarSlot extends Model
             ->whereIn('object_type', ['calendar_event', 'integration']);
     }
 
+    public function isOneToOne()
+    {
+        return $this->event_type == 'single';
+    }
+
     public function isGroup()
     {
         return $this->event_type == 'group';
@@ -168,14 +173,24 @@ class CalendarSlot extends Model
         return $this->isGroup() || $this->isGroupEvent();
     }
 
+    public function isRecurringEvent()
+    {
+        return Arr::isTrue($this->getRecurringConfig(), 'enabled');
+    }
+
     public function isProEvent()
     {
-        return $this->isGroup() || $this->isTeamEvent() || $this->isOneOffEvent();
+        return $this->isGroup() || $this->isTeamEvent() || $this->isOneOffEvent() || $this->allowMultiBooking();
+    }
+
+    public function isMultiBooking()
+    {
+        return Arr::isTrue($this->settings, 'multiple_booking.enabled');
     }
 
     public function allowMultiBooking()
     {
-        return Arr::isTrue($this->settings, 'multiple_booking.enabled');
+        return $this->isMultiBooking() || $this->isRecurringEvent();
     }
 
     public function multiBookingLimit()
@@ -224,6 +239,11 @@ class CalendarSlot extends Model
         }
 
         return $teamMembers;
+    }
+
+    public function getRecurringConfig()
+    {
+        return Arr::get($this->settings, 'recurring_config', []);
     }
 
     public function isLocationFieldRequired()
@@ -859,9 +879,21 @@ class CalendarSlot extends Model
         return $this->type == 'paid' && Helper::isPaymentEnabled();
     }
 
+    public function isPaidEvent()
+    {
+        $paymentSettings = $this->getPaymentSettings();
+
+        return $this->type != 'free' && Arr::get($paymentSettings, 'enabled') == 'yes';
+    }
+
     public function isWooEnabled()
     {
         return $this->type == 'woo' && defined('WC_PLUGIN_FILE');
+    }
+
+    public function isCartEnabled()
+    {
+        return $this->type == 'cart' && defined('FLUENTCART_VERSION');
     }
 
     public function getPaymentItems($duration = null)
@@ -1079,6 +1111,7 @@ class CalendarSlot extends Model
                 ]
             ],
             'woo_product_id'        => '',
+            'cart_product_id'       => '',
             'multi_payment_items'   => [
                 $duration => [
                     'title' => __('Booking Fee', 'fluent-booking'),
@@ -1086,6 +1119,9 @@ class CalendarSlot extends Model
                 ]
             ],
             'multi_payment_woo_ids' => [
+                $duration => ''
+            ],
+            'multi_payment_cart_ids' => [
                 $duration => ''
             ]
         ];

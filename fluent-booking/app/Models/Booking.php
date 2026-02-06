@@ -59,7 +59,6 @@ class Booking extends Model
         'utm_content'
     ];
 
-
     /**
      * $searchable Columns in table to search
      * @var array
@@ -238,8 +237,8 @@ class Booking extends Model
         }
 
         if (!empty($range['time_zone']) && $range['time_zone'] != 'UTC') {
-            $range['start_date'] = date('Y-m-d H:i:s', strtotime($range['start_date'] . ' -1 day'));
-            $range['end_date'] = date('Y-m-d H:i:s', strtotime($range['end_date'] . ' +1 day'));
+            $range['start_date'] = gmdate('Y-m-d H:i:s', strtotime($range['start_date'] . ' -1 day'));
+            $range['end_date'] = gmdate('Y-m-d H:i:s', strtotime($range['end_date'] . ' +1 day'));
         }
 
         return $query->whereBetween('start_time', [$range['start_date'], $range['end_date']]);
@@ -375,16 +374,29 @@ class Booking extends Model
         })->toArray();
     }
 
-    public function getAllBookingShortTimes($timeZone = 'UTC')
+    public function getAllBookingShortTimes($timeZone = 'UTC', $withTimeZone = false)
     {
         $otherBookings = self::where('parent_id', $this->id)->get();
 
-        $otherTimes = $otherBookings->map(function ($otherBooking) use ($timeZone) {
-            return $otherBooking->formatBookingDateTime($otherBooking->start_time, $timeZone);
+        $otherTimes = $otherBookings->map(function ($otherBooking) use ($timeZone, $withTimeZone) {
+            return $otherBooking->formatBookingDateTime($otherBooking->start_time, $timeZone) . ($withTimeZone ? ' (' . $timeZone . ')' : '');
         })->toArray();
 
         return array_merge($otherTimes, [
-            $this->formatBookingDateTime($this->start_time, $timeZone)
+            $this->formatBookingDateTime($this->start_time, $timeZone) . ($withTimeZone ? ' (' . $timeZone . ')' : '')
+        ]);
+    }
+
+    public function getAllBookingFullTimes($timeZone = 'UTC', $withTimeZone = false)
+    {
+        $otherBookings = self::where('parent_id', $this->id)->get();
+
+        $otherTimes = $otherBookings->map(function ($otherBooking) use ($timeZone, $withTimeZone) {
+            return $otherBooking->getFullBookingDateTimeText($timeZone) . ($withTimeZone ? ' (' . $timeZone . ')' : '');
+        })->toArray();
+
+        return array_merge($otherTimes, [
+            $this->getFullBookingDateTimeText($timeZone) . ($withTimeZone ? ' (' . $timeZone . ')' : '')
         ]);
     }
 
@@ -394,7 +406,7 @@ class Booking extends Model
 
         $guestNames = (array) trim($this->first_name . ' ' . $this->last_name);
 
-        if ($this->isMultiGuestBooking()) {
+        if ($this->isMultiGuestBooking() && !$this->isRecurringBooking()) {
             $otherGuests = self::where('parent_id', $this->id)->get()->map(function ($guest) {
                 return trim($guest->first_name . ' ' . $guest->last_name);
             })->toArray();
@@ -503,6 +515,24 @@ class Booking extends Model
         return \maybe_unserialize($locationDetails);
     }
 
+    public function setOtherInfoAttribute($otherInfo)
+    {
+        $originalOtherInfo = $this->getOriginal('other_info');
+
+        $originalOtherInfo = \maybe_unserialize($originalOtherInfo);
+
+        foreach ($otherInfo as $key => $value) {
+            $originalOtherInfo[$key] = $value;
+        }
+
+        $this->attributes['other_info'] = \maybe_serialize($originalOtherInfo);
+    }
+    
+    public function getOtherInfoAttribute($otherInfo)
+    {
+        return \maybe_unserialize($otherInfo);
+    }
+    
     public function getOngoingStatus()
     {
         if ($this->status != 'scheduled') {
@@ -915,7 +945,7 @@ class Booking extends Model
     public function hasBookingAccess()
     {
         $hostIds = $this->getHostIds();
-        $hasAccess = PermissionManager::userCan('manage_all_bookings');
+        $hasAccess = PermissionManager::userCan(['manage_all_data', 'manage_all_bookings']);
         return in_array(get_current_user_id(), $hostIds) || $hasAccess;
     }
 
@@ -974,6 +1004,11 @@ class Booking extends Model
     public function isMultiHostBooking()
     {
         return in_array($this->event_type, ['single_event', 'group_event', 'collective']);
+    }
+
+    public function isRecurringBooking()
+    {
+        return Arr::get($this->other_info, 'recurring_count', 0) > 1;
     }
 
     public function getHostProfiles($public = true)

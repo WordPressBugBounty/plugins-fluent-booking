@@ -15,7 +15,7 @@ class AvailabilityPolicy extends Policy
      */
     public function verifyRequest(Request $request)
     {
-        if (current_user_can('manage_options') || PermissionManager::userCan('manage_other_availabilities')) {
+        if (PermissionManager::userCan(['manage_all_data', 'manage_other_availabilities'])) {
             return true;
         }
 

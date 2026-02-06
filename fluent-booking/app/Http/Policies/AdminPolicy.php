@@ -15,7 +15,7 @@ class AdminPolicy extends Policy
      */
     public function verifyRequest(Request $request)
     {
-        return PermissionManager::userCan(['invite_team_members']);
+        return PermissionManager::userCan(['manage_all_data', 'invite_team_members']);
     }
     
     /**
@@ -25,6 +25,6 @@ class AdminPolicy extends Policy
      */
     public function create(Request $request)
     {
-        return PermissionManager::userCan(['invite_team_members']);
+        return PermissionManager::userCan(['manage_all_data', 'invite_team_members']);
     }
 }

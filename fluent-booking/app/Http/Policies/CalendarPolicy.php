@@ -16,7 +16,7 @@ class CalendarPolicy extends Policy
      */
     public function verifyRequest(Request $request)
     {
-        if (current_user_can('manage_options')) {
+        if (PermissionManager::userCan('manage_all_data')) {
             return true;
         }
 
@@ -48,7 +48,7 @@ class CalendarPolicy extends Policy
 
     public function createCalendar(Request $request)
     {
-        if (PermissionManager::userCan('invite_team_members')) {
+        if (PermissionManager::userCan(['manage_all_data', 'invite_team_members'])) {
             return true;
         }
 
@@ -66,7 +66,7 @@ class CalendarPolicy extends Policy
 
     public function checkSlug(Request $request)
     {
-        return PermissionManager::userCan(['invite_team_members', 'manage_own_calendar']);
+        return PermissionManager::userCan(['manage_all_data', 'invite_team_members', 'manage_own_calendar']);
     }
 
     public function getEvent(Request $request, $calendarId, $eventId)
@@ -76,7 +76,7 @@ class CalendarPolicy extends Policy
 
     public function deleteCalendar(Request $request)
     {
-        if (current_user_can('manage_options')) {
+        if (PermissionManager::userCan('manage_all_data')) {
             return true;
         }
 

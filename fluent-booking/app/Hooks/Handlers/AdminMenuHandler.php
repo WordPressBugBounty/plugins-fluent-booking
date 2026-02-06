@@ -83,7 +83,7 @@ class AdminMenuHandler
             'fluent-booking',
             __('Settings', 'fluent-booking'),
             __('Settings', 'fluent-booking'),
-            'manage_options',
+            $capability,
             'fluent-booking#/settings/general-settings',
             [$this, 'render']
         );
@@ -136,19 +136,12 @@ class AdminMenuHandler
             ]
         ];
 
-        if (current_user_can('manage_options')) {
-            $menuItems[] = [
+        $settingItems = [];
+        if (PermissionManager::userCan('manage_all_data')) {
+            $settingItems = [
                 'key'       => 'settings',
                 'label'     => __('Settings', 'fluent-booking'),
                 'permalink' => $baseUrl . 'settings/general-settings'
-            ];
-        }
-
-        if (!defined('FLUENT_BOOKING_PRO_DIR_FILE')) {
-            $menuItems[] = [
-                'key'       => 'buy',
-                'label'     => __('Upgrade to Pro', 'fluent-booking'),
-                'permalink' => Helper::getUpgradeUrl()
             ];
         }
 
@@ -160,8 +153,10 @@ class AdminMenuHandler
             'name'      => $name,
             'slug'      => $slug,
             'menuItems' => $menuItems,
+            'settings'  => $settingItems,
             'baseUrl'   => $baseUrl,
             'logo'      => $assets . 'images/logo.svg',
+            'dark_logo' => $assets . 'images/logo_dark.svg',
         ]);
 
         do_action('fluent_booking/admin_app_rendering');
@@ -290,7 +285,7 @@ class AdminMenuHandler
 
         wp_enqueue_style('fluent_booing_admin_app', $assets . $adminAppCss, [], FLUENT_BOOKING_ASSETS_VERSION, 'all');
 
-        do_action($slug . '_loading_app');
+        do_action($slug . '_loading_app'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
 
         wp_enqueue_script(
             $slug . '_admin_app',
@@ -400,6 +395,7 @@ class AdminMenuHandler
             'site_url'               => site_url('/'),
             'upgrade_url'            => Helper::getUpgradeUrl(),
             'timezones'              => DateTimeHelper::getTimeZones(true),
+            'features'               => Helper::getFeatures(),
             'supported_features'     => apply_filters('fluent_booking/supported_featured', [
                 'multi_users' => true
             ]),
@@ -420,7 +416,8 @@ class AdminMenuHandler
             'pref_settings'           => Helper::getPrefSettings(),
             'settings_menu_items'     => static::settingsMenuItems(),
             'admin_url'               => admin_url(),
-            'is_rtl'                  => Helper::fluentbooking_is_rtl()
+            'is_rtl'                  => Helper::fluentbooking_is_rtl(),
+            'iframe_html'             => Helper::getIframeHtml()
         ]);
     }
 
@@ -585,7 +582,7 @@ class AdminMenuHandler
             'next_cloud_calendar' => [
                 'title'          => __('Nextcloud Calendar', 'fluent-booking'),
                 'disable'        => true,
-                'icon_url'       => $urlAssets . 'images/Ncloud.svg',
+                'svg_icon'       => '<svg xmlns="http://www.w3.org/2000/svg" height="800" width="1200" viewBox="-17.0838 -18.65685 148.0596 111.9411"><path d="M57.0328 0C45.2275 0 35.2216 8.0032 32.1204 18.8466c-2.6952-5.7515-8.5359-9.781-15.2633-9.781C7.6053 9.0657 0 16.671 0 25.9228c0 9.2519 7.6052 16.8606 16.857 16.8606 6.7275 0 12.5682-4.0319 15.2635-9.7844 3.1011 10.8442 13.107 18.85 24.9123 18.85 11.718 0 21.6729-7.885 24.8533-18.607 2.745 5.622 8.5135 9.5414 15.1454 9.5414 9.2518 0 16.8605-7.6087 16.8605-16.8606 0-9.2518-7.6087-16.857-16.8605-16.857-6.632 0-12.4003 3.917-15.1454 9.5378C78.7057 7.8825 68.7507 0 57.0328 0zm0 9.8955c8.9116 0 16.0307 7.1156 16.0307 16.0272s-7.119 16.0308-16.0307 16.0308c-8.9116 0-16.0272-7.1192-16.0272-16.0308S48.1212 9.8955 57.0328 9.8955zm-40.1757 9.0657c3.9044 0 6.965 3.0571 6.965 6.9615s-3.0606 6.965-6.965 6.965-6.9616-3.0606-6.9616-6.965 3.0572-6.9615 6.9616-6.9615zm80.1744 0c3.9044 0 6.965 3.0571 6.965 6.9615s-3.0606 6.965-6.965 6.965-6.9616-3.0606-6.9616-6.965 3.0572-6.9615 6.9616-6.9615z" color="currentColor" font-weight="400" font-family="sans-serif" overflow="visible" fill="currentColor"></path><path d="M29.1085 63.7615c2.7752 0 4.3275 1.9756 4.3275 4.939 0 .2822-.2352.5174-.5174.5174h-7.4792c.047 2.6342 1.8816 4.1394 3.9983 4.1394 1.3171 0 2.2579-.5644 2.7283-.9408.2822-.1881.5174-.141.6585.1412l.1411.2352c.1411.2351.094.4703-.1411.6585-.5645.4233-1.7875 1.129-3.4338 1.129-3.0575 0-5.4094-2.2109-5.4094-5.4095.047-3.3868 2.3048-5.4094 5.1272-5.4094zm2.8693 4.4216c-.094-2.1638-1.4112-3.2457-2.9164-3.2457-1.7404 0-3.2456 1.129-3.575 3.2457zm15.584-2.9164v-3.622c0-.3292.1882-.5174.5174-.5174h.3764c.3292 0 .4703.1882.4703.5174v2.446h2.1168c.3292 0 .5174.1882.5174.5174v.1412c0 .3292-.1882.4703-.5174.4703h-2.1168v5.1743c0 2.399 1.4582 2.6812 2.2579 2.7282.4233.047.5644.1411.5644.5174v.2823c0 .3292-.141.4704-.5644.4704-2.2579 0-3.622-1.3642-3.622-3.8102zm10.7718-1.5052c1.7875 0 2.9164.7526 3.4339 1.176.2351.188.2822.4233.047.7055l-.1411.2352c-.1882.2822-.4234.2822-.7056.094-.4704-.3292-1.3641-.9407-2.5871-.9407-2.2579 0-4.0453 1.6934-4.0453 4.1864 0 2.446 1.7874 4.1394 4.0453 4.1394 1.4582 0 2.446-.6585 2.9164-1.0819.2822-.1881.4704-.141.6585.1411l.1411.1882c.1411.2822.0941.4704-.141.7056-.5175.4233-1.7876 1.317-3.6691 1.317-3.0575 0-5.4094-2.2108-5.4094-5.4094.047-3.1986 2.399-5.4564 5.4564-5.4564zm6.2562-3.3398c0-.3292-.1882-.5174.141-.5174h.3764c.3293 0 .8467.1882.8467.5174V71.664c0 1.3171.6115 1.4582 1.0819 1.5053.2352 0 .4233.141.4233.4703v.3293c0 .3293-.1411.5174-.5174.5174-.8467 0-2.352-.2822-2.352-2.54zm9.6429 3.3398c3.0104 0 5.4564 2.3048 5.4564 5.3623 0 3.1046-2.446 5.4565-5.4564 5.4565-3.0105 0-5.4565-2.352-5.4565-5.4565 0-3.0575 2.446-5.3623 5.4565-5.3623zm0 9.5958c2.2108 0 3.9982-1.7875 3.9982-4.2335 0-2.3519-1.7874-4.0923-3.9982-4.0923s-4.0454 1.7875-4.0454 4.0923c.047 2.399 1.8346 4.2335 4.0454 4.2335zm23.4722-9.5958c2.493 0 3.3868 2.0697 3.3868 2.0697h.047s-.047-.3293-.047-.7997v-4.6568c0-.3293-.1412-.5174.1881-.5174h.3763c.3293 0 .8467.1881.8467.5174v13.406c0 .3292-.1411.5174-.4704.5174h-.3292c-.3293 0-.5175-.1411-.5175-.4704v-.7997c0-.3763.0941-.6585.0941-.6585h-.047s-.8938 2.1638-3.575 2.1638c-2.7752 0-4.5157-2.2108-4.5157-5.4095-.094-3.1986 1.8345-5.3623 4.5628-5.3623zm.047 9.5958c1.7404 0 3.3398-1.223 3.3398-4.1864 0-2.1167-1.082-4.1394-3.2927-4.1394-1.8345 0-3.3398 1.5052-3.3398 4.1394.047 2.54 1.3641 4.1864 3.2927 4.1864zm-85.8923.9878h.3763c.3293 0 .5174-.1881.5174-.5174V63.7274c0-1.5993 1.7404-2.7412 3.716-2.7412 1.9757 0 3.7161 1.142 3.7161 2.7412v10.1003c0 .3293.1882.5174.5174.5174h.3763c.3293 0 .4704-.1881.4704-.5174V63.6674c0-2.6812-2.6812-3.9983-5.1272-3.9983-2.3519 0-5.0331 1.317-5.0331 3.9983v10.1603c0 .3293.1411.5174.4704.5174zm78.5073-10.3485h-.3763c-.3293 0-.5175.1882-.5175.5175v5.6916c0 1.5993-1.0348 3.0575-3.0575 3.0575-1.9756 0-3.0575-1.4582-3.0575-3.0575v-5.6916c0-.3293-.1881-.5175-.5174-.5175h-.3763c-.3293 0-.4704.1882-.4704.5175v6.068c0 2.6811 1.9756 3.9982 4.4216 3.9982 2.446 0 4.4217-1.317 4.4217-3.9983v-6.068c.047-.3292-.1412-.5174-.4704-.5174zm-46.5643-.0771c-.1152.0184-.2258.0953-.3317.2214L41.5673 66.41l-1.4249 1.6978-2.1571-2.5715-1.1705-1.3955c-.1058-.1261-.2257-.195-.35-.2058-.1244-.0107-.2533.0366-.3795.1424l-.2884.2416c-.2523.2117-.2392.446-.0276.6982l1.9045 2.2693 1.5793 1.8815-2.3124 2.7553c-.0018.002-.0029.0043-.0046.0064l-1.1668 1.39c-.2117.2523-.188.5178.0643.7295l.2885.2407c.2522.2116.481.1585.6927-.0937l1.9036-2.2693 1.425-1.6977 2.157 2.5715c.0015.0016.0032.0029.0047.0046l1.1668 1.391c.2116.2521.4763.275.7285.0633l.2885-.2416c.2522-.2117.2392-.446.0275-.6983l-1.9045-2.2692-1.5792-1.8815 2.3124-2.7553c.0017-.002.0028-.0044.0046-.0064l1.1668-1.39c.2116-.2523.1879-.5179-.0643-.7295l-.2885-.2416c-.1261-.1058-.2459-.1452-.361-.1268z" fill="currentColor"></path></svg>',
                 'component_type' => 'GlobalSettingsComponent',
                 'class'          => 'configure_nextcloud_calendar',
                 'route'          => [
@@ -608,7 +605,7 @@ class AdminMenuHandler
             'twilio'              => [
                 'title'          => __('SMS by Twilio', 'fluent-booking'),
                 'disable'        => true,
-                'icon_url'       => $urlAssets . 'images/tw.svg',
+                'svg_icon'       => '<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" viewBox="0 0 24 24" id="twilio"><path d="M0,12c0,6.64,5.359,12,12,12s12-5.36,12-12c0-6.641-5.36-12-12-12C5.381-0.008,0.008,5.352,0,11.971V12z M3.199,12c-0.014-4.846,3.904-8.786,8.75-8.801H12c4.847-0.014,8.786,3.904,8.801,8.75V12c0.015,4.847-3.904,8.786-8.75,8.801H12c-4.846,0.015-8.786-3.904-8.801-8.75V12z"></path><path d="M14.959 17.44c1.361 0 2.481-1.12 2.481-2.48 0-1.359-1.12-2.48-2.481-2.479-1.359 0-2.479 1.12-2.479 2.479C12.486 16.326 13.592 17.432 14.959 17.44zM14.959 11.52c1.361 0 2.481-1.12 2.481-2.479 0-1.361-1.12-2.481-2.481-2.481-1.359 0-2.479 1.12-2.479 2.481C12.487 10.407 13.593 11.513 14.959 11.52zM9.042 17.44c1.359 0 2.479-1.12 2.479-2.48 0-1.359-1.121-2.48-2.479-2.479-1.361 0-2.481 1.12-2.481 2.479C6.567 16.327 7.674 17.433 9.042 17.44zM9.042 11.52c1.359 0 2.479-1.12 2.479-2.479 0-1.361-1.121-2.481-2.479-2.481-1.361 0-2.481 1.12-2.481 2.481C6.567 10.408 7.675 11.513 9.042 11.52z"></path></svg>',
                 'component_type' => 'GlobalSettingsComponent',
                 'class'          => 'configure_twilio',
                 'route'          => [
@@ -646,7 +643,7 @@ class AdminMenuHandler
                     ]
                 ],
                 'label'   => __('Event Details', 'fluent-booking'),
-                'svgIcon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M8 2V5" stroke="#1B2533" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 2V5" stroke="#1B2533" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 13H15" stroke="#1B2533" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17H12" stroke="#1B2533" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.5C19.33 3.68 21 4.95 21 9.65V15.83C21 19.95 20 22.01 15 22.01H9C4 22.01 3 19.95 3 15.83V9.65C3 4.95 4.67 3.69 8 3.5H16Z" stroke="#1B2533" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                'svgIcon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M8 2V5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 2V5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 13H15" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17H12" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.5C19.33 3.68 21 4.95 21 9.65V15.83C21 19.95 20 22.01 15 22.01H9C4 22.01 3 19.95 3 15.83V9.65C3 4.95 4.67 3.69 8 3.5H16Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             ],
             'assignment'            => [
                 'type'    => 'route',
@@ -674,7 +671,7 @@ class AdminMenuHandler
                     ]
                 ],
                 'label'   => __('Availability', 'fluent-booking'),
-                'svgIcon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6.66666 1.66699V4.16699" stroke="#445164" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.3333 1.66699V4.16699" stroke="#445164" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.91666 7.5752H17.0833" stroke="#445164" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 7.08366V14.167C17.5 16.667 16.25 18.3337 13.3333 18.3337H6.66667C3.75 18.3337 2.5 16.667 2.5 14.167V7.08366C2.5 4.58366 3.75 2.91699 6.66667 2.91699H13.3333C16.25 2.91699 17.5 4.58366 17.5 7.08366Z" stroke="#445164" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.0789 11.4167H13.0864" stroke="#445164" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.0789 13.9167H13.0864" stroke="#445164" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.99623 11.4167H10.0037" stroke="#445164" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.99623 13.9167H10.0037" stroke="#445164" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.91194 11.4167H6.91942" stroke="#445164" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.91194 13.9167H6.91942" stroke="#445164" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                'svgIcon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6.66666 1.66699V4.16699" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.3333 1.66699V4.16699" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.91666 7.5752H17.0833" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 7.08366V14.167C17.5 16.667 16.25 18.3337 13.3333 18.3337H6.66667C3.75 18.3337 2.5 16.667 2.5 14.167V7.08366C2.5 4.58366 3.75 2.91699 6.66667 2.91699H13.3333C16.25 2.91699 17.5 4.58366 17.5 7.08366Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.0789 11.4167H13.0864" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.0789 13.9167H13.0864" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.99623 11.4167H10.0037" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.99623 13.9167H10.0037" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.91194 11.4167H6.91942" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.91194 13.9167H6.91942" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             ],
             'limit_settings'        => [
                 'type'    => 'route',
@@ -702,7 +699,7 @@ class AdminMenuHandler
                     ]
                 ],
                 'label'   => __('Question Settings', 'fluent-booking'),
-                'svgIcon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2V5" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 2V5" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 13.8714V13.6441C12 12.908 12.5061 12.5182 13.0121 12.2043C13.5061 11.9012 14 11.5115 14 10.797C14 9.8011 13.1085 9 12 9C10.8915 9 10 9.8011 10 10.797" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.9945 16.4587H12.0053" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.5C19.33 3.67504 21 4.91005 21 9.48055V15.4903C21 19.4968 20 21.5 15 21.5H9C4 21.5 3 19.4968 3 15.4903V9.48055C3 4.91005 4.67 3.68476 8 3.5H16Z" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                'svgIcon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2V5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 2V5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 13.8714V13.6441C12 12.908 12.5061 12.5182 13.0121 12.2043C13.5061 11.9012 14 11.5115 14 10.797C14 9.8011 13.1085 9 12 9C10.8915 9 10 9.8011 10 10.797" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.9945 16.4587H12.0053" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.5C19.33 3.67504 21 4.91005 21 9.48055V15.4903C21 19.4968 20 21.5 15 21.5H9C4 21.5 3 19.4968 3 15.4903V9.48055C3 4.91005 4.67 3.68476 8 3.5H16Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             ],
             'email_notification'    => [
                 'type'    => 'route',
@@ -731,6 +728,20 @@ class AdminMenuHandler
                 ],
                 'label'   => __('SMS Notification', 'fluent-booking'),
                 'elIcon'  => 'Notification'
+            ],
+            'recurring_settings'    => [
+                'type'    => 'route',
+                'visible' => ($event->isOneToOne() || $event->isGroup()) ? true : false,
+                'disable' => true,
+                'route'   => [
+                    'name'   => 'recurring_settings',
+                    'params' => [
+                        'calendar_id' => $event->calendar_id,
+                        'event_id'    => $event->id
+                    ]
+                ],
+                'label'   => __('Recurring Settings', 'fluent-booking'),
+                'svgIcon'  => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 4H21C21.5523 4 22 4.44772 22 5V12H20V6H6V9L1 5L6 1V4ZM18 20H3C2.44772 20 2 19.5523 2 19V12H4V18H18V15L23 19L18 23V20Z"></path></svg>'
             ],
             'advanced_settings'     => [
                 'type'    => 'route',
@@ -805,7 +816,7 @@ class AdminMenuHandler
                     ]
                 ],
                 'label'   => __('Calendar Settings', 'fluent-booking'),
-                'svgIcon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12.8799V11.1199C2 10.0799 2.85 9.21994 3.9 9.21994C5.71 9.21994 6.45 7.93994 5.54 6.36994C5.02 5.46994 5.33 4.29994 6.24 3.77994L7.97 2.78994C8.76 2.31994 9.78 2.59994 10.25 3.38994L10.36 3.57994C11.26 5.14994 12.74 5.14994 13.65 3.57994L13.76 3.38994C14.23 2.59994 15.25 2.31994 16.04 2.78994L17.77 3.77994C18.68 4.29994 18.99 5.46994 18.47 6.36994C17.56 7.93994 18.3 9.21994 20.11 9.21994C21.15 9.21994 22.01 10.0699 22.01 11.1199V12.8799C22.01 13.9199 21.16 14.7799 20.11 14.7799C18.3 14.7799 17.56 16.0599 18.47 17.6299C18.99 18.5399 18.68 19.6999 17.77 20.2199L16.04 21.2099C15.25 21.6799 14.23 21.3999 13.76 20.6099L13.65 20.4199C12.75 18.8499 11.27 18.8499 10.36 20.4199L10.25 20.6099C9.78 21.3999 8.76 21.6799 7.97 21.2099L6.24 20.2199C5.33 19.6999 5.02 18.5299 5.54 17.6299C6.45 16.0599 5.71 14.7799 3.9 14.7799C2.85 14.7799 2 13.9199 2 12.8799Z" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                'svgIcon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12.8799V11.1199C2 10.0799 2.85 9.21994 3.9 9.21994C5.71 9.21994 6.45 7.93994 5.54 6.36994C5.02 5.46994 5.33 4.29994 6.24 3.77994L7.97 2.78994C8.76 2.31994 9.78 2.59994 10.25 3.38994L10.36 3.57994C11.26 5.14994 12.74 5.14994 13.65 3.57994L13.76 3.38994C14.23 2.59994 15.25 2.31994 16.04 2.78994L17.77 3.77994C18.68 4.29994 18.99 5.46994 18.47 6.36994C17.56 7.93994 18.3 9.21994 20.11 9.21994C21.15 9.21994 22.01 10.0699 22.01 11.1199V12.8799C22.01 13.9199 21.16 14.7799 20.11 14.7799C18.3 14.7799 17.56 16.0599 18.47 17.6299C18.99 18.5399 18.68 19.6999 17.77 20.2199L16.04 21.2099C15.25 21.6799 14.23 21.3999 13.76 20.6099L13.65 20.4199C12.75 18.8499 11.27 18.8499 10.36 20.4199L10.25 20.6099C9.78 21.3999 8.76 21.6799 7.97 21.2099L6.24 20.2199C5.33 19.6999 5.02 18.5299 5.54 17.6299C6.45 16.0599 5.71 14.7799 3.9 14.7799C2.85 14.7799 2 13.9199 2 12.8799Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             ],
             'remote_calendars'  => [
                 'type'    => 'route',

@@ -120,7 +120,7 @@ class FileSystem
         $param['path'] = $param['basedir'] .'/'. $folderName;
 
         if (!is_dir($param['path'])) {
-             mkdir($param['path'], 0755);
+             mkdir($param['path'], 0755); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
              file_put_contents(
                  $param['basedir'].'/'.$folderName.'/.htaccess',
                  file_get_contents(__DIR__.'/Stubs/htaccess.stub')

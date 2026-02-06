@@ -39,7 +39,7 @@ $app->addAction('wp_ajax_fluent_booking_export_hosts', 'DataExporter@exportBooki
 $app->addAction('wp_ajax_fluent_booking_import_calendar', 'DataImporter@importCalendar');
 
 $app->addAction('fluent_booking/after_calendar_event_landing_page', function () {
-    echo \FluentBooking\App\Services\LandingPage\LandingPageHelper::getPoweredByHtml();
+    echo wp_kses_post(\FluentBooking\App\Services\LandingPage\LandingPageHelper::getPoweredByHtml());
 }, 10);
 
 add_action('init', function () {

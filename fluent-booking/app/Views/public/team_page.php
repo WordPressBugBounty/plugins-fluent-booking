@@ -21,16 +21,16 @@
                 </div>
             <?php endif; ?>
             <div class="fcal_team_body">
-                <?php foreach ($hosts as $host): ?>
-                    <div data-calendar_id="<?php echo esc_attr($host->id); ?>" id="fcal_host_<?php echo esc_attr($host->id); ?>" class="fcal_each_member">
+                <?php foreach ($hosts as $fluentBookingHost): ?>
+                    <div data-calendar_id="<?php echo esc_attr($fluentBookingHost->id); ?>" id="fcal_host_<?php echo esc_attr($fluentBookingHost->id); ?>" class="fcal_each_member">
                         <div class="fcal_person_avatar">
-                            <img src="<?php echo esc_url($host->getAuthorPhoto()); ?>"
-                                 alt="<?php echo esc_attr($host->title); ?>">
+                            <img src="<?php echo esc_url($fluentBookingHost->getAuthorPhoto()); ?>"
+                                 alt="<?php echo esc_attr($fluentBookingHost->title); ?>">
                         </div>
                         <div class="fcal_person_body">
-                            <h3 class="fcal_person_name"><?php echo esc_html($host->title); ?></h3>
+                            <h3 class="fcal_person_name"><?php echo esc_html($fluentBookingHost->title); ?></h3>
                             <div class="fcal_person_description">
-                                <?php echo wp_kses_post(wpautop($host->description)); ?>
+                                <?php echo wp_kses_post(wpautop($fluentBookingHost->description)); ?>
                             </div>
                         </div>
                     </div>

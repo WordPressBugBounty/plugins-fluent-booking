@@ -71,13 +71,6 @@ class NotificationHandler
     {
         $notifications = $bookingEvent->getNotifications();
 
-        if (Arr::isTrue($notifications, 'booking_conf_attendee.enabled') || (Arr::isTrue($notifications, 'booking_conf_host.enabled'))) {
-            as_enqueue_async_action('fluent_booking/after_booking_scheduled_async', [
-                $booking->id,
-                $bookingEvent->id
-            ], 'fluent-booking');
-        }
-
         if (Arr::isTrue($notifications, 'reminder_to_attendee.enabled')) {
             $reminderTimes = Arr::get($notifications, 'reminder_to_attendee.email.times', []);
             $this->pushRemindersToQueue($booking, $reminderTimes, 'guest');
@@ -86,6 +79,17 @@ class NotificationHandler
         if (Arr::isTrue($notifications, 'reminder_to_host.enabled')) {
             $reminderTimes = Arr::get($notifications, 'reminder_to_host.email.times', []);
             $this->pushRemindersToQueue($booking, $reminderTimes, 'host');
+        }
+
+        if (!is_null($booking->parent_id) && $booking->isRecurringBooking()) {
+            return;
+        }
+
+        if (Arr::isTrue($notifications, 'booking_conf_attendee.enabled') || (Arr::isTrue($notifications, 'booking_conf_host.enabled'))) {
+            as_enqueue_async_action('fluent_booking/after_booking_scheduled_async', [
+                $booking->id,
+                $bookingEvent->id
+            ], 'fluent-booking');
         }
     }
 
@@ -96,6 +100,10 @@ class NotificationHandler
         }
 
         if ($booking->payment_method && $booking->payment_status != 'paid') {
+            return;
+        }
+
+        if (!is_null($booking->parent_id) && $booking->isRecurringBooking()) {
             return;
         }
 
@@ -210,12 +218,13 @@ class NotificationHandler
 
     public function getAdditionalRecipients($additionalRecipients)
     {
-        if ($additionalRecipients) {
-            $recipients = explode(',', $additionalRecipients);
-            $recipients = array_map('trim', $recipients);
-            return array_unique($recipients);
+        if (!$additionalRecipients) {
+            return [];
         }
-        return [];
+
+        $recipients = explode(',', $additionalRecipients);
+        $recipients = array_map('trim', $recipients);
+        return array_unique($recipients);
     }
 
     public function emailOnBookingCancelled(Booking $booking, $calendarEvent)

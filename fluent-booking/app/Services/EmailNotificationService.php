@@ -101,6 +101,7 @@ class EmailNotificationService
         $logType = $result ? 'activity' : 'error';
 
         $title = sprintf(
+            /* translators: %1$s: Action type, %2$s: Status, %3$s: Recipient */
             __('Booking %1$s email %2$s to %3$s', 'fluent-booking'),
             $actionTypeLabel,
             $statusLabel,
@@ -191,11 +192,13 @@ class EmailNotificationService
         $logType = $result ? 'activity' : 'error';
 
         $title = sprintf(
+            /* translators: %1$s: Status, %2$s: Recipient */
             __('Booking reminder email %1$s to %2$s', 'fluent-booking'),
             $statusLabel,
             $recipientLabel
         );
 
+        /* translators: %1$s: Status, %2$s: Recipient */
         $description = sprintf(__('Reminder email %1$s to %2$s.', 'fluent-booking'), $statusLabel, $recipientLabel);
 
         self::addLog($title, $description, $booking->id, $logType);
@@ -284,6 +287,7 @@ class EmailNotificationService
         $logType = $result ? 'activity' : 'error';
 
         $title = sprintf(
+            /* translators: %1$s: Action type, %2$s: Status, %3$s: Recipient */
             __('Booking %1$s email %2$s to %3$s', 'fluent-booking'),
             $actionTypeLabel,
             $statusLabel,
@@ -384,11 +388,13 @@ class EmailNotificationService
         $logType = $result ? 'activity' : 'error';
 
         $title = sprintf(
+            /* translators: %1$s: Status, %2$s: Recipient */
             __('Rescheduled booking email %1$s to %2$s', 'fluent-booking'),
             $statusLabel,
             $recipientLabel
         );
 
+        /* translators: %1$s: Status, %2$s: Recipient */
         $description = sprintf(__('Rescheduling email %1$s to %2$s', 'fluent-booking'), $statusLabel, $recipientLabel);
 
         self::addLog($title, $description, $booking->id, $logType);
@@ -437,7 +443,7 @@ class EmailNotificationService
         }
 
         $icsContent = BookingService::generateBookingICS($booking);
-    
+
         $icsFileName = 'fcal-' . md5(wp_generate_uuid4()) . '.ics';
         $filePath = trailingslashit(wp_upload_dir()['path']) . $icsFileName;
 

@@ -27,6 +27,12 @@ add_action('fluent_boards_loaded', function () {
     });
 });
 
+add_action('fluentcart_loaded', function () use ($app) {
+    add_action('init', function () use ($app) {
+        (new \FluentBooking\App\Services\Integrations\FluentCart\Bootstrap($app));
+    });
+});
+
 if (defined('ELEMENTOR_VERSION')) {
     /*
      * We will keep it for then time being for backward compatibility of Old Fluent Booking Pro

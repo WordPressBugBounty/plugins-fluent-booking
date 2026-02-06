@@ -16,6 +16,7 @@ use FluentBooking\App\Models\Booking;
  * @var string $description
  * @var string $title
  * @var string $url
+ * @var boolean $embedded
  */
 ?>
 
@@ -41,10 +42,9 @@ use FluentBooking\App\Models\Booking;
     <meta property="og:description" content="<?php echo esc_attr($description); ?>">
     <meta property="og:author" content="<?php echo esc_attr($author['name']); ?>">
 
-    <?php foreach ($css_files as $css_file): ?>
-        <link rel="stylesheet"
-              href="<?php echo esc_url($css_file); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"
-              media="all"/>
+    <?php foreach ($css_files as $fluentBookingCssFile): ?>
+        <?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet ?>
+        <link rel="stylesheet" href="<?php echo esc_url($fluentBookingCssFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>" media="all"/>
     <?php endforeach; ?>
 
     <style>
@@ -59,8 +59,7 @@ use FluentBooking\App\Models\Booking;
 
 </head>
 <body>
-
-    <div class="calendar_wrap">
+    <div class="calendar_wrap <?php echo esc_attr($embedded ? 'fcal_booking_iframe' : ''); ?>">
         <?php do_action('fluent_booking/before_calendar_event_landing_page', $calendar_event); ?>
         <div class="fluent_booking_app fcal_loading" data-calendar_id="<?php echo (int)$calendar->id; ?>"
             data-event_id="<?php echo (int)$calendar_event->id; ?>">
@@ -70,14 +69,14 @@ use FluentBooking\App\Models\Booking;
     </div>
 
     <script>
-        <?php foreach ($js_vars as $varKey => $values): ?>
-            var <?php echo esc_attr($varKey); ?> = <?php echo wp_json_encode($values); ?>;
+        <?php foreach ($js_vars as $fluentBookingVarKey => $fluentBookingValues): ?>
+            var <?php echo esc_attr($fluentBookingVarKey); ?> = <?php echo wp_json_encode($fluentBookingValues); ?>;
         <?php endforeach; ?>
     </script>
 
-    <?php foreach ($js_files as $fileKey => $file): ?>
-        <script id="<?php echo esc_attr($fileKey); ?>"
-                src="<?php echo esc_url($file); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"
+    <?php foreach ($js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>"
+                src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"
                 defer="defer">
         </script>
     <?php endforeach; ?>

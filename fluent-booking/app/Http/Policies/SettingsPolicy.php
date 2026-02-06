@@ -4,6 +4,7 @@ namespace FluentBooking\App\Http\Policies;
 
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\Framework\Foundation\Policy;
+use FluentBooking\App\Services\PermissionManager;
 
 class SettingsPolicy extends Policy
 {
@@ -14,7 +15,7 @@ class SettingsPolicy extends Policy
      */
     public function verifyRequest(Request $request)
     {
-        return current_user_can('manage_options');
+        return PermissionManager::userCan('manage_all_data');
     }
 
 }

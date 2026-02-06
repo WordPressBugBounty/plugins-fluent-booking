@@ -22,6 +22,7 @@ class BookingFieldService
                 $isTerms = $customField['type'] === 'terms-and-conditions';
                 $isCheckbox = $customField['type'] === 'checkbox';
                 if (!$value || ($isCheckbox && $value !== 'Yes') || ($isTerms && $value !== 'Accepted')) {
+                    /* translators: %s: Field label */
                     $errors[$fieldKey . '.required'] = sprintf(__('%s is required', 'fluent-booking'), $customField['label']);
                     continue;
                 }
@@ -143,6 +144,7 @@ class BookingFieldService
                 'disable_alter'  => false
             ];
         }
+
         if ($calendarSlot->isLocationFieldRequired()) {
             $requiredIndexes[] = 'location';
             $defaultFields['location'] = [
@@ -411,14 +413,16 @@ class BookingFieldService
                 $maxDate = Arr::get($field, 'max_date');
 
                 $fieldValue = DateTimeHelper::getFormattedDate($fieldValue, Arr::get($field, 'date_format'));
-                $minDate = date('Y-m-d', strtotime($minDate ?: '1900-01-01'));
-                $maxDate = date('Y-m-d', strtotime($maxDate ?: date('Y-12-31')));
+                $minDate = gmdate('Y-m-d', strtotime($minDate ?: '1900-01-01'));
+                $maxDate = gmdate('Y-m-d', strtotime($maxDate ?: gmdate('Y-12-31')));
 
                 if ($minDate && $fieldValue < $minDate) {
-                    return new \WP_Error('invalid_date', sprintf(__('The date for %s cannot be earlier than %s.', 'fluent-booking'), $field['label'], $minDate));
+                    /* translators: %1$s: Field label, %2$s: Minimum date */
+                    return new \WP_Error('invalid_date', sprintf(__('The date for %1$s cannot be earlier than %2$s.', 'fluent-booking'), $field['label'], $minDate));
                 }
                 if ($maxDate && $fieldValue > $maxDate) {
-                    return new \WP_Error('invalid_date', sprintf(__('The date for %s cannot be later than %s.', 'fluent-booking'), $field['label'], $maxDate));
+                    /* translators: %1$s: Field label, %2$s: Maximum date */
+                    return new \WP_Error('invalid_date', sprintf(__('The date for %1$s cannot be later than %2$s.', 'fluent-booking'), $field['label'], $maxDate));
                 }
             }
         }

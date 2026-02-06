@@ -11,6 +11,7 @@ use FluentBooking\App\Services\BookingService;
 use FluentBooking\App\Services\DateTimeHelper;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\LandingPage\LandingPageHandler;
+use FluentBooking\App\Services\LandingPage\LandingPageHelper;
 use FluentBooking\App\Hooks\Handlers\TimeSlotServiceHandler;
 use FluentBooking\App\Services\CalendarEventService;
 use FluentBooking\App\Services\LocationService;
@@ -231,11 +232,25 @@ class FrontEndHandler
             return '';
         }
 
+        $settings = LandingPageHelper::getSettings($calendar, 'public');
+
         $calendarEventQuery = CalendarSlot::where('calendar_id', $calendar->id)
             ->where('status', 'active');
-        
+
+        $enabledEvents = [];
+        $isEnabledOnly = false;
+        if ($settings['show_type'] != 'all') {
+            $isEnabledOnly = true;
+            $enabledEvents = $settings['enabled_slots'];
+        }
+
         if ($eventIds && $eventIds != 'all') {
-            $calendarEventQuery->whereIn('id', $eventIds);
+            $isEnabledOnly = true;
+            $enabledEvents = !empty($enabledEvents) ? array_intersect($enabledEvents, $eventIds) : $eventIds;
+        }
+
+        if (!empty($enabledEvents) || $isEnabledOnly) {
+            $calendarEventQuery->whereIn('id', $enabledEvents);
         }
 
         $calendarEvents = $calendarEventQuery->get();
@@ -396,7 +411,7 @@ class FrontEndHandler
             return __('Booking hash is missing!', 'fluent-booking');
         }
 
-        $hash = sanitize_text_field($_REQUEST['hash']); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $hash = isset($_REQUEST['hash']) ? sanitize_text_field(wp_unslash($_REQUEST['hash'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
         return apply_filters('fluent_booking/payment_receipt_html', '', $hash);
     }
@@ -439,7 +454,7 @@ class FrontEndHandler
 
             $rescheduleBy = 'guest';
             $hostIds = $existingBooking->getHostIds();
-            if (in_array(get_current_user_id(), $hostIds) || PermissionManager::userCan('manage_all_bookings')) {
+            if (in_array(get_current_user_id(), $hostIds) || PermissionManager::userCan(['manage_all_data', 'manage_all_bookings'])) {
                 $rescheduleBy = 'host';
             }
 
@@ -601,9 +616,27 @@ class FrontEndHandler
                 'Hours'                         => __('Hours', 'fluent-booking'),
                 'Minute'                        => __('Minute', 'fluent-booking'),
                 'Minutes'                       => __('Minutes', 'fluent-booking'),
+                'week'                          => __('week', 'fluent-booking'),
+                'month'                         => __('month', 'fluent-booking'),
+                'year'                          => __('year', 'fluent-booking'),
+                'weeks'                         => __('weeks', 'fluent-booking'),
+                'months'                        => __('months', 'fluent-booking'),
+                'years'                         => __('years', 'fluent-booking'),
+                'Every'                         => __('Every', 'fluent-booking'),
+                'for'                           => __('for', 'fluent-booking'),
+                'Number of Occurrences'         => __('Number of Occurrences', 'fluent-booking'),
+                'occurrence'                    => __('occurrence', 'fluent-booking'),
+                'occurrences'                   => __('occurrences', 'fluent-booking'),
+                'You can only book up to'       => __('You can only book up to', 'fluent-booking'),
+                'at a time'                     => __('at a time', 'fluent-booking'),
                 'Enter Details'                 => __('Enter Details', 'fluent-booking'),
                 'Summary'                       => __('Summary', 'fluent-booking'),
                 'Payment Details'               => __('Payment Details', 'fluent-booking'),
+                'Item'                          => __('Item', 'fluent-booking'),
+                'Price'                         => __('Price', 'fluent-booking'),
+                'Quantity'                      => __('Quantity', 'fluent-booking'),
+                'Subtotal:'                     => __('Subtotal:', 'fluent-booking'),
+                'Total:'                        => __('Total:', 'fluent-booking'),
                 'Total Payment'                 => __('Total Payment', 'fluent-booking'),
                 'Payment Method'                => __('Payment Method', 'fluent-booking'),
                 'Pay Now'                       => __('Pay Now', 'fluent-booking'),
@@ -634,6 +667,7 @@ class FrontEndHandler
                 'Email'                                => __('Email', 'fluent-booking'),
                 'Date'                                 => __('Date', 'fluent-booking'),
                 'Time'                                 => __('Time', 'fluent-booking'),
+                'per occurrence'                       => __('per occurrence', 'fluent-booking'),
                 'per guest'                            => __('per guest', 'fluent-booking'),
                 'Add guest'                            => __('Add guest', 'fluent-booking'),
                 'Add guests'                           => __('Add guests', 'fluent-booking'),
@@ -655,7 +689,7 @@ class FrontEndHandler
         ];
 
         if (isset($_SERVER['HTTP_CF_IPCOUNTRY'])) {
-            $data['user_country'] = sanitize_text_field($_SERVER['HTTP_CF_IPCOUNTRY']); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $data['user_country'] = isset($_SERVER['HTTP_CF_IPCOUNTRY']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_CF_IPCOUNTRY'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         } else {
             $data['user_country'] = Arr::get($globalSettings, 'administration.default_country', '');
         }
@@ -723,11 +757,6 @@ class FrontEndHandler
 
         $duration = (int)$calendarEvent->getDuration(Arr::get($postedData, 'duration', null));
 
-        if ($calendarEvent->isPaymentEnabled($duration)) {
-            $rules['payment_method'] = 'required';
-            $messages['payment_method.required'] = __('Please select a valid payment method', 'fluent-booking');
-        }
-
         if ($additionalGuests = Arr::get($postedData, 'guests', [])) {
             if ($calendarEvent->isMultiGuestEvent()) {
                 $additionalGuests = $this->sanitize_mapped_data($additionalGuests);
@@ -759,11 +788,11 @@ class FrontEndHandler
 
         $validator = $app->validator->make($postedData, $validationConfig['rules'], $validationConfig['messages']);
         if ($validator->validate()->fails()) {
+            $errorMessage = $validator->firstError() ?: __('Please fill up the required data', 'fluent-booking');
             wp_send_json([
-                'message' => __('Please fill up the required data', 'fluent-booking'),
+                'message' => $errorMessage,
                 'errors'  => $validator->errors()
             ], 422);
-            return;
         }
 
         $customFieldsData = BookingFieldService::getCustomFieldsData($postedData, $calendarEvent);
@@ -774,7 +803,6 @@ class FrontEndHandler
                 'message' => $customFieldsData->get_error_message(),
                 'errors'  => $customFieldsData->get_error_data()
             ], 422);
-            return;
         }
 
         $validateDateFields = BookingFieldService::validateDateFields($customFieldsData, $calendarEvent);
@@ -783,7 +811,6 @@ class FrontEndHandler
             wp_send_json([
                 'message' => $validateDateFields->get_error_message(),
             ], 422);
-            return;
         }
 
         $startDate = Arr::get($postedData, 'start_date');
@@ -806,7 +833,7 @@ class FrontEndHandler
             $endDateTime = gmdate('Y-m-d H:i:s', strtotime($startDateTime) + ($duration * 60)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
         }
 
-        $bookingData = [
+        $bookingData = apply_filters('fluent_booking/initialize_booking_data', [
             'person_time_zone' => sanitize_text_field($timezone),
             'start_time'       => $startDateTime,
             'end_time'         => $endDateTime,
@@ -825,9 +852,9 @@ class FrontEndHandler
             'utm_campaign'     => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_campaign', '')),
             'utm_term'         => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_term', '')),
             'utm_content'      => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_content', ''))
-        ];
+        ], $postedData, $calendarEvent);
 
-        if ($calendarEvent->isConfirmationRequired($startDateTime)) {
+        if ($calendarEvent->isConfirmationRequired($bookingData['start_time'])) {
             $bookingData['status'] = 'pending';
         }
 
@@ -851,13 +878,17 @@ class FrontEndHandler
             $customFieldsData['payment_method'] = sanitize_text_field($postedData['payment_method']);
         }
 
+        if (!empty($postedData['recurring_count'])) {
+            $bookingData['recurring_count'] = (int) Arr::get($postedData, 'recurring_count', 0);
+        }
+
         $timeSlotService = TimeSlotServiceHandler::initService($calendarEvent->calendar, $calendarEvent);
 
         if (is_wp_error($timeSlotService)) {
             return TimeSlotServiceHandler::sendError($timeSlotService, $calendarEvent, $timezone);
         }
 
-        $availableSpot = $timeSlotService->isSpotAvailable($startDateTime, $endDateTime, $duration);
+        $availableSpot = $timeSlotService->isSpotAvailable($bookingData['start_time'], $bookingData['end_time'], $duration);
 
         if (!$availableSpot) {
             wp_send_json([
@@ -945,7 +976,7 @@ class FrontEndHandler
         $duration = (int)$calendarEvent->getDuration(Arr::get($request, 'duration', null));
 
         $timeSlotService = TimeSlotServiceHandler::initService($calendar, $calendarEvent);
-        
+
         if (is_wp_error($timeSlotService)) {
             return TimeSlotServiceHandler::sendError($timeSlotService, $calendarEvent, $timeZone);
         }
@@ -956,7 +987,7 @@ class FrontEndHandler
             return TimeSlotServiceHandler::sendError($availableSpots, $calendarEvent, $timeZone);
         }
 
-        $availableSpots = array_filter((array)$availableSpots);
+        $availableSpots = array_filter((array) $availableSpots);
         $availableSpots = apply_filters('fluent_booking/available_slots_for_view', $availableSpots, $calendarEvent, $calendar, $timeZone, $duration);
 
         wp_send_json([
@@ -1005,6 +1036,7 @@ class FrontEndHandler
             ],
             'date_formatter'  => DateTimeHelper::getDateFormatter(true),
             'isRtl'           => Helper::fluentbooking_is_rtl(),
+            'has_pro'         => defined('FLUENT_BOOKING_PRO_DIR_FILE'),
             'duration_lookup' => Helper::getDurationLookup(),
             'multi_duration_lookup' => Helper::getDurationLookup(true)
         ];
@@ -1052,7 +1084,7 @@ class FrontEndHandler
 
         if (is_wp_error($result)) {
             if (!wp_doing_ajax()) {
-                wp_redirect($meeting->getConfirmationUrl());
+                wp_safe_redirect($meeting->getConfirmationUrl());
                 exit();
             }
 
@@ -1067,7 +1099,7 @@ class FrontEndHandler
             ], 200);
         }
 
-        wp_redirect($meeting->getConfirmationUrl());
+        wp_safe_redirect($meeting->getConfirmationUrl());
         exit;
     }
 

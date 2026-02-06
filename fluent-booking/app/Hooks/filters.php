@@ -168,6 +168,11 @@ $app->addFilter('fluent_booking/create_calendar_event_data', function ($slotData
     return $slotData;
 }, 10, 2);
 
+$app->addFilter('wp_plugin_check_ignore_directories', function ($dirs){
+    $dirs[] = 'app/Services/Libs';
+    return $dirs;
+});
+
 if (!defined('FLUENT_BOOKING_PRO_DIR_FILE')) {
     $app->addFilter('fluent_booking/payment/get_all_methods', function () {
         $methods['stripe'] = [

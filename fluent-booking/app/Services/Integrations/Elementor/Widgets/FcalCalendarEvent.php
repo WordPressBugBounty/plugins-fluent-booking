@@ -323,7 +323,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $settings = $this->get_settings_for_display();
 
         if (empty($settings['selected_event']) && empty($settings['event_hash'])) {
-            echo __('Please select an event', 'fluent-booking');
+            echo esc_html__('Please select an event', 'fluent-booking');
             return;
         }
 
@@ -334,7 +334,7 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
         $selectedEvent = $this->getCalendarEvent($selectedEventId, $eventHash);
 
         if (empty($selectedEvent['id'])) {
-            echo __('Calendar event not found', 'fluent-booking');
+            echo esc_html__('Calendar event not found', 'fluent-booking');
             return;
         }
 
@@ -393,14 +393,14 @@ class FcalCalendarEvent extends \Elementor\Widget_Base
                     <div class="fcal_date_wrapper">
                         <div class="fcal_day_picker_wrap">
                             <div class="calendar-container">
-                                <img src="<?php echo FLUENT_BOOKING_URL .'/assets/images/fcal-calendar.png' ?>" alt="calendar">
+                                <img src="<?php echo esc_url(FLUENT_BOOKING_URL .'/assets/images/fcal-calendar.png'); ?>" alt="calendar">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         <?php else :
-            echo $shortcode_output;
+            echo $shortcode_output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         endif;
 
     }

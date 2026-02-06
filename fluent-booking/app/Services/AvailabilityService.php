@@ -29,7 +29,7 @@ class AvailabilityService
 
     public static function availabilitySchedules()
     {
-        $permissions = ['read_and_use_other_availabilities', 'manage_other_availabilities', 'read_other_calendars', 'manage_other_calendars'];
+        $permissions = ['manage_all_data', 'read_and_use_other_availabilities', 'manage_other_availabilities', 'read_other_calendars', 'manage_other_calendars'];
 
         $availabilities = Availability::when(
             !PermissionManager::userCan($permissions),
@@ -116,7 +116,7 @@ class AvailabilityService
 
     public static function getScheduleOptions()
     {
-        $permissions = ['read_and_use_other_availabilities', 'manage_other_availabilities', 'read_other_calendars', 'manage_other_calendars'];
+        $permissions = ['manage_all_data', 'read_and_use_other_availabilities', 'manage_other_availabilities', 'read_other_calendars', 'manage_other_calendars'];
 
         $availabilities = Availability::when(
             !PermissionManager::userCan($permissions),

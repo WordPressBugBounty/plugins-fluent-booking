@@ -40,12 +40,20 @@ class LandingPageHandler
 
         $authorSlug = sanitize_text_field($urlParts[1]);
 
+        if (isset($_GET['embedded'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $this->handleEmbeddedStyle();
+        }
+
         $this->routeView($authorSlug, Arr::get($urlParts, 2, null));
     }
 
     public function handleUrlParamsPage()
     {
-        $route = sanitize_text_field($_GET['fluent-booking']); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $route = isset($_GET['fluent-booking']) ? sanitize_text_field(wp_unslash($_GET['fluent-booking'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+        if (isset($_GET['embedded'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $this->handleEmbeddedStyle();
+        }
 
         if ($route == 'booking') {
             $this->handleAfterBookingPage();
@@ -104,7 +112,7 @@ class LandingPageHandler
 
         $activeEvents = CalendarSlot::where('calendar_id', $calendar->id)
             ->where('status', 'active');
-            
+
         if ($settings['show_type'] != 'all') {
             $activeEvents = $activeEvents->whereIn('id', $settings['enabled_slots']);
         }
@@ -154,6 +162,7 @@ class LandingPageHandler
             'title'       => $calendar->title .' - '.get_bloginfo('name'),
             'description' => $metaDescription,
             'url'         => home_url($wp->request),
+            'embedded'    => isset($_GET['embedded']) ? true : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             'css_files'   => [
                 App::getInstance('url.assets') . 'public/saas.css'
             ],
@@ -172,7 +181,7 @@ class LandingPageHandler
         }
 
         $data = apply_filters('fluent_booking/host_view_page_vars', $data, $calendar, $activeEvents, $authorProfile);
-        
+
         $app = App::getInstance();
         status_header(200);
         $app->view->render('landing.author_landing', $data);
@@ -196,7 +205,7 @@ class LandingPageHandler
         $calendarEvent->min_lookup_date = $calendarEvent->getMinLookUpDate();
 
         if (!empty($_REQUEST['booking_id'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-            $bookingHash = sanitize_text_field($_REQUEST['booking_id']); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $bookingHash = sanitize_text_field(wp_unslash($_REQUEST['booking_id'])); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $booking = Booking::where('hash', $bookingHash)
                 ->where('event_id', $calendarEvent->id)
                 ->first();
@@ -235,6 +244,7 @@ class LandingPageHandler
             'title'          => $title,
             'description'    => substr(strip_shortcodes(wp_strip_all_tags(str_replace(PHP_EOL, ' ', $calendarEvent->description))), 0, 300) . '...',
             'url'            => home_url($wp->request),
+            'embedded'       => isset($_GET['embedded']) ? true : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             'css_files'      => [
                 $assetUrl . $publicCss
             ],
@@ -323,6 +333,7 @@ class LandingPageHandler
             'slot'        => $calendarEvent,
             'url'         => home_url($wp->request),
             'action_type' => $actionType,
+            'embedded'    => isset($_GET['embedded']) ? true : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             'theme'       => Arr::get(get_option('_fluent_booking_settings'), 'theme','system-default'),
             'back_button' => [
                 'show' => true,
@@ -345,7 +356,7 @@ class LandingPageHandler
 
     private function handleAfterBookingPage()
     {
-        $bookingHash = sanitize_text_field(Arr::get($_REQUEST, 'meeting_hash')); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $bookingHash = sanitize_text_field(wp_unslash(Arr::get($_REQUEST, 'meeting_hash'))); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (!$bookingHash) {
             return;
         }
@@ -427,6 +438,24 @@ class LandingPageHandler
         });
 
         $this->renderBookingView($booking->calendar, $booking->calendar_event, $booking, true);
+    }
+
+    private function handleEmbeddedStyle()
+    {
+        add_action('wp_print_styles', function () {
+            global $wp_styles;
+            if($wp_styles) {
+                foreach ($wp_styles->queue as $style) {
+                    $src = $wp_styles->registered[$style]->src;
+                    if (
+                        (strpos($src, 'fluentbooking') === false) &&
+                        (strpos($src, 'fluent_booking') === false)
+                    ) {
+                        wp_dequeue_style($wp_styles->registered[$style]->handle);
+                    }
+                }
+            }
+        }, 100);
     }
 
     public function getEventLandingExtraJsFiles($formFields, $calendarEvent)

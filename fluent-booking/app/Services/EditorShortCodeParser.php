@@ -29,7 +29,7 @@ class EditorShortCodeParser
             return static::parseShortCodes($parsable);
         } catch (\Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log($e->getTraceAsString());
+                error_log($e->getTraceAsString()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             }
             return '';
         }
@@ -87,6 +87,22 @@ class EditorShortCodeParser
 
         if ($key == 'full_start_and_end_host_timezone') {
             return $booking->getFullBookingDateTimeText($booking->getHostTimezone()) . ' (' . $booking->getHostTimezone() . ')';
+        }
+
+        if ($key == 'all_bookings_short_times_guest_timezone') {
+            return implode("<br>", $booking->getAllBookingShortTimes($booking->person_time_zone, true));
+        }
+
+        if ($key == 'all_bookings_short_times_host_timezone') {
+            return implode("<br>", $booking->getAllBookingShortTimes($booking->getHostTimezone(), true));
+        }
+
+        if ($key == 'all_bookings_full_times_guest_timezone') {
+            return implode("<br>", $booking->getAllBookingFullTimes($booking->person_time_zone, true));
+        }
+
+        if ($key == 'all_bookings_full_times_host_timezone') {
+            return implode("<br>", $booking->getAllBookingFullTimes($booking->getHostTimezone(), true));
         }
 
         if ($key == 'start_date_time') {

@@ -4,11 +4,18 @@ namespace FluentBooking\App\Hooks\Handlers;
 
 use FluentBooking\App\App;
 use FluentBooking\App\Services\CalendarService;
+use FluentBooking\App\Services\PermissionManager;
 
 class DataImporter
 {
     public function importCalendar()
     {
+        if (!PermissionManager::userCan(['invite_team_members', 'manage_all_data', 'manage_other_calendars'])) {
+            wp_send_json_error([
+                'message' => __('You are not authorized to import calendar', 'fluent-booking'),
+            ]);
+        }
+
         $app = App::getInstance();
 
         $data = $app->request->all();

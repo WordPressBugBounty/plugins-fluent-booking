@@ -942,15 +942,18 @@ class Helper
     {
         $server = $_SERVER;
 
-        $clientIp = Arr::get($server, 'HTTP_CLIENT_IP');
-        $xForwarded = Arr::get($server, 'HTTP_X_FORWARDED_FOR');
+        $ipSources = [
+            'clientIp'   => Arr::get($server, 'HTTP_CLIENT_IP'),
+            'xForwarded' => Arr::get($server, 'HTTP_X_FORWARDED_FOR'),
+            'serverAddr' => Arr::get($server, 'SERVER_ADDR')
+        ];
 
-        if (!empty($clientIp)) {
-            $ip = $clientIp;
-        } elseif (!empty($xForwarded)) {
-            $ip = $clientIp;
-        } else {
-            $ip = $clientIp;
+        $ip = '';
+        foreach ($ipSources as $source) {
+            if (!empty($source) && filter_var($source, FILTER_VALIDATE_IP)) {
+                $ip = $source;
+                break;
+            }
         }
 
         return sanitize_text_field($ip);
@@ -1672,7 +1675,14 @@ class Helper
         return apply_filters('fluent_booking/confirm_and_reject_button_html', $html);
     }
 
-    public static function getEditorShortCodes($calendarEvent = null, $isHtmlSupported = false)
+    public static function getIframeHtml()
+    {
+        $html = '<iframe id="fluentbooking" loading="lazy" height="700px" width="100%" style="min-width:320px;height:700px;" frameborder="0" src="##landing_page_url##"></iframe>';
+
+        return apply_filters('fluent_booking/get_iframe_html', $html);
+    }
+
+    public static function getEditorShortCodes($calendarEvent = null, $isHtmlSupported = false, $iframeHtml = '')
     {
         if (!$isHtmlSupported) {
             $groups = [
@@ -1702,6 +1712,10 @@ class Helper
                         '{{booking.full_start_end_host_timezone}}'              => __('Full Start Date Time (with host timezone)', 'fluent-booking'),
                         '{{booking.full_start_and_end_guest_timezone}}'         => __('Full Start & End Date Time (with guest timezone)', 'fluent-booking'),
                         '{{booking.full_start_and_end_host_timezone}}'          => __('Full Start & End Date Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_short_times_guest_timezone}}'   => __('All Bookings Short Times (with guest timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_short_times_host_timezone}}'    => __('All Bookings Short Times (with host timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_full_times_guest_timezone}}'    => __('All Bookings Full Times (with guest timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_full_times_host_timezone}}'     => __('All Bookings Full Times (with host timezone)', 'fluent-booking'),
                         '{{booking.start_date_time}}'                           => __('Event Date Time (UTC)', 'fluent-booking'),
                         '{{booking.start_date_time_for_attendee}}'              => __('Event Date Time (with attendee timezone)', 'fluent-booking'),
                         '{{booking.start_date_time_for_host}}'                  => __('Event Date Time (with host timezone)', 'fluent-booking'),
@@ -1775,6 +1789,10 @@ class Helper
                         '{{booking.full_start_end_host_timezone}}'              => __('Full Start Date Time (with host timezone)', 'fluent-booking'),
                         '{{booking.full_start_and_end_guest_timezone}}'         => __('Full Start & End Date Time (with guest timezone)', 'fluent-booking'),
                         '{{booking.full_start_and_end_host_timezone}}'          => __('Full Start & End Date Time (with host timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_short_times_guest_timezone}}'   => __('All Bookings Short Times (with guest timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_short_times_host_timezone}}'    => __('All Bookings Short Times (with host timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_full_times_guest_timezone}}'    => __('All Bookings Full Times (with guest timezone)', 'fluent-booking'),
+                        '{{booking.all_bookings_full_times_host_timezone}}'     => __('All Bookings Full Times (with host timezone)', 'fluent-booking'),
                         '{{booking.start_date_time}}'                           => __('Event Date Time (UTC)', 'fluent-booking'),
                         '{{booking.start_date_time_for_attendee}}'              => __('Event Date time (with guest timezone)', 'fluent-booking'),
                         '{{booking.start_date_time_for_host}}'                  => __('Event Date time (with host timezone)', 'fluent-booking'),
@@ -1928,7 +1946,7 @@ class Helper
     public static function debugLog($data)
     {
         if (defined('FLUENT_BOOKING_DEBUG') && FLUENT_BOOKING_DEBUG) {
-            error_log(print_r($data, true));
+            error_log(print_r($data, true)); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log,WordPress.PHP.DevelopmentFunctions.error_log_print_r
         }
     }
 
@@ -1957,7 +1975,7 @@ class Helper
                 'start_day'              => 'sun',
                 'auto_cancel_timing'     => '10',
                 'auto_complete_timing'   => '60',
-                'default_phone_country'  => ''
+                'default_country'        => ''
             ],
             'time_format'    => '12',
             'theme'          => 'system-default'
@@ -2175,6 +2193,17 @@ class Helper
     public static function getPrefSettins($cached = true)
     {
         return self::getPrefSettings($cached);
+    }
+
+    public static function getFeatures()
+    {
+        return apply_filters('fluent_booking/get_features', [
+            'has_fluentcrm'    => defined('FLUENTCRM'),
+            'has_fluentsmtp'   => defined('FLUENTMAIL'),
+            'has_fluentform'   => defined('FLUENTFORM'),
+            'has_fluentboards' => defined('FLUENT_BOARDS'),
+            'has_fluentcart'   => defined('FLUENTCART_VERSION')
+        ]);
     }
 
     public static function getActiveThemeName()

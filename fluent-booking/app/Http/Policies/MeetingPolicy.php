@@ -15,7 +15,7 @@ class MeetingPolicy extends Policy
      */
     public function verifyRequest(Request $request)
     {
-        if (current_user_can('manage_options')) {
+        if (PermissionManager::userCan('manage_all_data')) {
             return true;
         }
 
@@ -57,7 +57,7 @@ class MeetingPolicy extends Policy
             return true;
         }
 
-        if (PermissionManager::userCan(['read_all_bookings', 'manage_all_bookings'])) {
+        if (PermissionManager::userCan(['manage_all_data', 'read_all_bookings', 'manage_all_bookings'])) {
             return true;
         }
 

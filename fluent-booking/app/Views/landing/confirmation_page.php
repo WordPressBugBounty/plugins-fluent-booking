@@ -19,13 +19,14 @@
     <meta property="og:description" content="<?php echo esc_attr($description); ?>">
     <meta property="og:author" content="<?php echo esc_attr($author['name']); ?>">
 
-    <?php foreach ($css_files as $css_file): ?>
-        <link rel="stylesheet" href="<?php echo esc_url($css_file); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>" media="all" />
+    <?php foreach ($css_files as $fluentBookingCssFile): ?>
+        <?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet ?>
+        <link rel="stylesheet" href="<?php echo esc_url($fluentBookingCssFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>" media="all" />
     <?php endforeach; ?>
 </head>
 <body class="booking-confirmation-page">
 
-    <div class="confirmation_page">
+    <div class="confirmation_page <?php echo esc_attr($embedded ? 'fcal_booking_iframe' : ''); ?>">
         <div class="fcal_conf_wrap">
             <?php echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         </div>
@@ -40,13 +41,13 @@
     </div>
 
     <script>
-        <?php foreach ($js_vars as $varKey => $values): ?>
-            var <?php echo esc_attr($varKey); ?> = <?php echo wp_json_encode($values); ?>;
+        <?php foreach ($js_vars as $fluentBookingVarKey => $fluentBookingValues): ?>
+            var <?php echo esc_attr($fluentBookingVarKey); ?> = <?php echo wp_json_encode($fluentBookingValues); ?>;
         <?php endforeach; ?>
     </script>
 
-    <?php foreach ($js_files as $fileKey => $file): ?>
-        <script id="<?php echo esc_attr($fileKey); ?>" src="<?php echo esc_url($file); ?>" defer="defer"></script>
+    <?php foreach ($js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>" src="<?php echo esc_url($fluentBookingFile); ?>" defer="defer"></script>
     <?php endforeach; ?>
 
     <script>

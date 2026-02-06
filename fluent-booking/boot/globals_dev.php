@@ -8,7 +8,7 @@ defined( 'ABSPATH' ) || exit;
 if (!function_exists('fluentbooking_eql')) {
     function fluentbooking_eql()
     {
-        defined('SAVEQUERIES') || define('SAVEQUERIES', true);
+        defined('SAVEQUERIES') || define('SAVEQUERIES', true); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
     }
 }
 

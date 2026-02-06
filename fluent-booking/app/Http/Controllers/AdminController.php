@@ -36,6 +36,7 @@ class AdminController extends Controller
             'role__not_in' => ['subscriber'],
             'number'       => 50,
             'fields'       => ['ID', 'user_email', 'display_name'],
+            /* phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query */
             'meta_query' => [
                 'relation' => 'OR',
                 [

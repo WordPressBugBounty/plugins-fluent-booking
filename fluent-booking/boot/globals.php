@@ -11,17 +11,17 @@ defined( 'ABSPATH' ) || exit;
 
 if ($app->config->get('app.env') == 'dev') {
 
-    $globalsDevFile = __DIR__ . '/globals_dev.php';
+    $fluentBookingGlobalsDevFile = __DIR__ . '/globals_dev.php';
     
-    is_readable($globalsDevFile) && include $globalsDevFile;
+    is_readable($fluentBookingGlobalsDevFile) && include $fluentBookingGlobalsDevFile;
 }
 
 if (!function_exists('dd')) {
-    function dd()
+    function dd() // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
     {
-        foreach (func_get_args() as $arg) {
+        foreach (func_get_args() as $fluentBookingArg) {
             echo "<pre>";
-            print_r($arg);
+            print_r($fluentBookingArg); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
             echo "</pre>";
         }
         die();

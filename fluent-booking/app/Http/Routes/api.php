@@ -45,6 +45,8 @@ $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($rou
 
     $router->get('/{id}/events/{event_id}/booking-fields', 'CalendarController@getEventBookingFields')->int('id')->int('event_id');
     $router->post('/{id}/events/{event_id}/booking-fields', 'CalendarController@saveEventBookingFields')->int('id')->int('event_id');
+
+    $router->get('/{id}/events/{event_id}/payment-settings', 'CalendarController@getEventPaymentSettings')->int('id')->int('event_id');
 });
 
 $router->prefix('admin')->withPolicy('AdminPolicy')->group(function ($router) {

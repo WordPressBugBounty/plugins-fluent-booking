@@ -97,7 +97,7 @@ class ElementorIntegration
     }
 
     public function ajaxGetCalendarEvents() {
-        if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'calendar_events_nonce')) {
+        if (!isset($_POST['security']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['security'])), 'calendar_events_nonce')) {
             wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking')]);
             exit;
         }
@@ -116,12 +116,12 @@ class ElementorIntegration
     }
 
     public function ajaxGetEventHash() {
-        if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'calendar_events_nonce')) {
+        if (!isset($_POST['security']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['security'])), 'calendar_events_nonce')) {
             wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking')]);
             exit;
         }
 
-        $eventId = intval($_POST['event_id']);
+        $eventId = isset($_POST['event_id']) ? intval($_POST['event_id']) : null;
 
         $event = CalendarSlot::find($eventId);
 
@@ -151,7 +151,8 @@ class ElementorIntegration
         if (file_exists($filePath)) {
             require_once($filePath);
         } else {
-            throw new \Exception(sprintf(__("File not found: %s", "fluent-booking"), $filePath));
+            /* translators: %s: File path */
+            throw new \Exception(esc_html(sprintf(__('File not found: %s', 'fluent-booking'), $filePath)));
         }
     }
 

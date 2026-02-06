@@ -68,7 +68,7 @@ class DateTimeHelper
         $timeZone = self::getTimeZone();
 
         if (isset($_COOKIE['fluent_booking_user_timezone'])) {
-            $timeZone = $_COOKIE['fluent_booking_user_timezone'];
+            $timeZone = sanitize_text_field(wp_unslash($_COOKIE['fluent_booking_user_timezone']));
         }
 
         return $timeZone;

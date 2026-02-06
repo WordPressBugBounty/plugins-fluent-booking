@@ -99,10 +99,6 @@ class FluentCrmInit
 
     public function getScheduledMeetings($data, $subsriber)
     {
-        $app = fluentCrm();
-        $page = intval($app->request->get('page', 1));
-        $perPage = intval($app->request->get('per_page', 10));
-
         $meetings = Booking::with(['slot', 'calendar'])
             ->where('email', $subsriber->email)
             ->distinct('group_id')
@@ -116,16 +112,16 @@ class FluentCrmInit
                 continue;
             }
 
-            $formattedMeetings[] = [
+            $formattedMeetings[] = apply_filters('fluent_booking/crm_meeting_data', [
                 'id'         => '#' . $meeting->group_id,
                 'title'      => $this->getBookingTitle($meeting),
                 'status'     => $meeting->status,
                 'meeting_at' => $this->getFormattedTime($meeting),
                 'action'     => $this->getActionUrl($meeting)
-            ];
+            ], $meeting);
         }
 
-        return [
+        return apply_filters('fluent_booking/crm_meetings_response', [
             'total'          => $meetings->total(),
             'data'           => $formattedMeetings,
             'columns_config' => [
@@ -149,6 +145,6 @@ class FluentCrmInit
                     'width' => '100px'
                 ]
             ]
-        ];
+        ], $meetings, $subsriber);
     }
 }

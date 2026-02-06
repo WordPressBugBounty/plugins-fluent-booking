@@ -19,14 +19,14 @@
         <p><?php echo wp_kses_post($sub_heading); ?></p>
     </div>
     <div class="fcal_confirm_body">
-        <?php foreach ($sections as $section): ?>
+        <?php foreach ($sections as $fluentBookingSection): ?>
             <div class="fcal_confirm_section">
                 <div class="fcal_confirm_section_title">
-                    <h4><?php echo esc_html($section['title']); ?></h4>
+                    <h4><?php echo esc_html($fluentBookingSection['title']); ?></h4>
                 </div>
-                <?php foreach ((array)$section['content'] as $content) : ?>
+                <?php foreach ((array)$fluentBookingSection['content'] as $fluentBookingContent) : ?>
                     <div class="fcal_confirm_section_content">
-                        <?php echo wp_kses_post($content); ?>
+                        <?php echo wp_kses_post($fluentBookingContent); ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -92,10 +92,10 @@
             <div class="fcal_booking_manage fcal_to_calendars">
                 <span><?php esc_html_e('Add to calendar', 'fluent-booking'); ?></span>
                 <div class="fcal_cal_items">
-                    <?php foreach ($bookmarks as $bookmark): ?>
-                        <div title="<?php echo esc_attr($bookmark['title']); ?>">
-                            <a href="<?php echo esc_url($bookmark['url']); ?>" target="_blank" rel="noopener">
-                                <img style="width: 20px; height: 20px;" src="<?php echo esc_url($bookmark['icon']); ?>" alt="<?php echo esc_attr($bookmark['title']); ?>"/>
+                    <?php foreach ($bookmarks as $fluentBookingBookmark): ?>
+                        <div title="<?php echo esc_attr($fluentBookingBookmark['title']); ?>">
+                            <a href="<?php echo esc_url($fluentBookingBookmark['url']); ?>" target="_blank" rel="noopener">
+                                <img style="width: 20px; height: 20px;" src="<?php echo esc_url($fluentBookingBookmark['icon']); ?>" alt="<?php echo esc_attr($fluentBookingBookmark['title']); ?>"/>
                             </a>
                         </div>
                     <?php endforeach; ?>

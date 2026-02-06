@@ -447,6 +447,7 @@ class Bootstrap extends IntegrationManagerController
 
         $this->addLog(
             $feed['settings']['name'],
+            /* translators: %s: Task URL */
             sprintf(__('Task has been created in FluentBoards. You can %s to view the task.', 'fluent-booking'), '<a target="_blank" href="' . $taskUrl . '">' . __('click here', 'fluent-booking') . '</a>'),
             $booking->id,
             'success'

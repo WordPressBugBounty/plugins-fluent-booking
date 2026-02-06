@@ -65,6 +65,7 @@ class FiveMinuteScheduler
             ->where('created_at', '<=', gmdate('Y-m-d H:i:s', time() - $autoCancelTimeOut)) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             ->where('status', 'pending')
             ->where('payment_status', 'pending')
+            ->where('payment_method', '!=', 'offline')
             ->get();
 
         foreach ($bookings as $booking) {

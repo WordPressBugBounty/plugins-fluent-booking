@@ -8,12 +8,12 @@
         <?php if ($attributes['filter'] == 'show') : ?>
             <div class="fcal_booking_header_actions">
                 <form action="" method="GET">
-                    <?php foreach ($period_options as $value => $label): ?>
+                    <?php foreach ($period_options as $fluentBookingValue => $fluentBookingLabel): ?>
                         <div class="fcal_radio_btn">
-                            <input type="radio" name="booking_period" id="fcal_period_<?php echo esc_attr($value) ?>"
-                                value="<?php echo esc_attr($value) ?>" <?php echo $booking_period == $value ? 'checked' : '' ?>
+                            <input type="radio" name="booking_period" id="fcal_period_<?php echo esc_attr($fluentBookingValue) ?>"
+                                value="<?php echo esc_attr($fluentBookingValue) ?>" <?php echo $booking_period == $fluentBookingValue ? 'checked' : '' ?>
                                 onchange="this.form.submit()">
-                            <label for="fcal_period_<?php echo esc_attr($value) ?>"><?php echo esc_html($label) ?></label>
+                            <label for="fcal_period_<?php echo esc_attr($fluentBookingValue) ?>"><?php echo esc_html($fluentBookingLabel) ?></label>
                         </div>
                     <?php endforeach; ?>
                     <input type="hidden" name="booking_per_page" value="<?php echo esc_attr($per_page); ?>">
@@ -24,41 +24,41 @@
     <div class="fcal_all_bookings">
         <div class="fcal_bookings">
             <div class="fcal_booking_wrapper">
-                <?php foreach ($bookings as $booking) : ?>
-                    <div class="fcal_booking" onclick="location.href='<?php echo esc_url($booking->getConfirmationUrl()); ?>'">
-                        <div class="fcal_spot_wrapper <?php echo 'fcal_spot_status_' . esc_attr($booking->status) ?>">
+                <?php foreach ($bookings as $fluentBookingBooking) : ?>
+                    <div class="fcal_booking" onclick="location.href='<?php echo esc_url($fluentBookingBooking->getConfirmationUrl()); ?>'">
+                        <div class="fcal_spot_wrapper <?php echo 'fcal_spot_status_' . esc_attr($fluentBookingBooking->status) ?>">
                             <div class="fcal_spot_line">
                                 <div class="fcal_spot_timing">
-                                    <p class="fcal_booking_date"><?php echo esc_html($booking->booking_date); ?></p>
-                                    <p class="fcal_booking_time"><?php echo esc_html($booking->booking_time); ?></p>
-                                    <p class="fcal_booking_timezone">(<?php echo esc_html($booking->person_time_zone); ?>)</p>
+                                    <p class="fcal_booking_date"><?php echo esc_html($fluentBookingBooking->booking_date); ?></p>
+                                    <p class="fcal_booking_time"><?php echo esc_html($fluentBookingBooking->booking_time); ?></p>
+                                    <p class="fcal_booking_timezone">(<?php echo esc_html($fluentBookingBooking->person_time_zone); ?>)</p>
                                 </div>
                                 <div class="fcal_spot_desc">
                                 <h3 class="fcal_spot_title">
-                                    <?php echo wp_kses_post($booking->getBookingTitle(true)); ?>
+                                    <?php echo wp_kses_post($fluentBookingBooking->getBookingTitle(true)); ?>
                                 </h3>
                                     <div class="fcal_spot_desc_sub_info">
-                                        <?php if ($booking->happening_status) : ?>
-                                            <?php foreach ($booking->happening_status as $slug => $status) : ?>
+                                        <?php if ($fluentBookingBooking->happening_status) : ?>
+                                            <?php foreach ($fluentBookingBooking->happening_status as $fluentBookingSlug => $fluentBookingStatus) : ?>
                                                 <div class="fcal_spot_happening">
-                                                    <span class=<?php echo 'fcal_' . esc_attr($slug) ?>>
-                                                        <?php echo esc_html($status) ?>
+                                                    <span class=<?php echo 'fcal_' . esc_attr($fluentBookingSlug) ?>>
+                                                        <?php echo esc_html($fluentBookingStatus) ?>
                                                     </span>
                                                 </div>
                                             <?php endforeach; ?>
                                         <?php else : ?>
                                             <span class="fcal_spot_period_status">
-                                                <?php echo esc_html($booking->booking_status_text) ?>
+                                                <?php echo esc_html($fluentBookingBooking->booking_status_text) ?>
                                             </span>
                                         <?php endif; ?>
 
-                                        <?php if ($booking->payment_status) : ?>
-                                            <p class="fcal_spot_payment_status <?php echo esc_attr($booking->payment_status) ?>">
-                                                <?php echo esc_html($booking->payment_status_text) ?>
+                                        <?php if ($fluentBookingBooking->payment_status) : ?>
+                                            <p class="fcal_spot_payment_status <?php echo esc_attr($fluentBookingBooking->payment_status) ?>">
+                                                <?php echo esc_html($fluentBookingBooking->payment_status_text) ?>
                                             </p>
                                         <?php endif; ?>
 
-                                        <?php if ($booking->status == 'pending' && $booking->payment_status != 'pending') : ?>
+                                        <?php if ($fluentBookingBooking->status == 'pending' && $fluentBookingBooking->payment_status != 'pending') : ?>
                                             <p class="fcal_spot_period_status unconfirmed">
                                                 <?php esc_html_e('Unconfirmed', 'fluent-booking') ?>
                                             </p>
@@ -67,7 +67,7 @@
                                 </div>
                                 <div class="fcal_spot_actions">
                                     <button class="fcal_plain_btn"
-                                        onclick="location.href='<?php echo esc_url($booking->getConfirmationUrl()); ?>'">
+                                        onclick="location.href='<?php echo esc_url($fluentBookingBooking->getConfirmationUrl()); ?>'">
                                         <?php esc_html_e('View', 'fluent-booking')?>
                                     </button>
                                 </div>
@@ -91,9 +91,9 @@
 
             <form action="" method="GET">
                 <select name="booking_per_page" id="fcal_booking_per_page" onchange="this.form.submit()">
-                    <?php foreach ($page_options as $option): ?>
-                        <option value="<?php echo esc_attr($option); ?>" <?php echo ($per_page == $option) ? 'selected' : ''; ?>>
-                            <?php echo esc_html($option) . '/' . esc_html__('page', 'fluent-booking') ?>
+                    <?php foreach ($page_options as $fluentBookingOption): ?>
+                        <option value="<?php echo esc_attr($fluentBookingOption); ?>" <?php echo ($per_page == $fluentBookingOption) ? 'selected' : ''; ?>>
+                            <?php echo esc_html($fluentBookingOption) . '/' . esc_html__('page', 'fluent-booking') ?>
                         </option>
                     <?php endforeach; ?>
                     <input type="hidden" name="booking_period" value="<?php echo esc_attr($booking_period); ?>">

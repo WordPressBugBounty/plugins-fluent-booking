@@ -591,7 +591,7 @@ class FcalCalendar extends \Elementor\Widget_Base
             </div>
         <?php else :
             // Output for frontend
-            echo $blockEditor->fcalRenderCalendarManagementBlock($attributes);
+            echo $blockEditor->fcalRenderCalendarManagementBlock($attributes); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         endif;
         ?>
         <?php

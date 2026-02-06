@@ -26,10 +26,9 @@
         <meta property="og:image" content="<?php echo esc_url($author['featured_image']); ?>"/>
     <?php } ?>
 
-    <?php foreach ($css_files as $css_file): ?>
-        <link rel="stylesheet"
-              href="<?php echo esc_url($css_file); ?>?version=<?php echo esc_html(FLUENT_BOOKING_ASSETS_VERSION); ?>"
-              media="screen"/>
+    <?php foreach ($css_files as $fluentBookingCssFile): ?>
+        <?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet ?>
+        <link rel="stylesheet" href="<?php echo esc_url($fluentBookingCssFile); ?>?version=<?php echo esc_html(FLUENT_BOOKING_ASSETS_VERSION); ?>" media="screen"/>
     <?php endforeach; ?>
 
     <style>
@@ -60,29 +59,30 @@
         }
     </style>
 
-    <?php foreach ($header_js_files as $fileKey => $file): ?>
-        <script id="<?php echo esc_attr($fileKey); ?>" src="<?php echo esc_url($file); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"></script>
+    <?php foreach ($header_js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>" src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"></script>
     <?php endforeach; ?>
 
     <?php do_action('fluent_booking/main_landing'); ?>
 </head>
 <body>
         <?php \FluentBooking\App\App::getInstance('view')->render('landing.author_html', [
-            'author' => $author,
+            'author'   => $author,
             'calendar' => $calendar,
-            'events' => $events
+            'events'   => $events,
+            'embedded' => $embedded
         ]); ?>
         </div>
     </div>
 
     <script>
-        <?php foreach ($js_vars as $varKey => $values): ?>
-            var <?php echo esc_attr($varKey); ?> = <?php echo wp_json_encode($values); ?>;
+        <?php foreach ($js_vars as $fluentBookingVarKey => $fluentBookingValues): ?>
+            var <?php echo esc_attr($fluentBookingVarKey); ?> = <?php echo wp_json_encode($fluentBookingValues); ?>;
         <?php endforeach; ?>
     </script>
 
-    <?php foreach ($js_files as $fileKey => $file): ?>
-        <script id="<?php echo esc_attr($fileKey); ?>" src="<?php echo esc_url($file); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>" defer="defer"></script>
+    <?php foreach ($js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>" src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>" defer="defer"></script>
     <?php endforeach; ?>
 
     <?php do_action('fluent_booking/main_landing_footer'); ?>

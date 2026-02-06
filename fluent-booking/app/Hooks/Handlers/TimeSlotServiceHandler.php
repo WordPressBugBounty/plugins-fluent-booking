@@ -24,10 +24,10 @@ class TimeSlotServiceHandler
             if ($calendarEvent->isOneOffEvent()) {
                 return new \FluentBookingPro\App\Modules\SingleEvent\SingleTimeSlotService($calendar, $calendarEvent);
             }
-        }
 
-        if ($calendarEvent->allowMultiBooking()) {
-            return new \FluentBookingPro\App\Services\MultiTimeSlotService($calendar, $calendarEvent);
+            if ($calendarEvent->allowMultiBooking()) {
+                return new \FluentBookingPro\App\Services\MultiTimeSlotService($calendar, $calendarEvent);
+            }
         }
 
         return new TimeSlotService($calendar, $calendarEvent);

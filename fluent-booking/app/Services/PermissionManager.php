@@ -18,18 +18,19 @@ class PermissionManager
             'read_other_calendars'              => __('Read Access of Other Users Calendars', 'fluent-booking'),
             'manage_other_calendars'            => __('Manage Other Users Calendars', 'fluent-booking'),
             'read_and_use_other_availabilities' => __('Read & Use Access of All Availabilities', 'fluent-booking'),
-            'manage_other_availabilities'       => __('Manage All Availabilities', 'fluent-booking')
+            'manage_other_availabilities'       => __('Manage All Availabilities', 'fluent-booking'),
+            'manage_all_data'                   => __('Manage All Data and Settings', 'fluent-booking')
         ];
     }
 
     public static function hasAllCalendarAccess($readAccess = false)
     {
-        $hasCalendarAccess = self::userCan('manage_other_calendars');
+        $hasCalendarAccess = self::userCan(['manage_all_data', 'manage_other_calendars']);
 
         if ($readAccess) {
             $hasCalendarAccess = $hasCalendarAccess || self::userCan('read_other_calendars');
         }
-        
+
         return apply_filters('fluent_booking/has_all_calendar_access', current_user_can('manage_options')) || $hasCalendarAccess;
     }
 
@@ -53,7 +54,7 @@ class PermissionManager
             return true;
         }
         
-        return self::userCan(['read_other_calendars', 'manage_other_calendars']);
+        return self::userCan(['manage_all_data', 'read_other_calendars', 'manage_other_calendars']);
     }
 
     public static function canUpdateCalendarEvent($slotId)
@@ -72,7 +73,7 @@ class PermissionManager
             return true;
         }
 
-        return current_user_can('manage_options') || self::userCan(['manage_other_calendars']);
+        return self::userCan(['manage_all_data', 'manage_other_calendars']);
     }
 
     public static function canWriteCalendar($calendarId)
@@ -91,12 +92,12 @@ class PermissionManager
             return true;
         }
 
-        return self::userCan('manage_other_calendars');
+        return self::userCan(['manage_all_data', 'manage_other_calendars']);
     }
 
     public static function hasCalendarAccess($calendar)
     {
-        $hasAccess = current_user_can('manage_options') || $calendar->user_id == get_current_user_id();
+        $hasAccess = self::userCan('manage_all_data') || $calendar->user_id == get_current_user_id();
 
         return apply_filters('fluent_booking/has_calendar_access', $hasAccess, $calendar);
     }
@@ -254,6 +255,6 @@ class PermissionManager
 
     public static function userCanSeeAllBookings()
     {
-        return self::userCan(['read_all_bookings', 'manage_all_bookings']);
+        return self::userCan(['manage_all_data', 'read_all_bookings', 'manage_all_bookings']);
     }
 }

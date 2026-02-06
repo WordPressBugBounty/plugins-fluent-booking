@@ -64,13 +64,20 @@ class BookingService
 
         $booking->load('calendar');
 
+        $bookingStatus = $booking->status;
+
         $bookingData = apply_filters('fluent_booking/after_booking_data', $bookingData, $booking, $calendarSlot, $customFieldsData);
 
         // this pre hook is for early actions that require for remote calendars and locations
-        do_action('fluent_booking/pre_after_booking_' . $booking->status, $booking, $calendarSlot, $bookingData);
+        do_action('fluent_booking/pre_after_booking_' . $bookingStatus, $booking, $calendarSlot, $bookingData);
 
         // We are just renewing this as this may have been changed by the pre hook
         $booking = Booking::find($booking->id);
+
+        if ($bookingStatus != $booking->status) {
+            return $booking;
+        }
+
         do_action('fluent_booking/after_booking_' . $booking->status, $booking, $calendarSlot, $bookingData);
 
         return $booking;
@@ -93,9 +100,12 @@ class BookingService
 
             $isConfRequired = $calendarSlot->isConfirmationRequired($startTime);
             $bookingData['status'] = $isConfRequired ? 'pending' : $data['status'];
+            $bookingData['group_id'] = self::getGroupId($calendarSlot, $bookingData);
 
             if ($startTime == $lastBooking) {
                 $createdBookingIds = $bookingIds;
+            } else {
+                $bookingData['parent_id'] = '';
             }
 
             if (Arr::get($data, 'payment_method')) {

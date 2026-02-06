@@ -2,6 +2,8 @@
 
 namespace FluentBooking\App\Services;
 
+use FluentBooking\App\Services\PermissionManager;
+
 class ImportService
 {
     /*
@@ -12,6 +14,10 @@ class ImportService
      */
     public function importHostJson($data, $useCurrentUser = true)
     {
+        if (!PermissionManager::userCan(['manage_all_data', 'invite_team_members', 'manage_other_calendars'])) {
+            return new \WP_Error('invalid_data', __('You are not authorized to import calendar', 'fluent-booking'));
+        }
+ 
         if (is_string($data)) {
             $data = json_decode($data, true);
         }

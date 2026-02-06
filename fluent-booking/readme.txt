@@ -3,9 +3,9 @@ Contributors: techjewel, wpmanageninja
 Author URI: https://fluentbooking.com/
 Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.3
-Stable tag: 1.9.11
+Stable tag: 2.0.01
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,51 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.0.01 (Date: 12 Jan 2026)
+- Added: All Bookings Shortcode
+- Added: Recurring Booking Support in Admin Booking
+- Fixed: Calendar Shortcode Showing Disabled Events
+- Fixed: Paid Events Not Working in Admin Booking
+- Fixed: Recurring Booking Issue with Group Events
+- Fixed: Group Booking Status not Updating
+- Fixed: Date Field Formatting Issue
+- Improved: Dark Mode and Overall Responsiveness
+
+= 2.0.0 (Date: 31 Dec 2025)
+- Introduced: Recurring Event
+- Introduced: Admin Panel Dark Mode
+- Added: Super Admin User Capability
+- Added: Require All Occurrence Feature.
+- Added: Support for Paid Bookings as Free Using 100% Coupon.
+- Fixed: Issue Selecting FluentCart Private Products.
+- Fixed: Florida’s New Phone Area Code Validation Issue.
+- Fixed: Custom Date Formatting Issue.
+- Fixed: Order Item Details not Showing in Confirmation.
+- Improved: Overall UI/UX and Responsiveness
+
+= 1.10.02 (Date: 12 Dec 2025)
+– Fixed: Fluentform Field Mapping Issue
+- Fixed: Payment Icon Not Showing in Author Calendars
+
+= 1.10.01 (Date: 28 Nov 2025)
+– Hotfix: UTM Content Not Found Issue
+
+= 1.10.0 (Date: 27 Nov 2025)
+- Introduced: Monetize Bookings with FluentCart
+- Introduced: Embed Calendar Feature
+- Added: Host Calendar Share Option
+- Added: Internal Note in Group Mettings
+- Added: Missing Translation Strings
+- Added: Stripe Refund Option in Calendar View
+- Added: IP Address in Booking Details
+- Added: Onboarding with Recommended Features
+- Added: Hook to Add Booking Column in CRM Contact
+- Added: FluentCart and SMTP in Global Modules
+- Fixed: Issue with Advanced Date Format
+- Fixed: Advanced Settings Not Saving in Import Calendar
+- Fixed: Calendar Import Permission Check Security Issue
+- Fixed: Offline Payment Auto Cancellation Issue with Requires Confirmation
 
 = 1.9.11 (Date: 08 Sep 2025)
 - Hotfix: Fixed Issue with UTM Content
