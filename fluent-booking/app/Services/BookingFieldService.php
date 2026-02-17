@@ -31,7 +31,8 @@ class BookingFieldService
             if (is_array($value)) {
                 if ($customField['type'] === 'multi-select') {
                     $value = array_map(function ($item) {
-                        return sanitize_text_field(Arr::get($item, 'value'));
+                        $val = is_array($item) ? Arr::get($item, 'value') : $item;
+                        return sanitize_text_field($val);
                     },$value);
                 } else if ($customField['type'] === 'file') {
                     $maxField = Arr::get($customField, 'max_file_allow', 1);
@@ -301,9 +302,9 @@ class BookingFieldService
 
         foreach ($customFormData as $dataKey => $value) {
             $label = $labels[$dataKey] ?? $dataKey;
-    
+
             $formattedValue = is_array($value) ? implode(', ', $value) : $value;
-            
+
             $field = self::getBookingFieldByName($booking->calendar_event, $dataKey);
 
             $fieldType = Arr::get($field, 'type');
@@ -311,7 +312,7 @@ class BookingFieldService
             if ($fieldType == 'file' && is_array($value)) {
                 $formattedValue = self::getUploadedFiles($value, $htmlSupport);
             }
-        
+
             if ($fieldType == 'hidden') {
                 if ($isPublic) continue;
                 $formattedValue = EditorShortcodeParser::parse($formattedValue, $booking);

@@ -437,20 +437,20 @@ class Booking extends Model
 
         $html = '';
         if ($locationType === 'in_person_guest') {
-            $html = '<b>' . __('Invitee Address:', 'fluent-booking') . ' </b>' . Arr::get($details, 'description');
+            $html = '<b>' . esc_html(__('Invitee Address:', 'fluent-booking')) . ' </b>' . esc_html(Arr::get($details, 'description'));
         } else if ($locationType === 'in_person_organizer') {
-            $html = '<b>' . Arr::get($details, 'title') . ' </b>';
+            $html = '<b>' . esc_html(Arr::get($details, 'title')) . ' </b>';
             $description = Arr::get($details, 'description');
             if ($description) {
-                $html .= wpautop($description);
+                $html .= wpautop(wp_kses_post($description));
             }
         } else if ($locationType === 'phone_guest') {
-            $html = '<b>' . __('Phone Call:', 'fluent-booking') . ' </b>' . $this->phone;
+            $html = '<b>' . esc_html(__('Phone Call:', 'fluent-booking')) . ' </b>' . esc_html($this->phone);
         } else if ($locationType === 'phone_organizer') {
-            $html = '<b>' . __('Phone Call:', 'fluent-booking') . ' </b>' . Arr::get($details, 'description') . __(' (Host phone number)', 'fluent-booking');
+            $html = '<b>' . __('Phone Call:', 'fluent-booking') . ' </b>' . esc_html(Arr::get($details, 'description')) . esc_html(__(' (Host phone number)', 'fluent-booking'));
         } else if ($locationType === 'custom') {
-            $html = '<b>' . Arr::get($details, 'title') . '</b>';
-            $html .= wpautop(Arr::get($details, 'description'));
+            $html = '<b>' . esc_html(Arr::get($details, 'title')) . '</b>';
+            $html .= wpautop(wp_kses_post(Arr::get($details, 'description')));
         } else if (in_array($locationType, ['google_meet', 'online_meeting', 'zoom_meeting', 'ms_teams'])) {
             $platformLabels = [
                 'google_meet'    => __('Google Meet', 'fluent-booking'),
@@ -459,10 +459,10 @@ class Booking extends Model
                 'ms_teams'       => __('MS Teams', 'fluent-booking'),
             ];
 
-            $html = '<b>' . $platformLabels[$locationType] . '</b> ';
+            $html = '<b>' . esc_html($platformLabels[$locationType]) . '</b> ';
             $meetingLink = Arr::get($details, 'online_platform_link');
             if ($meetingLink) {
-                $html .= '<a target="_blank" href="' . esc_url($meetingLink) . '">' . __('Join Meeting', 'fluent-booking') . '</a>';
+                $html .= '<a target="_blank" href="' . esc_url($meetingLink) . '">' . esc_html(__('Join Meeting', 'fluent-booking')) . '</a>';
             }
         } else {
             return '--';

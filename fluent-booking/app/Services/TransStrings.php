@@ -1061,6 +1061,7 @@ class TransStrings
             'Repeats every'                                                                    => __('Repeats every', 'fluent-booking'),
             'Recurring Settings'                                                               => __('Recurring Settings', 'fluent-booking'),
             'Recurring Event'                                                                  => __('Recurring Event', 'fluent-booking'),
+            'Recurring Event does not support this feature'                                    => __('Recurring Event does not support this feature', 'fluent-booking'),
             'Manage your payment coupons and create discount codes for your customers here.'   => __('Manage your payment coupons and create discount codes for your customers here.', 'fluent-booking'),
             'Select the events that this coupon can be applied to. Empty for all events'       => __('Select the events that this coupon can be applied to. Empty for all events', 'fluent-booking'),
             'Can this coupon code be used with other coupon code'                              => __('Can this coupon code be used with other coupon code', 'fluent-booking'),
@@ -1076,6 +1077,9 @@ class TransStrings
             'CouponModule/per_user_limit_help'                                                 => __('Total number of times this coupon can be redeemed by a single user. Empty or 0 for no limit', 'fluent-booking'),
             'CouponModule/disabled_description'                                                => __('Coupon Module is disabled. Enable the Coupon module to manage your payment coupons and create discount codes for your customers here.', 'fluent-booking'),
             'Ensure your calendar has at least'                                                => __('Ensure your calendar has at least', 'fluent-booking'),
+            'Choose File'                                                                      => __('Choose File', 'fluent-booking'),
+            'Max files reached'                                                                => __('Max files reached', 'fluent-booking'),
+            'File size should be less than'                                                    => __('File size should be less than', 'fluent-booking'),
             'days of future availability to support all recurring occurrences'                 => __('days of future availability to support all recurring occurrences', 'fluent-booking'),
             'Onboarding/fluent_smtp_description'                                               => __('Use FluentSMTP to make sure your site can send emails reliably and securely. You can use any SMTP service like Amazon SES, Sendgrid, Mailgun, ElasticEMail or any SMTP with FluentSMTP (it\'s free).', 'fluent-booking')
         );

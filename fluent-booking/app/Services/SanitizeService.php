@@ -190,10 +190,6 @@ class SanitizeService
 
     public static function sanitizeUtmData($value)
     {
-        if (is_array($value)) {
-            return array_map('sanitize_text_field', $value);
-        }
-
         return sanitize_text_field($value);
     }
 

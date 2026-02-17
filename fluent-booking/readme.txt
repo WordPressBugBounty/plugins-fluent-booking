@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.3
-Stable tag: 2.0.01
+Stable tag: 2.0.05
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,17 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.0.05 (Date: 17 Feb 2026)
+- Added: File Upload Option in Admin Booking
+- Added: Rate Limit in Meeting Scheduling
+- Fixed: Data Import/Export Security Vulnerability
+- Fixed: User Phone and Address Security Vulnerability
+- Fixed: Multi-field Not Showing in Manual Booking
+- Fixed: Coupon Issue with Multi-Duration Events
+- Fixed: Event Time Not Showing in One-off Event Landing
+- Fixed: Cancelled Booking Report
+- Improved: Minor UI-UX and Dark Mode
 
 = 2.0.01 (Date: 12 Jan 2026)
 - Added: All Bookings Shortcode

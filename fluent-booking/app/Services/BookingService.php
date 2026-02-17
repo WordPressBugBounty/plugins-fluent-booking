@@ -439,19 +439,19 @@ class BookingService
         $icsContent .= "BEGIN:VEVENT\r\n";
         $icsContent .= "UID:" . md5($booking->hash) . "\r\n"; // Unique ID for the event
 
-        // Event details
-        $icsContent .= "SUMMARY:" . $booking->getBookingTitle() . "\r\n";
+        $icsContent .= "SUMMARY:" . self::escapeIcsText($booking->getBookingTitle()) . "\r\n";
         $icsContent .= "DESCRIPTION:" . $booking->getIcsBookingDescription() . "\r\n";
 
         // Date and time formatting (assuming eventStart and eventEnd are DateTime objects)
         $icsContent .= "DTSTART:" . gmdate('Ymd\THis\Z', strtotime($booking->start_time)) . "\r\n";
         $icsContent .= "DTEND:" . gmdate('Ymd\THis\Z', strtotime($booking->end_time)) . "\r\n";
 
-        $icsContent .= "LOCATION:" . $booking->getLocationAsText() . "\r\n";
+        $icsContent .= "LOCATION:" . self::escapeIcsText($booking->getLocationAsText()) . "\r\n";
 
-        $icsContent .= "ORGANIZER;CN=\"" . $author['name'] . "\":mailto:" . $author['email'] . "\r\n";
-
-        $icsContent .= "ATTENDEE;CN=\"" . $booking->email . "\";ROLE=REQ-PARTICIPANT;RSVP=TRUE;PARTSTAT=ACCEPTED:mailto:" . $booking->email . "\r\n";
+        $organizerEmail = sanitize_email($author['email']) ?: $author['email'];
+        $attendeeEmail  = sanitize_email($booking->email) ?: $booking->email;
+        $icsContent .= "ORGANIZER;CN=\"" . self::escapeIcsText($author['name']) . "\":mailto:" . $organizerEmail . "\r\n";
+        $icsContent .= "ATTENDEE;CN=\"" . $attendeeEmail . "\";ROLE=REQ-PARTICIPANT;RSVP=TRUE;PARTSTAT=ACCEPTED:mailto:" . $attendeeEmail . "\r\n";
 
         $icsContent .= "END:VEVENT\r\n";
 
@@ -459,6 +459,27 @@ class BookingService
         $icsContent .= "END:VCALENDAR\r\n";
 
         return $icsContent;
+    }
+
+    /**
+     * Escape text for use in ICS (iCalendar) content per RFC5545.
+     * Escapes backslash, semicolon, comma and normalizes newlines to \\n.
+     *
+     * @param string $value Raw text value.
+     * @return string Escaped value safe for ICS properties.
+     */
+    public static function escapeIcsText($value)
+    {
+        if (empty($value)) {
+            return '';
+        }
+        $value = (string) $value;
+        // Escape backslash first, then semicolon and comma (RFC5545 special chars).
+        $value = str_replace(['\\', ';', ','], ['\\\\', '\\;', '\\,'], $value);
+        // Normalize line breaks to literal \n in output (ICS uses \\n for newline in text).
+        $value = str_replace(["\r\n", "\r", "\n"], "\\n", $value);
+
+        return $value;
     }
 
 }

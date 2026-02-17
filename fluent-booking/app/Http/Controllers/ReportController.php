@@ -171,12 +171,38 @@ class ReportController extends Controller
 
     private function getBookingStats($currentMonthStart, $currentMonthEnd, $lastMonthStart, $lastMonthEnd)
     {
-        // Get booking query by created_at and end_time
-        $currentMonthBookings = Booking::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])->get();
-        $lastMonthBookings = Booking::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->get();
+        $scopeByUser = !PermissionManager::userCanSeeAllBookings();
 
-        $currentMonthStartBookings = Booking::whereBetween('end_time', [$currentMonthStart, $currentMonthEnd])->get();
-        $lastMonthStartBookings = Booking::whereBetween('end_time', [$lastMonthStart, $lastMonthEnd])->get();
+        // Get booking query by created_at and end_time (scoped by permission)
+        $currentMonthBookings = Booking::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+            ->when($scopeByUser, function ($query) {
+                $query->whereHas('hosts', function ($hostQuery) {
+                    $hostQuery->where('user_id', get_current_user_id());
+                });
+            })
+            ->get();
+        $lastMonthBookings = Booking::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
+            ->when($scopeByUser, function ($query) {
+                $query->whereHas('hosts', function ($hostQuery) {
+                    $hostQuery->where('user_id', get_current_user_id());
+                });
+            })
+            ->get();
+
+        $currentMonthStartBookings = Booking::whereBetween('end_time', [$currentMonthStart, $currentMonthEnd])
+            ->when($scopeByUser, function ($query) {
+                $query->whereHas('hosts', function ($hostQuery) {
+                    $hostQuery->where('user_id', get_current_user_id());
+                });
+            })
+            ->get();
+        $lastMonthStartBookings = Booking::whereBetween('end_time', [$lastMonthStart, $lastMonthEnd])
+            ->when($scopeByUser, function ($query) {
+                $query->whereHas('hosts', function ($hostQuery) {
+                    $hostQuery->where('user_id', get_current_user_id());
+                });
+            })
+            ->get();
 
         // Calculate bookings and guests based on 'created_at'
         $totalBookedCurrentMonth = $currentMonthBookings->count();
@@ -189,8 +215,8 @@ class ReportController extends Controller
         $bookingCompletedCurrentMonth = $currentMonthStartBookings->where('status', 'completed')->count();
         $bookingCompletedLastMonth = $lastMonthStartBookings->where('status', 'completed')->count();
 
-        $bookingCancelledCurrentMonth = $lastMonthStartBookings->where('status', 'cancelled')->count();
-        $bookingCancelledLastMonth = $currentMonthStartBookings->where('status', 'cancelled')->count();
+        $bookingCancelledCurrentMonth = $currentMonthStartBookings->where('status', 'cancelled')->count();
+        $bookingCancelledLastMonth = $lastMonthStartBookings->where('status', 'cancelled')->count();
 
         $bookingStats['bookedStat'] = $this->getPercentage($totalBookedCurrentMonth, $totalBookedLastMonth);
         $bookingStats['completedStat'] = $this->getPercentage($bookingCompletedCurrentMonth, $bookingCompletedLastMonth);
@@ -212,8 +238,23 @@ class ReportController extends Controller
 
     private function getBookingWidgetNumbers($startTime, $endTime)
     {
-        $statusQuery = Booking::whereBetween('end_time', [$startTime, $endTime])->get();
-        $bookedQuery = Booking::whereBetween('created_at', [$startTime, $endTime])->get();
+        $scopeByUser = !PermissionManager::userCanSeeAllBookings();
+
+        $statusQuery = Booking::whereBetween('end_time', [$startTime, $endTime])
+            ->when($scopeByUser, function ($query) {
+                $query->whereHas('hosts', function ($hostQuery) {
+                    $hostQuery->where('user_id', get_current_user_id());
+                });
+            })
+            ->get();
+
+        $bookedQuery = Booking::whereBetween('created_at', [$startTime, $endTime])
+            ->when($scopeByUser, function ($query) {
+                $query->whereHas('hosts', function ($hostQuery) {
+                    $hostQuery->where('user_id', get_current_user_id());
+                });
+            })
+            ->get();
 
         $totalBooked = $bookedQuery->count();
         $totalGuests = $bookedQuery->pluck('email')->unique()->count();
@@ -231,19 +272,36 @@ class ReportController extends Controller
 
     private function getAllBookingWidgetNumbers()
     {
-        $permissionAccess = PermissionManager::userCan(['manage_all_data', 'read_all_bookings', 'manage_all_bookings', 'read_other_calendars', 'manage_other_calendars']);
+        $scopeByUser = !PermissionManager::userCanSeeAllBookings();
 
-        if ($permissionAccess) {
-            $totalBooked = Booking::count();
-            $bookingCompleted = Booking::where('status', 'completed')->count();
-            $bookingCancelled = Booking::where('status', 'cancelled')->count();
-            $totalGuests = Booking::distinct()->count('email');
-        } else {
-            $totalBooked = Booking::where('host_user_id', get_current_user_id())->count();
-            $bookingCompleted = Booking::where('status', 'completed')->where('host_user_id', get_current_user_id())->count();
-            $bookingCancelled = Booking::where('status', 'cancelled')->where('host_user_id', get_current_user_id())->count();
-            $totalGuests = Booking::distinct()->where('host_user_id', get_current_user_id())->count('email');
-        }
+        $userId = get_current_user_id();
+
+        $totalBooked = Booking::when($scopeByUser, function($q) use ($userId) {
+                $q->whereHas('hosts', function ($hostQuery) use ($userId) {
+                    $hostQuery->where('user_id', $userId);
+                });
+            })->count();
+
+        $bookingCompleted = Booking::where('status', 'completed')
+            ->when($scopeByUser, function($q) use ($userId) {
+                $q->whereHas('hosts', function ($hostQuery) use ($userId) {
+                    $hostQuery->where('user_id', $userId);
+                });
+            })->count();
+
+        $bookingCancelled = Booking::where('status', 'cancelled')
+            ->when($scopeByUser, function($q) use ($userId) {
+                $q->whereHas('hosts', function ($hostQuery) use ($userId) {
+                    $hostQuery->where('user_id', $userId);
+                });
+            })->count();
+
+        $totalGuests = Booking::distinct()
+            ->when($scopeByUser, function($q) use ($userId) {
+                $q->whereHas('hosts', function ($hostQuery) use ($userId) {
+                    $hostQuery->where('user_id', $userId);
+                });
+            })->count('email');
 
         return [
             'totalBooked'      => $totalBooked,

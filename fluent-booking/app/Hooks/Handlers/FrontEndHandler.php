@@ -699,6 +699,10 @@ class FrontEndHandler
 
     public function ajaxScheduleMeeting()
     {
+        if (!$this->checkPublicAjaxRateLimit('schedule_meeting', 15)) {
+            wp_send_json_error(['message' => __('Too many requests. Please try again in a minute.', 'fluent-booking')], 429);
+        }
+
         $app = App::getInstance();
 
         $postedData = $_REQUEST;  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -718,10 +722,15 @@ class FrontEndHandler
         do_action('fluent_booking/starting_scheduling_ajax', $postedData);
 
         $rules = [
-            'name'       => 'required',
-            'email'      => 'required|email',
-            'timezone'   => 'required',
-            'start_date' => 'required'
+            'name'         => 'required',
+            'email'        => 'required|email',
+            'timezone'     => 'required',
+            'start_date'   => 'required',
+            'utm_source'   => 'max:192',
+            'utm_medium'   => 'max:192',
+            'utm_campaign' => 'max:192',
+            'utm_term'     => 'max:192',
+            'utm_content'  => 'max:192',
         ];
 
         $messages = [
@@ -840,18 +849,18 @@ class FrontEndHandler
             'name'             => sanitize_text_field($postedData['name']),
             'email'            => sanitize_email($postedData['email']),
             'message'          => sanitize_textarea_field(wp_unslash(Arr::get($postedData, 'message', ''))),
-            'phone'            => sanitize_textarea_field(Arr::get($postedData, 'phone_number', '')),
+            'phone'            => sanitize_text_field(Arr::get($postedData, 'phone_number', '')),
             'address'          => sanitize_textarea_field(Arr::get($postedData, 'address', '')),
             'ip_address'       => Helper::getIp(),
             'status'           => 'scheduled',
             'source'           => 'web',
             'event_type'       => $calendarEvent->event_type,
             'slot_minutes'     => $duration,
-            'utm_source'       => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_source', '')),
-            'utm_medium'       => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_medium', '')),
-            'utm_campaign'     => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_campaign', '')),
-            'utm_term'         => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_term', '')),
-            'utm_content'      => SanitizeService::sanitizeUtmData(Arr::get($postedData, 'utm_content', ''))
+            'utm_source'       => sanitize_text_field(Arr::get($postedData, 'utm_source', '')),
+            'utm_medium'       => sanitize_text_field(Arr::get($postedData, 'utm_medium', '')),
+            'utm_campaign'     => sanitize_text_field(Arr::get($postedData, 'utm_campaign', '')),
+            'utm_term'         => sanitize_text_field(Arr::get($postedData, 'utm_term', '')),
+            'utm_content'      => sanitize_text_field(Arr::get($postedData, 'utm_content', ''))
         ], $postedData, $calendarEvent);
 
         if ($calendarEvent->isConfirmationRequired($bookingData['start_time'])) {
@@ -940,6 +949,10 @@ class FrontEndHandler
 
     public function ajaxGetAvailableDates()
     {
+        if (!$this->checkPublicAjaxRateLimit('available_dates', 30)) {
+            wp_send_json_error(['message' => __('Too many requests. Please try again in a minute.', 'fluent-booking')], 429);
+        }
+
         $startBenchmark = microtime(true);
 
         $request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1052,6 +1065,10 @@ class FrontEndHandler
 
     public function ajaxHandleCancelMeeting()
     {
+        if (!$this->checkPublicAjaxRateLimit('cancel_meeting', 15)) {
+            wp_send_json_error(['message' => __('Too many requests. Please try again in a minute.', 'fluent-booking')], 429);
+        }
+
         $data = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
         $meetingHash = Arr::get($data, 'meeting_hash');
@@ -1101,6 +1118,37 @@ class FrontEndHandler
 
         wp_safe_redirect($meeting->getConfirmationUrl());
         exit;
+    }
+
+    /**
+     * Per-IP rate limit for public booking AJAX. Uses transients; 60s window.
+     *
+     * @param string $action Action name (e.g. schedule_meeting, available_dates, cancel_meeting).
+     * @param int    $limit  Max requests per window.
+     * @param int    $window Window in seconds.
+     * @return bool True if under limit (and count incremented), false if over limit.
+     */
+    private function checkPublicAjaxRateLimit($action, $limit, $window = 60)
+    {
+        $args = apply_filters('fluent_booking/public_ajax_ratelimit', [
+            'limit'  => $limit,
+            'window' => $window,
+        ], $action);
+
+        $limit  = max(1, (int) (isset($args['limit']) ? $args['limit'] : $limit));
+        $window = max(1, (int) (isset($args['window']) ? $args['window'] : $window));
+
+        $ip    = Helper::getIp();
+        $key   = 'fcal_ratelimit_' . $action . '_' . md5($ip);
+        $count = (int) get_transient($key);
+
+        if ($count >= $limit) {
+            return false;
+        }
+
+        set_transient($key, $count + 1, $window);
+
+        return true;
     }
 
     private static function sanitize_mapped_data($settings)

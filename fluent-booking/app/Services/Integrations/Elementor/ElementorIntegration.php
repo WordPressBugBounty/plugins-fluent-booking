@@ -20,10 +20,8 @@ class ElementorIntegration
         add_action('elementor/editor/after_enqueue_scripts', [$this, 'editorScripts']);
 
         add_action('wp_ajax_get_calendar_events', [$this, 'ajaxGetCalendarEvents']);
-        add_action('wp_ajax_nopriv_get_calendar_events', [$this, 'ajaxGetCalendarEvents']);
 
         add_action('wp_ajax_get_event_hash', [$this, 'ajaxGetEventHash']);
-        add_action('wp_ajax_nopriv_get_event_hash', [$this, 'ajaxGetEventHash']);
     }
 
     public function editorScripts()

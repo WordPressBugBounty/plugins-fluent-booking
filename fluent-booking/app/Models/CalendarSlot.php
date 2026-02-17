@@ -903,21 +903,21 @@ class CalendarSlot extends Model
         $isMultiEnabled = Arr::get($paymentSettings, 'multi_payment_enabled') == 'yes';
 
         if ($this->isMultiDurationEnabled() && $isMultiEnabled) {
-            $duration = $duration ?? $this->getDefaultDuration();
+            $duration = $duration ?: $this->getDefaultDuration();
             return [Arr::get($paymentSettings, 'multi_payment_items.' . $duration)];
         }
 
         return Arr::get($paymentSettings, 'items', []);
     }
 
-    public function getPricingTotal()
+    public function getPricingTotal($duration = null)
     {
         if (!$this->isPaymentEnabled()) {
             return 0;
         }
 
         $total = 0;
-        $items = $this->getPaymentItems();
+        $items = $this->getPaymentItems($duration);
         foreach ($items as $item) {
             $total += $item['value'];
         }

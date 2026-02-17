@@ -87,7 +87,6 @@ class LocationService
 
     public static function getLocationDetails($calendarEvent, $userInput = [], $allInput = [])
     {
-        $userInput = array_map('sanitize_text_field', $userInput);
         $locations = $calendarEvent->location_settings;
 
         if (empty($locations)) {
@@ -112,9 +111,9 @@ class LocationService
             ];
 
             if ($type == 'phone_guest') {
-                $userInput['user_location_input'] = Arr::get($allInput, 'phone_number');
+                $userInput['user_location_input'] = sanitize_text_field(Arr::get($allInput, 'phone_number'));
             } else if ($type == 'in_person_guest') {
-                $userInput['user_location_input'] = Arr::get($allInput, 'address');
+                $userInput['user_location_input'] = sanitize_textarea_field(Arr::get($allInput, 'address'));
             }
         }
 
@@ -123,7 +122,7 @@ class LocationService
             $keyedLocations[$location['type'] . '__:__' . $index] = $location;
         }
 
-        $driver = Arr::get($userInput, 'driver');
+        $driver = sanitize_text_field(Arr::get($userInput, 'driver'));
 
         if (empty($keyedLocations[$driver])) {
             return [
@@ -137,10 +136,15 @@ class LocationService
         $selectedType = $selectedLocation['type'];
 
         // custom user input location types
-        if (in_array($selectedType, ['in_person_guest', 'phone_guest'])) {
+        if ($selectedType === 'phone_guest') {
             return [
                 'type'        => $selectedType,
-                'description' => Arr::get($userInput, 'user_location_input')
+                'description' => sanitize_text_field(Arr::get($userInput, 'user_location_input'))
+            ];
+        } else if ($selectedType === 'in_person_guest') {
+            return [
+                'type'        => $selectedType,
+                'description' => sanitize_textarea_field(Arr::get($userInput, 'user_location_input'))
             ];
         }
 

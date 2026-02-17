@@ -2,7 +2,7 @@
 /**
 Plugin Name: FluentBooking - Appointment Scheduling & Booking Solution
 Description: FluentBooking is the ultimate solution for booking appointments, meetings, webinars, events, sales calls, and more.
-Version: 2.0.01
+Version: 2.0.05
 Author: Appointment & Booking Solution Team - WPManageNinja
 Author URI: https://fluentbooking.com
 Plugin URI: https://fluentbooking.com/pricing/
@@ -19,10 +19,10 @@ if (defined('FLUENT_BOOKING_VERSION')) {
 
 define('FLUENT_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('FLUENT_BOOKING_URL', plugin_dir_url(__FILE__));
-define('FLUENT_BOOKING_VERSION', '2.0.01');
+define('FLUENT_BOOKING_VERSION', '2.0.05');
 define('FLUENT_BOOKING_DB_VERSION', '1.0.1');
-define('FLUENT_BOOKING_ASSETS_VERSION', '2.0.01');
-define('FLUENT_BOOKING_MIN_PRO_VERSION', '2.0.01');
+define('FLUENT_BOOKING_ASSETS_VERSION', '2.0.05');
+define('FLUENT_BOOKING_MIN_PRO_VERSION', '2.0.05');
 
 require __DIR__ . '/vendor/autoload.php';
 

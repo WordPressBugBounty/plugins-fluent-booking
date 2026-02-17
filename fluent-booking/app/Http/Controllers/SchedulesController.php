@@ -19,7 +19,7 @@ class SchedulesController extends Controller
     {
         $filters = $request->get('filters', []);
 
-        $search = $request->getSafe('search', '');
+        $search = $request->getSafe('search');
 
         $eventId = Arr::get($filters, 'event');
 
@@ -48,24 +48,20 @@ class SchedulesController extends Controller
                 ->where('type', 'simple')
                 ->first();
 
-            if ($authorCalendar) {
-                $author = $authorCalendar->id;
-            }
+            $author = $authorCalendar ? $authorCalendar->id : '';
+        }
+
+        if (!$hasPermission || $author == 'me') {
+            $query->where('host_user_id', $currentHostId);
         }
 
         if ($author && $author !== 'all') {
-            if ($author == 'me' || !$hasPermission) {
-                $query->where('host_user_id', $currentHostId);
-            } 
-
             if ($author != 'me') {
                 $query->where('calendar_id', $author);
             }
-
             if ($eventId && $eventId !== 'all') {
                 $query->where('event_id', (int) $eventId);
             }
-
             if ($eventType && $eventType !== 'all') {
                 $query->where('event_type', $eventType);
             }
@@ -316,7 +312,7 @@ class SchedulesController extends Controller
 
     public function sendConfirmationEmail(Request $request, $bookingId)
     {
-        $booking = Booking::with(['calendar', 'calendar_event'])->find($bookingId);
+        $booking = Booking::with(['calendar', 'calendar_event'])->findOrFail($bookingId);
 
         $emailTo = $request->get('email_to', 'guest');
 
@@ -355,7 +351,7 @@ class SchedulesController extends Controller
         }
 
         $attendees = Booking::where('group_id', $booking->group_id);
-        $search = sanitize_text_field($request->get('search'));
+        $search = $request->getSafe('search');
 
         if (!empty($search)) {
             $attendees = $attendees->searchBy($search);

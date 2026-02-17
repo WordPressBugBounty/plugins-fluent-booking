@@ -147,18 +147,18 @@ class BookingController extends Controller
         }
 
         $duration = $calendarEvent->getDuration(Arr::get($postedData, 'duration', null));
-        $timezone = Arr::get($postedData, 'timezone', 'UTC');
+        $timezone = sanitize_text_field($postedData['timezone']);
 
-        $startDateTime = DateTimeHelper::convertToUtc($postedData['event_time'], $timezone);
+        $startDateTime = DateTimeHelper::convertToUtc(sanitize_text_field($postedData['event_time']), $timezone);
         $endDateTime   = gmdate('Y-m-d H:i:s', strtotime($startDateTime) + ($duration * 60));
 
         $bookingData = apply_filters('fluent_booking/initialize_booking_data', [
-            'person_time_zone' => sanitize_text_field($timezone),
+            'person_time_zone' => $timezone,
             'start_time'       => $startDateTime,
             'name'             => sanitize_text_field($postedData['name']),
             'email'            => sanitize_email($postedData['email']),
             'message'          => sanitize_textarea_field(wp_unslash(Arr::get($postedData, 'message', ''))),
-            'phone'            => sanitize_textarea_field(Arr::get($postedData, 'phone_number', '')),
+            'phone'            => sanitize_text_field(Arr::get($postedData, 'phone_number', '')),
             'address'          => sanitize_textarea_field(Arr::get($postedData, 'address', '')),
             'ip_address'       => Helper::getIp(),
             'status'           => sanitize_text_field($postedData['status']),
@@ -177,9 +177,9 @@ class BookingController extends Controller
         if ($locationType == 'phone_organizer') {
             $locationDetails['description'] = $eventLocations[$locationType]['host_phone_number'];
         } else if ($locationType == 'phone_guest') {
-            $bookingData['phone'] = Arr::get($postedData, 'location_description', '');
+            $bookingData['phone'] = sanitize_text_field(Arr::get($postedData, 'location_description', ''));
         } else if ($locationType == 'in_person_guest') {
-            $locationDetails['description'] = Arr::get($postedData, 'location_description', '');
+            $locationDetails['description'] = sanitize_textarea_field(Arr::get($postedData, 'location_description', ''));
         } else if (in_array($locationType, ['custom', 'in_person_organizer'])) {
             $locationDetails['description'] = $eventLocations[$locationType]['description'];
         } else if (in_array($locationType, ['google_meet', 'online_meeting', 'zoom_meeting', 'ms_teams'])) {
@@ -194,7 +194,7 @@ class BookingController extends Controller
         }
 
         if ($hostUserId = Arr::get($postedData, 'host_user_id', null)) {
-            $bookingData['host_user_id'] = (int)$hostUserId;
+            $bookingData['host_user_id'] = (int) $hostUserId;
         }
 
         $hostIds = null;
