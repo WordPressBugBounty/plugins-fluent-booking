@@ -62,20 +62,38 @@ class Event implements \JsonSerializable
 			'dtend' => $this->getDtEnd()
 		];
 
+		$timezone = !empty($this->data['timezone']) && $this->data['timezone'] !== 'UTC'
+			? $this->data['timezone']
+			: null;
+
+		$prefix = $timezone ? ';TZID=' . $timezone . ':' : ':';
+		$format = $timezone ? 'Ymd\THis' : $this->dateTimeFormat;
+
 		foreach ($dates as $key => $value) {
 
-			$dateTime = $value;
-
-			if (is_string($value)) {
-				$dateTime = new DateTime($value, new DateTimeZone('UTC'));
+			if ($this->isPrefixedDateTime($value)) {
+				continue;
 			}
 
-			if ($dateTime instanceof DateTime) {
-				$this->data[$key] = $dateTime->format($this->dateTimeFormat);
-			} else {
+			$dateTime = is_string($value)
+				? new DateTime($value, new DateTimeZone('UTC'))
+				: $value;
+
+			if (!$dateTime instanceof DateTime) {
 				throw new Exception("Invalid value: {$value} for {$key}.");
 			}
+
+			if ($timezone) {
+				$dateTime->setTimezone(new DateTimeZone($timezone));
+			}
+
+			$this->data[$key] = $prefix . $dateTime->format($format);
 		}
+	}
+
+	private function isPrefixedDateTime($value)
+	{
+		return is_string($value) && isset($value[0]) && ($value[0] === ':' || $value[0] === ';');
 	}
 
 	protected function getDtStart()
@@ -165,6 +183,8 @@ class Event implements \JsonSerializable
 
 			$str = rtrim($str, ';');
 
+			$str .= ';SCHEDULE-AGENT=CLIENT';
+
 			$str .= ":mailto:{$attendee['email']}";
 
 			$attendee['str'] = $str;
@@ -205,6 +225,8 @@ class Event implements \JsonSerializable
 		}
 
 		$str = rtrim($str, ';');
+
+		$str .= ';SCHEDULE-AGENT=CLIENT';
 
 		$str .= ":mailto:{$organizer['email']}";
 
@@ -338,8 +360,8 @@ class Event implements \JsonSerializable
 		$calendar[] = "LAST-MODIFIED:{$this->data['last-modified']}";
 		$calendar[] = "SEQUENCE:{$this->data['sequence']}";
 		$calendar[] = "UID:{$this->data['uid']}";
-		$calendar[] = "DTSTART:{$this->data['dtstart']}";
-		$calendar[] = "DTEND:{$this->data['dtend']}";
+		$calendar[] = "DTSTART{$this->data['dtstart']}";
+		$calendar[] = "DTEND{$this->data['dtend']}";
 		
 		if (isset($this->data['transp'])) {
 			$calendar[] = "TRANSP:{$this->data['transp']}";

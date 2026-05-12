@@ -28,14 +28,21 @@ class FiveMinuteScheduler
     {
         $autoCompleteTimeOut = (int)Helper::getGlobalAdminSetting('auto_complete_timing', 60) * 60; // 10 minutes
 
-        $bookings = Booking::where('status', 'scheduled')
+        $bookings = Booking::with('calendar_event')
+            ->where('status', 'scheduled')
             ->where('end_time', '<', gmdate('Y-m-d H:i:s', time() - $autoCompleteTimeOut)) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             ->limit(500)
             ->get();
 
+        if ($bookings->isEmpty()) {
+            return true;
+        }
+
+        Booking::whereIn('id', $bookings->pluck('id'))
+            ->update(['status' => 'completed']);
+
         foreach ($bookings as $booking) {
             $booking->status = 'completed';
-            $booking->save();
             do_action('fluent_booking/booking_schedule_completed', $booking, $booking->calendar_event);
         }
 
@@ -46,13 +53,26 @@ class FiveMinuteScheduler
     {
         $autoCompleteTimeOut = (int)Helper::getGlobalAdminSetting('auto_complete_timing', 60) * 60; // 10 minutes
 
-        Booking::query()
+        $bookings = Booking::with('calendar_event')
             ->where('status', 'pending')
             ->where('end_time', '<', gmdate('Y-m-d H:i:s', time() - $autoCompleteTimeOut)) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+            ->limit(500)
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            return true;
+        }
+
+        Booking::whereIn('id', $bookings->pluck('id'))
             ->update([
                 'status'     => 'cancelled',
-                'updated_at' => gmdate('Y-m-d H:i:s') // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+                'updated_at' => gmdate('Y-m-d H:i:s'), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             ]);
+
+        foreach ($bookings as $booking) {
+            $booking->status = 'cancelled';
+            do_action('fluent_booking/booking_schedule_auto_cancelled', $booking, $booking->calendar_event);
+        }
 
         return true;
     }
@@ -62,17 +82,27 @@ class FiveMinuteScheduler
         $autoCancelTimeOut = (int)Helper::getGlobalAdminSetting('auto_cancel_timing', 10) * 60; // 10 minutes
 
         $bookings = Booking::query()
+            ->with('calendar_event')
             ->where('created_at', '<=', gmdate('Y-m-d H:i:s', time() - $autoCancelTimeOut)) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             ->where('status', 'pending')
             ->where('payment_status', 'pending')
             ->where('payment_method', '!=', 'offline')
+            ->limit(500)
             ->get();
+
+        if ($bookings->isEmpty()) {
+            return true;
+        }
+
+        Booking::whereIn('id', $bookings->pluck('id'))
+            ->update([
+                'status'     => 'cancelled',
+                'updated_at' => gmdate('Y-m-d H:i:s'), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+            ]);
 
         foreach ($bookings as $booking) {
             $booking->status = 'cancelled';
-            $booking->updated_at = gmdate('Y-m-d H:i:s');
-            $booking->save();
-            do_action('fluent_booking/booking_schedule_auto_cancelled', $booking);
+            do_action('fluent_booking/booking_schedule_auto_cancelled', $booking, $booking->calendar_event);
         }
 
         return true;
@@ -103,6 +133,7 @@ class FiveMinuteScheduler
             ->with(['calendar_event' => function ($query) {
                 $query->where('status', 'active');
             }])
+            ->limit(500)
             ->get()
             ->each(function ($meta) {
                 $meta->calendar_event->update(['status' => 'expired']);

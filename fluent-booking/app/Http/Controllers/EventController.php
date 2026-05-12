@@ -24,6 +24,12 @@ class EventController extends Controller
             ]);
         }
 
+        if (!$calendarEvent->calendar) {
+            return $this->sendError([
+                'message' => __('Calendar not found', 'fluent-booking')
+            ]);
+        }
+
         $calendarEvent->author_profile = $calendarEvent->getAuthorProfile();
 
         $calendarEvent->calendar->author_profile = $calendarEvent->calendar->getAuthorProfile();

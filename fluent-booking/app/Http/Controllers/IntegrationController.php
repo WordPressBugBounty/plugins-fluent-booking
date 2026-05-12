@@ -35,7 +35,7 @@ class IntegrationController extends Controller
             do_action('fluent_booking/save_client_settings_' . $settingsKey, $settings);
 
             return [
-                'message' => __('Settings has been successfully saved.', 'fluent-booking')
+                'message' => __('Settings have been successfully saved.', 'fluent-booking')
             ];
 
         } catch (\Exception $e) {

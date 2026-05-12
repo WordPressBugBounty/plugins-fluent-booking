@@ -6,6 +6,7 @@ use FluentBooking\App\App;
 use FluentBooking\App\Services\GlobalModules\GlobalModules;
 use FluentBooking\App\Hooks\Handlers\AdminMenuHandler;
 use FluentBooking\App\Services\Helper;
+use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\App\Services\Libs\Countries;
 use FluentBooking\App\Services\OnboardingService;
 use FluentBooking\Framework\Http\Request\Request;
@@ -82,7 +83,7 @@ class SettingsController extends Controller
                 'wrapper_class' => 'fc_full_width fc_mb_0 fc_wp_editor',
                 'type'          => 'wp-editor-field',
                 'label'         => __('Email Footer for Booking related emails (Optional)', 'fluent-booking'),
-                'inline_help'   => __('You may include your business name, address etc here, for example: <br />You have received this email because signed up for an event or made a booking on our website.', 'fluent-booking')
+                'inline_help'   => __('You may include your business name, address, etc. here. For example: <br />You have received this email because you signed up for an event or made a booking on our website.', 'fluent-booking')
             ]
         ];
 
@@ -132,6 +133,8 @@ class SettingsController extends Controller
             'number_format'     => $numberFormat == 'comma_separated' ? 'comma_separated' : 'dot_separated',
             'currency_position' => sanitize_text_field($currencyPosition)
         ], 'no');
+
+        CurrenciesHelper::getGlobalCurrencySettings(true);
 
         return [
             'message' => __('Settings updated successfully', 'fluent-booking')

@@ -95,7 +95,8 @@ class BookingController extends Controller
             $messages['location_description.required'] = __('Please provide attendee\'s address', 'fluent-booking');
         }
 
-        if ($additionalGuests = Arr::get($postedData, 'guests', [])) {
+        $additionalGuests = Arr::get($postedData, 'guests', []);
+        if (!empty($additionalGuests)) {
             if ($calendarEvent->isMultiGuestEvent()) {
                 $additionalGuests = $this->sanitize_mapped_data($additionalGuests);
                 $additionalGuests = array_values(array_filter($additionalGuests, function ($guest) {
@@ -161,7 +162,7 @@ class BookingController extends Controller
             'phone'            => sanitize_text_field(Arr::get($postedData, 'phone_number', '')),
             'address'          => sanitize_textarea_field(Arr::get($postedData, 'address', '')),
             'ip_address'       => Helper::getIp(),
-            'status'           => sanitize_text_field($postedData['status']),
+            'status'           => sanitize_text_field(Arr::get($postedData, 'status', 'scheduled')),
             'source'           => Arr::get($postedData, 'source') == 'admin' ? 'admin' : 'web',
             'event_type'       => $calendarEvent->event_type,
             'slot_minutes'     => $duration
@@ -361,7 +362,7 @@ class BookingController extends Controller
                 'booking_title'     => $booking->getBookingTitle(true),
                 'author_name'       => $booking->getHostDetails(false)['name'],
                 'booking_date'      => DateTimeHelper::formatToLocale($booking->getAttendeeStartTime(), 'date'),
-                'booking_time'      => DateTimeHelper::formatToLocale($booking->getAttendeeEndTime(), 'time') . ' - ' . DateTimeHelper::formatToLocale($booking->getAttendeeEndTime(), 'time'),
+                'booking_time'      => DateTimeHelper::formatToLocale($booking->getAttendeeStartTime(), 'time') . ' - ' . DateTimeHelper::formatToLocale($booking->getAttendeeEndTime(), 'time'),
             ];
         }
 

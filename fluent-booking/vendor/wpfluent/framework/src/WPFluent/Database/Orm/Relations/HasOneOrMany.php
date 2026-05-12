@@ -10,6 +10,9 @@ use FluentBooking\Framework\Database\UniqueConstraintViolationException;
 use FluentBooking\Framework\Database\Orm\Relations\Concerns\InteractsWithDictionary;
 use FluentBooking\Framework\Database\Orm\Relations\Concerns\SupportsInverseRelations;
 
+/**
+ * @template TRelatedModel of Model
+ */
 abstract class HasOneOrMany extends Relation
 {
     use InteractsWithDictionary, SupportsInverseRelations;

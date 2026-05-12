@@ -6,9 +6,10 @@ use FluentBooking\Framework\Support\Arr;
 use FluentBooking\Framework\View\View;
 use FluentBooking\Framework\Cache\Cache;
 use FluentBooking\Framework\Http\URL;
-use FluentBooking\Framework\Http\Router;
-use FluentBooking\Framework\Support\Facade;
+use FluentBooking\Framework\Http\UrlGenerator;
+use FluentBooking\Framework\Support\Mail;
 use FluentBooking\Framework\Support\Pipeline;
+use FluentBooking\Framework\Http\Router;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\Framework\Http\Response\Response;
 use FluentBooking\Framework\Events\Dispatcher;
@@ -16,6 +17,8 @@ use FluentBooking\Framework\Encryption\Encrypter;
 use FluentBooking\Framework\Database\Orm\Model;
 use FluentBooking\Framework\Validator\Validator;
 use FluentBooking\Framework\Foundation\RequestGuard;
+use FluentBooking\Framework\Database\DatabaseManager;
+use FluentBooking\Framework\Database\DatabaseTransactionsManager;
 use FluentBooking\Framework\Database\ConnectionResolver;
 use FluentBooking\Framework\Database\Query\WPDBConnection;
 use FluentBooking\Framework\Pagination\AbstractCursorPaginator;
@@ -26,6 +29,8 @@ use WpOrg\Requests\Exception\Http\Status401;
 
 class ComponentBinder
 {
+    use Concerns\DynamicFacadeTrait;
+
     /**
      * The application instance
      * @var \FluentBooking\Framework\Foundation\Application
@@ -47,6 +52,7 @@ class ComponentBinder
         'DB',
         'URL',
         'Router',
+        'Mail',
         'Paginator',
         'Pipeline',
     ];
@@ -80,6 +86,17 @@ class ComponentBinder
         $this->registerResolvingEvent($this->app);
     }
 
+    public function resolveDatabaseTransactionsManager()
+    {
+        if (!$this->app->bound('db.transactions')) {
+            $this->app->singleton('db.transactions', function ($app) {
+                return new DatabaseTransactionsManager;
+            });
+        }
+
+        return $this->app->make('db.transactions');
+    }
+
     /**
      * Register resolving event into the container.
      * @param  \FluentBooking\Framework\Foundation\Application $app
@@ -88,81 +105,19 @@ class ComponentBinder
     protected function registerResolvingEvent($app)
     {
         $app->resolving(RequestGuard::class, function($request) use ($app) {
+            
+            $request->setRequestInstance($app->request);
 
             if (method_exists($request, 'authorize')) {
                 if(!$request->authorize()) throw new Status401;
             }
 
-            $request->merge($request->beforeValidation());
+            $request->merge((array) $request->beforeValidation());
             $request->validate();
             $request->merge((array) $request->afterValidation(
-                $app->make('validator')
+                $request->getValidator()
             ));
         });
-    }
-
-    /**
-     * Register the dynamic facade resolver.
-     * @param  \FluentBooking\Framework\Foundation\Application $app
-     * @return null
-     */
-    protected function registerFacadeResolver($app)
-    {
-        Facade::setFacadeApplication($app);
- 
-        spl_autoload_register(function($class) use ($app) {
-
-            $ns = substr(($fqn = __NAMESPACE__), 0, strpos($fqn, '\\'));
-
-            if (str_contains($class, ($facade = $ns.'\Facade'))) {
-                $this->createFacadeFor($facade, $class, $app);
-            }
-        }, true, true);
-    }
-
-    /**
-     * Create a facade resolver class dynamically
-     * @param  string $facade
-     * @param  string $class
-     * @param  \FluentBooking\Framework\Foundation\Application $app
-     * @return null
-     */
-    protected function createFacadeFor($facade, $class, $app)
-    {
-        $facadeAccessor = $this->resolveFacadeAccessor($facade, $class, $app);
-
-        $anonymousClass = new class($facadeAccessor) extends Facade {
-
-            protected static $facadeAccessor;
-
-            public function __construct($facadeAccessor) {
-                static::$facadeAccessor = $facadeAccessor;
-            }
-
-            protected static function getFacadeAccessor() {
-                return static::$facadeAccessor;
-            }
-        };
-
-        class_alias(get_class($anonymousClass), $class, true);
-    }
-
-    /**
-     * Resolve the binding name.
-     * @param  string $facade
-     * @param  string $class
-     * @param  \FluentBooking\Framework\Foundation\Application $app
-     * @return string
-     */
-    protected function resolveFacadeAccessor($facade, $class,$app)
-    {
-        $name = strtolower(trim(str_replace($facade, '', $class), '\\'));
-        
-        if ($name == 'route') $name = 'router';
-
-        if ($app->bound($name)) {
-            return $name;
-        }
     }
 
     /**
@@ -187,7 +142,7 @@ class ComponentBinder
         $method = $this->getBindingMethod('singleton');
 
         $this->app->$method(Request::class, function ($app) {
-            return new Request($app, $_GET, $_POST, $_FILES);
+            return $this->resolveRequest($app);
         });
 
         $this->app->alias(Request::class, 'request');
@@ -260,7 +215,9 @@ class ComponentBinder
     protected function bindEvents()
     {
         $this->app->singleton(Dispatcher::class, function($app) {
-            return new Dispatcher($app);
+            return (new Dispatcher($app))->setTransactionManagerResolver(
+                fn () => $this->resolveDatabaseTransactionsManager()
+            );
         });
 
         $this->app->alias(Dispatcher::class, 'events');
@@ -286,25 +243,36 @@ class ComponentBinder
      */
     protected function bindDB()
     {
-        $this->app->singleton('db', function($app) {
-            return new WPDBConnection(
-                $GLOBALS['wpdb'], $app->config->get('database')
-            );
-        });
+        $connection = new WPDBConnection($GLOBALS['wpdb']);
 
-        Model::setEventDispatcher($this->app['events']);
+        $resolver = new ConnectionResolver([
+            'mysql' => $connection,
+            'sqlite' => $connection,
+        ]);
+
+        $resolver->setDefaultConnection('mysql');
+
+        $resolver->connection()->setTransactionManager(
+            $this->resolveDatabaseTransactionsManager()
+        );
+
+        Model::setConnectionResolver($resolver);
         
-        Model::setConnectionResolver(new ConnectionResolver);
+        Model::setEventDispatcher($this->app['events']);
+
+        $this->app->singletonIf('db', function($app) use ($resolver) {
+            return new DatabaseManager($resolver);
+        });
     }
 
     /**
-     * Bind the URL instance into the container.
+     * Bind the Url instance into the container.
      * @return null
      */
-    protected function bindURL()
+    protected function bindUrl()
     {
         $this->app->bind(URL::class, function($app) {
-            return new URL($app->make(Encrypter::class));
+            return new URL('', new UrlGenerator($app));
         });
 
         $this->app->alias(URL::class, 'url');
@@ -321,6 +289,19 @@ class ComponentBinder
         });
 
         $this->app->alias(Router::class, 'router');
+    }
+
+    /**
+     * Bind the mail instance into the container.
+     * @return null
+     */
+    protected function bindMail()
+    {
+        $this->app->bind(Mail::class, function($app) {
+            return new Mail();
+        });
+
+        $this->app->alias(Mail::class, 'mail');
     }
 
     /**
@@ -427,5 +408,51 @@ class ComponentBinder
         }
         
         return implode('\\', $pieces);
+    }
+
+    /**
+     * Resolve the appropriate request instance.
+     * 
+     * @param  $app
+     * @return Request|object (Anonymous Class)
+     */
+    protected function resolveRequest($app)
+    {
+        return new Request($app, $_GET, $_POST);
+    }
+
+    /**
+     * Check if the request is of the plugin.
+     * 
+     * @return boolean
+     */
+    protected function isRequestOfPlugin()
+    {
+        if (str_starts_with($this->app->env(), 'testing')) {
+            return true;
+        }
+
+        $slug = $this->app->config->get('app.slug');
+
+        if (get_option('permalink_structure')) {
+            $route = $_SERVER['REQUEST_URI'] ?? '';
+        } else {
+            $route = $_GET['rest_route'] ?? '';
+        }
+
+        $parsedUrl = parse_url($route);
+
+        $path = $parsedUrl['path'] ?? '';
+
+        $path = str_replace('/wp-json', '', $path);
+
+        if (is_admin()) {
+            $page = $_GET['page'] ?? '';
+            if ($slug === $page) {
+                $path = $page;
+            }
+        }
+
+        return str_starts_with(ltrim($path, '/'), $slug);
     }
 }

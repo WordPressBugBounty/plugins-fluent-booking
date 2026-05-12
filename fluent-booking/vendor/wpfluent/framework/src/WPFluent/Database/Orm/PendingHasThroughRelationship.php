@@ -23,15 +23,15 @@ class PendingHasThroughRelationship
     /**
      * The local relationship.
      *
-     * @var \FluentBooking\Framework\Database\Orm\Relations\HasMany<TIntermediateModel, TDeclaringModel>|\FluentBooking\Framework\Database\Orm\Relations\HasOne<TIntermediateModel, TDeclaringModel>
+     * @var \FluentBooking\Framework\Database\Orm\Relations\HasMany|\FluentBooking\Framework\Database\Orm\Relations\HasOne
      */
     protected $localRelationship;
 
     /**
      * Create a pending has-many-through or has-one-through relationship.
      *
-     * @param  TDeclaringModel  $rootModel
-     * @param  \FluentBooking\Framework\Database\Orm\Relations\HasMany<TIntermediateModel, TDeclaringModel>|\FluentBooking\Framework\Database\Orm\Relations\HasOne<TIntermediateModel, TDeclaringModel>  $localRelationship
+     * @param mixed $rootModel
+     * @param \FluentBooking\Framework\Database\Orm\Relations\HasMany|\FluentBooking\Framework\Database\Orm\Relations\HasOne $localRelationship
      */
     public function __construct($rootModel, $localRelationship)
     {
@@ -43,18 +43,9 @@ class PendingHasThroughRelationship
     /**
      * Define the distant relationship that this model has.
      *
-     * @template TRelatedModel of \FluentBooking\Framework\Database\Orm\Model
-     *
-     * @param  string|(callable(TIntermediateModel): (\FluentBooking\Framework\Database\Orm\Relations\HasOne<TRelatedModel, TIntermediateModel>|\FluentBooking\Framework\Database\Orm\Relations\HasMany<TRelatedModel, TIntermediateModel>|\FluentBooking\Framework\Database\Orm\Relations\MorphOneOrMany<TRelatedModel, TIntermediateModel>))  $callback
-     * @return (
-     *     $callback is string
-     *     ? \FluentBooking\Framework\Database\Orm\Relations\HasManyThrough<\FluentBooking\Framework\Database\Orm\Model, TIntermediateModel, TDeclaringModel>|\FluentBooking\Framework\Database\Orm\Relations\HasOneThrough<\FluentBooking\Framework\Database\Orm\Model, TIntermediateModel, TDeclaringModel>
-     *     : (
-     *         $callback is callable(TIntermediateModel): \FluentBooking\Framework\Database\Orm\Relations\HasOne<TRelatedModel, TIntermediateModel>
-     *         ? \FluentBooking\Framework\Database\Orm\Relations\HasOneThrough<TRelatedModel, TIntermediateModel, TDeclaringModel>
-     *         : \FluentBooking\Framework\Database\Orm\Relations\HasManyThrough<TRelatedModel, TIntermediateModel, TDeclaringModel>
-     *     )
-     * )
+     * @param string|callable $callback Either the distant relationship name or a callback returning the local relation.
+     * @return \FluentBooking\Framework\Database\Orm\Relations\HasManyThrough|\FluentBooking\Framework\Database\Orm\Relations\HasOneThrough
+     *         The distant relationship instance.
      */
     public function has($callback)
     {

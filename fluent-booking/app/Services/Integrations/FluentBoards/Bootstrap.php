@@ -80,6 +80,7 @@ class Bootstrap extends IntegrationManagerController
             'position'     => 'bottom',
             'due_at_type'  => 'booking',
             'due_at_days'  => 0,
+            'disable_auto_started_at' => false,
             'enabled'      => true
         ];
     }
@@ -178,6 +179,14 @@ class Bootstrap extends IntegrationManagerController
                 'label'     => __('Due Date', 'fluent-booking'),
                 'tips'      => __('Set the due date by entering a number relative to the booking or meeting date. Positive for days after and negative for days before the booking or meeting date.', 'fluent-booking'),
                 'component' => 'number'
+            ],
+            [
+                'key'            => 'disable_auto_started_at',
+                'require_list'   => false,
+                'label'          => __('Start Date', 'fluent-booking'),
+                'component'      => 'checkbox-single',
+                'checkbox_label' => __('Do not set a start date on the task', 'fluent-booking'),
+                'tips'           => __('By default, the task start date is set to the booking creation time when a due date is present. Enable this to leave the start date empty.', 'fluent-booking'),
             ],
             [
                 'key'         => 'position',
@@ -353,7 +362,7 @@ class Bootstrap extends IntegrationManagerController
 
     public function notify($feed, $booking, $calendarEvent)
     {
-        $validData = ['task_title', 'description', 'board_config', 'author_name', 'email', 'position', 'due_at_days', 'due_at_type'];
+        $validData = ['task_title', 'description', 'board_config', 'author_name', 'email', 'position', 'due_at_days', 'due_at_type', 'disable_auto_started_at'];
         $data = Arr::only($feed['processedValues'], $validData);
 
         $boardId = intval(Arr::get($data, 'board_config.board_id'));
@@ -389,7 +398,8 @@ class Bootstrap extends IntegrationManagerController
             'source'      => 'FluentBooking'
         ];
 
-        $data['started_at'] = $data['due_at'] ? gmdate('Y-m-d H:i:s', strtotime(current_time('mysql'))) : null; // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+        $disableAutoStartedAt = Arr::isTrue($feed['processedValues'], 'disable_auto_started_at');
+        $data['started_at'] = (!$disableAutoStartedAt && $data['due_at']) ? gmdate('Y-m-d H:i:s', strtotime(current_time('mysql'))) : null; // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 
         $existingUser = User::where('user_email', $authorEmail)->first();
         if ($existingUser) {

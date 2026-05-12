@@ -97,28 +97,28 @@
         },
         {
             "name": "wpfluent/framework",
-            "version": "2.10.45",
-            "version_normalized": "2.10.45.0",
+            "version": "2.11.19",
+            "version_normalized": "2.11.19.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:wpfluent/framework.git",
-                "reference": "daf207542f79ef2063f6526b4d973b3c720ba609"
+                "url": "git@github.com:wpfluent/framework2x.git",
+                "reference": "0e3ae150e85d48f2bb489d8fdf000133b448c7dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpfluent/framework/zipball/daf207542f79ef2063f6526b4d973b3c720ba609",
-                "reference": "daf207542f79ef2063f6526b4d973b3c720ba609",
+                "url": "https://api.github.com/repos/wpfluent/framework2x/zipball/0e3ae150e85d48f2bb489d8fdf000133b448c7dd",
+                "reference": "0e3ae150e85d48f2bb489d8fdf000133b448c7dd",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "php": "^7.3|^8.0"
             },
-            "time": "2025-04-20T10:33:01+00:00",
+            "time": "2026-05-07T17:16:12+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.0.x-dev"
+                    "dev-master": "2.10.x-dev"
                 }
             },
             "installation-source": "dist",
@@ -138,8 +138,8 @@
             ],
             "description": "A lightweight rest api based framework to build WordPress plugins.",
             "support": {
-                "source": "https://github.com/wpfluent/framework/tree/2.10.45",
-                "issues": "https://github.com/wpfluent/framework/issues"
+                "source": "https://github.com/wpfluent/framework2x/tree/2.11.19",
+                "issues": "https://github.com/wpfluent/framework2x/issues"
             },
             "install-path": "../wpfluent/framework"
         }

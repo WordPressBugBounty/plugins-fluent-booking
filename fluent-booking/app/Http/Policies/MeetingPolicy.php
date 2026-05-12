@@ -55,6 +55,31 @@ class MeetingPolicy extends Policy
         return $this->hasBookingAccess($booking);
     }
 
+    public function getBookingActivities(Request $request)
+    {
+        return $this->authorizeBookingAccess($request);
+    }
+
+    public function getBookingMetaInfo(Request $request)
+    {
+        return $this->authorizeBookingAccess($request);
+    }
+
+    private function authorizeBookingAccess(Request $request)
+    {
+        if (PermissionManager::userCan(['manage_all_bookings', 'manage_all_data', 'read_all_bookings'])) {
+            return true;
+        }
+
+        if (!$request->id) {
+            return false;
+        }
+
+        $booking = Booking::find($request->id);
+
+        return $this->hasBookingAccess($booking);
+    }
+
     private function hasBookingAccess($booking)
     {
         if (!$booking) {

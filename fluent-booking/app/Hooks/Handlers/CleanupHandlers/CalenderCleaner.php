@@ -30,9 +30,10 @@ class CalenderCleaner
 
         if ($calendarEvents->count()) {
             foreach ($calendarEvents as $event) {
+                $eventId = $event->id;
                 do_action('fluent_booking/before_delete_calendar_event', $event, $calendar);
                 $event->delete();
-                do_action('fluent_booking/after_delete_calendar_event', $event, $calendar);
+                do_action('fluent_booking/after_delete_calendar_event', $eventId, $calendar);
             }
         }
 
@@ -78,10 +79,11 @@ class CalenderCleaner
                     ->where('user_id', '!=', $schedule->object_id)
                     ->count();
 
+                $scheduleId = $schedule->id;
                 if ($eventAssociated == 0) {
-                    do_action('fluent_booking/before_delete_availability_schedule', $schedule, $calendar);
+                    do_action('fluent_booking/before_delete_availability_schedule', $schedule);
                     $schedule->delete();
-                    do_action('fluent_booking/after_delete_availability_schedule', $schedule, $calendar);
+                    do_action('fluent_booking/after_delete_availability_schedule', $scheduleId);
                 }
             }
         }

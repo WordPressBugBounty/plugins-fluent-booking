@@ -3,6 +3,7 @@
 namespace FluentBooking\App\Models;
 
 use FluentBooking\App\Models\Model;
+use FluentBooking\Framework\Support\Arr;
 use FluentBooking\App\Services\SanitizeService;
 use FluentBooking\App\Services\AvailabilityService;
 use FluentBooking\App\Services\BookingFieldService;
@@ -10,7 +11,7 @@ use FluentBooking\App\Services\DateTimeHelper;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\App\Services\LocationService;
-use FluentBooking\Framework\Support\Arr;
+use FluentBooking\App\Services\Integrations\FluentCart\CartHelper;
 
 class CalendarSlot extends Model
 {
@@ -910,6 +911,25 @@ class CalendarSlot extends Model
         return Arr::get($paymentSettings, 'items', []);
     }
 
+    public function getEventPrice($duration = null)
+    {
+        if (!$this->isPaidEvent()) {
+            return 0;
+        }
+
+        $paymentSettings = $this->getPaymentSettings();
+
+        if ($this->isCartEnabled()) {
+            return CartHelper::getCartProductPrice($paymentSettings, $duration, false);
+        }
+
+        if ($this->isWooEnabled()) {
+            return $this->getWooProductPrice($duration);
+        }
+
+        return $this->getPricingTotal($duration);
+    }
+
     public function getPricingTotal($duration = null)
     {
         if (!$this->isPaymentEnabled()) {
@@ -925,14 +945,14 @@ class CalendarSlot extends Model
         return $total;
     }
 
-    public function getWooProductPrice()
+    public function getWooProductPrice($duration = null)
     {
         $paymentSettings = $this->getPaymentSettings();
 
         $productId = $paymentSettings['woo_product_id'];
 
         if (Arr::get($paymentSettings, 'multi_payment_enabled') == 'yes') {
-            $duration = $this->getDefaultDuration();
+            $duration = $duration ?? $this->getDefaultDuration();
             $productId = Arr::get($paymentSettings, 'multi_payment_woo_ids.' . $duration);
         }
 
@@ -1137,7 +1157,7 @@ class CalendarSlot extends Model
         return apply_filters('fluent_booking/get_event_payment_settings', $settings, $this);
     }
 
-    public function getHostSchedule($hostId) 
+    public function getHostSchedule($hostId)
     {
         $hostSchedules = Arr::get($this->settings, 'hosts_schedules', []);
         if (isset($hostSchedules[$hostId])) {

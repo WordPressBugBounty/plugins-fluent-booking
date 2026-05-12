@@ -5,6 +5,7 @@ namespace FluentBooking\Framework\Http;
 use Exception;
 use BadMethodCallException;
 use FluentBooking\Framework\Support\Arr;
+use FluentBooking\Framework\Support\Str;
 use FluentBooking\Framework\Foundation\App;
 use FluentBooking\Framework\Http\Request\File;
 
@@ -177,6 +178,31 @@ class Client
 	}
 
 	/**
+	 * Sets one or more headers.
+	 * 
+	 * @param  array $headers
+	 * @return self
+	 */
+	public function withHeaders(array $headers)
+	{
+		return $this->withHeader($headers);
+	}
+
+	/**
+	 * Sets the Authorization header.
+	 * 
+	 * @param  string $token
+	 * @param  string $type
+	 * @return self
+	 */
+	public function withToken($token, $type = 'Bearer')
+	{
+	    return $this->withHeader([
+	        'Authorization' => $type . ' ' . $token,
+	    ]);
+	}
+
+	/**
 	 * Sets one or more cookies.
 	 * 
 	 * @return self
@@ -245,6 +271,18 @@ class Client
 	}
 
 	/**
+     * Allows users to enable streaming on their requests.
+     *
+     * @return self
+     */
+    public function withStreaming($callback = null)
+    {
+        return $this->withOption(
+        	'stream', true
+        )->withOption('stream_callback', $callback);
+    }
+
+	/**
 	 * Build the request arguments.
 	 * 
 	 * @param  array  $params
@@ -263,6 +301,11 @@ class Client
 
 	    $options = array_merge($this->options, $params['options'] ?? []);
 
+	    if (Str::isJson($params['body'])) {
+	    	$this->withHeader('Content-Type', 'application/json');
+	    	$params['body'] = json_decode($params['body'], true);
+	    }
+
 	    $params = [
 	        'method' => strtoupper($method),
 	        'body' => array_merge($this->body, $params['body']),
@@ -270,7 +313,6 @@ class Client
 	        'headers' => array_merge($this->headers, $params['headers']),
 	    ];
 
-	    
 	    foreach($options as $key => $value) {
 	        $params[$key] = $value;
 	    }
@@ -287,22 +329,155 @@ class Client
 	 */
 	protected function request($url, $args = [])
 	{
-		$parsedUrl = parse_url($url);
-		$delimiter = isset($parsedUrl['query']) ? '&' : '?';
-		$url .= $this->query ? $delimiter . http_build_query($this->query) : '';
+		return $this->dispatch(
+			$this->resolveUrl($url),
+			$this->filterArgs($args)
+		);
+	}
 
+	/**
+	 * Build the URL.
+	 * 
+	 * @param  string $url
+	 * @return string
+	 */
+	protected function resolveUrl($url)
+	{
+		$q = $this->query;
+
+		$parsedUrl = parse_url($url);
+		
+		$delimiter = isset($parsedUrl['query']) ? '&' : '?';
+		
+		return $url . ($q ? $delimiter . http_build_query($q) : '');
+
+	}
+
+	/**
+	 * Filter the args before sending the request.
+	 * 
+	 * @param  array $args
+	 * @return array
+	 */
+	protected function filterArgs($args)
+	{
+		if ($this->shouldBeJson($args)) {
+	        $args['body'] = json_encode($args['body']);
+	    }
+
+	    return $args;
+	}
+
+	/**
+	 * Encode the body if Content-Type is JSON.
+	 * 
+	 * @param  array $params
+	 * @return bool
+	 */
+	protected function shouldBeJson($params)
+	{
+		return isset(
+			$params['headers']['Content-Type']
+		) && $params['headers']['Content-Type'] === 'application/json';
+	}
+
+	/**
+	 * Dispatch the request.
+	 * 
+	 * @param  string $url
+	 * @param  array $args
+	 * @return array (response)
+	 */
+	protected function dispatch($url, $args)
+	{
 		$response = wp_remote_request($url, $args);
 
-		if (is_wp_error($response)) {
-			throw new Exception($response->get_error_message(), 500);
-		}
-		
-		$this->cookies = array_merge(
-			$this->cookies,
-			wp_remote_retrieve_cookies($response)
-		);
+	    if (is_wp_error($response)) {
+	        throw new Exception($response->get_error_message(), 500);
+	    }
 
-		return $this->makeResponse($response);
+	    $this->mergeCookies($response);
+
+	    if ($this->isStreamEnabled($args)) {
+            return $this->makeStreamResponse($response);
+        }
+
+	    return $this->makeResponse($response);
+	}
+
+	/**
+	 * Merge the coolkies (useful for stateful request).
+	 * 
+	 * @return void
+	 */
+	protected function mergeCookies($response)
+	{
+		$this->cookies = array_merge(
+	        $this->cookies,
+	        wp_remote_retrieve_cookies($response)
+	    );
+	}
+
+	/**
+	 * Check if the stream is enabled.
+	 * @return boolean
+	 */
+	protected function isStreamEnabled($args)
+	{
+		return isset($args['stream']) && $args['stream'];
+	}
+
+	/**
+	 * Build a response object from an anonymous class.
+	 * 
+	 * @param  array $response
+	 * @return \FluentBooking\Framework\Http\Response
+	 */
+	protected function makeResponse($response)
+	{
+		return new Response($response);
+	}
+
+	/**
+     * Handle the streaming response and process chunks.
+     *
+     * @param  array $response
+     * @return \FluentBooking\Framework\Http\Response|null
+     */
+    protected function makeStreamResponse($response)
+	{
+	    $response['body'] = $response['filename'];
+
+	    return new class($response) extends Response implements \ArrayAccess {
+	    	public function flush() {
+				$source = fopen($this->response['body'], 'rb');
+			    
+			    $fp = fopen('php://output', 'wb');
+
+			    while (!feof($source)) {
+			        $data = fread($source, 8192);
+			        fwrite($fp, $data);
+			        ob_flush();
+			        flush();
+			    }
+
+			    fclose($source);
+			    fclose($fp);
+			}
+
+			#[ReturnTypeWillChange]
+		    public function offsetGet($offset) {
+		        return $this->response[$offset] ?? null;
+		    }
+		    #[ReturnTypeWillChange]
+		    public function offsetSet($offset, $value) {
+		    	$this->response[$offset] = $value;
+		    }
+		    #[ReturnTypeWillChange]
+			public function offsetExists($offset) {}
+		    #[ReturnTypeWillChange]
+		    public function offsetUnset($offset) {}
+		};
 	}
 
 	/**
@@ -358,12 +533,20 @@ class Client
 	        throw new Exception('File does not exist.', 500);
 	    }
 
+	    // Auto prepend base URL if $url is relative
+	    if (strpos($url, 'http') !== 0) {
+	        $url = rtrim($this->baseUrl, '/') . '/' . ltrim($url, '/');
+	    }
+
 	    $boundary = wp_generate_password(24, false);
 
-	    $headers = [
-	        'Accept'       => '*/*',
-	        'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
-	    ];
+	    $headers = array_merge(
+	        $this->headers,
+	        [
+	            'Accept'       => '*/*',
+	            'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+	        ]
+	    );
 
 	    $fileName = basename($path);
 	    $content = file_get_contents($path);
@@ -390,17 +573,6 @@ class Client
 	    ]);
 
 	    return $this->makeResponse($response);
-	}
-
-	/**
-	 * Build a response object from an anonymous class.
-	 * 
-	 * @param  array $response
-	 * @return \FluentBooking\Framework\Http\Response
-	 */
-	protected function makeResponse($response)
-	{
-		return new Response($response);
 	}
 
 	protected function checkIfValidHttpMethod($method)

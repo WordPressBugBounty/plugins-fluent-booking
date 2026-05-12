@@ -15,12 +15,10 @@ use FluentBooking\Framework\Database\Query\Grammars\MySqlGrammar;
 use FluentBooking\Framework\Database\UniqueConstraintViolationException;
 
 /**
- * @template TRelatedModel of \FluentBooking\Framework\Database\Orm\Model
- * @template TIntermediateModel of \FluentBooking\Framework\Database\Orm\Model
- * @template TDeclaringModel of \FluentBooking\Framework\Database\Orm\Model
+ * @template TRelatedModel of Model
+ * @template TIntermediateModel of Model
+ * @template TDeclaringModel of Model
  * @template TResult
- *
- * @extends \FluentBooking\Framework\Database\Orm\Relations\Relation<TRelatedModel, TIntermediateModel, TResult>
  */
 abstract class HasOneOrManyThrough extends Relation
 {
@@ -114,7 +112,7 @@ abstract class HasOneOrManyThrough extends Relation
      * @param  \FluentBooking\Framework\Database\Orm\Builder<TRelatedModel>|null  $query
      * @return void
      */
-    protected function performJoin(Builder $query = null)
+    protected function performJoin(?Builder $query = null)
     {
         $query = $query ?: $this->query;
 
@@ -183,10 +181,12 @@ abstract class HasOneOrManyThrough extends Relation
     {
         $dictionary = [];
 
-        // First we will create a dictionary of models keyed by the foreign key of the
-        // relationship as this will allow us to quickly access all of the related
-        // models without having to do nested looping which will be quite slow.
+        // First we will create a dictionary of models keyed by the foreign
+        // key of the relationship as this will allow us to quickly
+        // access all of the related models without having
+        // to do nested looping which will be quite slow.
         foreach ($results as $result) {
+            // @phpstan-ignore-next-line
             $dictionary[$result->laravel_through_key][] = $result;
         }
 
@@ -312,7 +312,7 @@ abstract class HasOneOrManyThrough extends Relation
      * @param  (\Closure(): TValue)|null  $callback
      * @return TRelatedModel|TValue
      */
-    public function firstOr($columns = ['*'], Closure $callback = null)
+    public function firstOr($columns = ['*'], ?Closure $callback = null)
     {
         if ($columns instanceof Closure) {
             $callback = $columns;
@@ -332,7 +332,7 @@ abstract class HasOneOrManyThrough extends Relation
      *
      * @param  mixed  $id
      * @param  array  $columns
-     * @return ($id is (\FluentBooking\Framework\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>) ? \FluentBooking\Framework\Database\Orm\Collection<int, TRelatedModel> : TRelatedModel|null)
+     * @return \FluentBooking\Framework\Database\Orm\Collection<int, TRelatedModel>|TRelatedModel|null
      */
     public function find($id, $columns = ['*'])
     {
@@ -348,7 +348,7 @@ abstract class HasOneOrManyThrough extends Relation
     /**
      * Find multiple related models by their primary keys.
      *
-     * @param  \FluentBooking\Framework\Contracts\Support\ArrayableInterface|array  $ids
+     * @param  array<int, mixed>|mixed  $ids
      * @param  array  $columns
      * @return \FluentBooking\Framework\Database\Orm\Collection<int, TRelatedModel>
      */
@@ -370,9 +370,9 @@ abstract class HasOneOrManyThrough extends Relation
      *
      * @param  mixed  $id
      * @param  array  $columns
-     * @return ($id is (\FluentBooking\Framework\Contracts\Support\ArrayableInterface<array-key, mixed>|array<mixed>) ? \FluentBooking\Framework\Database\Orm\Collection<int, TRelatedModel> : TRelatedModel)
+     * @return \FluentBooking\Framework\Database\Orm\Model| \FluentBooking\Framework\Database\Orm\Collection<int, TRelatedModel>
      *
-     * @throws \FluentBooking\Framework\Database\Orm\ModelNotFoundException<TRelatedModel>
+     * @throws \FluentBooking\Framework\Database\Orm\ModelNotFoundException
      */
     public function findOrFail($id, $columns = ['*'])
     {
@@ -388,7 +388,9 @@ abstract class HasOneOrManyThrough extends Relation
             return $result;
         }
 
-        throw (new ModelNotFoundException)->setModel(get_class($this->related), $id);
+        throw (new ModelNotFoundException)->setModel(
+            get_class($this->related), $id
+        );
     }
 
     /**
@@ -397,15 +399,11 @@ abstract class HasOneOrManyThrough extends Relation
      * @template TValue
      *
      * @param  mixed  $id
-     * @param  (\Closure(): TValue)|list<string>|string  $columns
+     * @param  array|string|(\Closure(): TValue)  $columns
      * @param  (\Closure(): TValue)|null  $callback
-     * @return (
-     *     $id is (\FluentBooking\Framework\Contracts\Support\ArrayableInterface<array-key, mixed>|array<mixed>)
-     *     ? \FluentBooking\Framework\Database\Orm\Collection<int, TRelatedModel>|TValue
-     *     : TRelatedModel|TValue
-     * )
+     * @return \FluentBooking\Framework\Database\Orm\Model|\FluentBooking\Framework\Database\Orm\Collection<int, TRelatedModel>|TValue
      */
-    public function findOr($id, $columns = ['*'], Closure $callback = null)
+    public function findOr($id, $columns = ['*'], ?Closure $callback = null)
     {
         if ($columns instanceof Closure) {
             $callback = $columns;
@@ -454,7 +452,7 @@ abstract class HasOneOrManyThrough extends Relation
      * @param  array  $columns
      * @param  string  $pageName
      * @param  int  $page
-     * @return \FluentBooking\Framework\Contracts\Pagination\LengthAwarePaginator
+     * @return \FluentBooking\Framework\Pagination\LengthAwarePaginatorInterface
      */
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
@@ -470,7 +468,7 @@ abstract class HasOneOrManyThrough extends Relation
      * @param  array  $columns
      * @param  string  $pageName
      * @param  int|null  $page
-     * @return \FluentBooking\Framework\Contracts\Pagination\Paginator
+     * @return \FluentBooking\Framework\Pagination\PaginatorInterface
      */
     public function simplePaginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
@@ -486,7 +484,7 @@ abstract class HasOneOrManyThrough extends Relation
      * @param  array  $columns
      * @param  string  $cursorName
      * @param  string|null  $cursor
-     * @return \FluentBooking\Framework\Contracts\Pagination\CursorPaginator
+     * @return \FluentBooking\Framework\Pagination\CursorPaginatorInterface
      */
     public function cursorPaginate($perPage = null, $columns = ['*'], $cursorName = 'cursor', $cursor = null)
     {

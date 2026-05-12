@@ -165,13 +165,13 @@ class Bootstrap extends IntegrationManagerController
             [
                 'key'            => 'skip_if_exists',
                 'require_list'   => false,
-                'checkbox_label' => __('Skip if contact already exist in FluentCRM', 'fluent-booking'),
+                'checkbox_label' => __('Skip if contact already exists in FluentCRM', 'fluent-booking'),
                 'component'      => 'checkbox-single',
             ],
             [
                 'key'            => 'skip_primary_data',
                 'require_list'   => false,
-                'checkbox_label' => __('Skip name update if existing contact have old data (per primary field)', 'fluent-booking'),
+                'checkbox_label' => __('Skip name update if an existing contact has old data (per primary field)', 'fluent-booking'),
                 'component'      => 'checkbox-single',
             ],
             [
@@ -185,7 +185,7 @@ class Bootstrap extends IntegrationManagerController
                 'require_list'   => false,
                 'checkbox_label' => __('Enable Force Subscribe if contact is not in subscribed status (Existing contact only)', 'fluent-booking'),
                 'component'      => 'checkbox-single',
-                'inline_tip'     => __('If you enable this then contact will forcefully subscribed no matter in which status that contact had', 'fluent-booking'),
+                'inline_tip'     => __('If you enable this, the contact will be forcefully subscribed regardless of its current status', 'fluent-booking'),
             ],
             [
                 'require_list'   => false,
@@ -197,6 +197,7 @@ class Bootstrap extends IntegrationManagerController
                     'booking_schedule_cancelled' => __('Booking Canceled', 'fluent-booking'),
                     'after_booking_rescheduled'  => __('Booking Rescheduled', 'fluent-booking'),
                     'booking_schedule_rejected'  => __('Booking Rejected', 'fluent-booking'),
+                    'booking_schedule_no_show'   => __('Booking No-Show', 'fluent-booking'),
                 ],
                 'tips'           => __('Select in which booking stage you want to trigger this feed', 'fluent-booking'),
                 'label'          => __('Event Trigger', 'fluent-booking'),
@@ -289,7 +290,7 @@ class Bootstrap extends IntegrationManagerController
         if (!is_email($contact['email'])) {
             $this->addLog(
                 $feed['settings']['name'],
-                __('FluentCRM API called skipped because no valid email available', 'fluent-booking'),
+                __('FluentCRM API call was skipped because no valid email is available', 'fluent-booking'),
                 $booking->id,
                 'failed'
             );
@@ -300,7 +301,7 @@ class Bootstrap extends IntegrationManagerController
         if ($subscriber && Arr::isTrue($data, 'skip_if_exists')) {
             $this->addLog(
                 $feed['settings']['name'],
-                __('Contact creation has been skipped because contact already exist in the database', 'fluent-booking'),
+                __('Contact creation has been skipped because the contact already exists in the database', 'fluent-booking'),
                 $booking->id,
                 'failed'
             );

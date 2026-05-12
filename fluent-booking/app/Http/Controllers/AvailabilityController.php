@@ -111,7 +111,7 @@ class AvailabilityController extends Controller
 
         if ($isTitleExist) {
             /* translators: %s is the existing availability title */
-            $message = sprintf(__('%s is already exist', 'fluent-booking'), $data['title']);
+            $message = sprintf(__('%s already exists', 'fluent-booking'), $data['title']);
             return $this->sendError([
                 'message' => $message,
             ], 422);
@@ -207,7 +207,7 @@ class AvailabilityController extends Controller
 
         if ($isTitleExist) {
             /* translators: %s is the existing availability title */
-            $message = sprintf(__('%s is already exist', 'fluent-booking'), $title);
+            $message = sprintf(__('%s already exists', 'fluent-booking'), $title);
             return $this->sendError([
                 'message' => $message,
             ], 422);
@@ -257,7 +257,7 @@ class AvailabilityController extends Controller
             $calendar = Calendar::where('user_id', $schedule->object_id)->first();
             if ($calendar) {
                 return $this->sendError([
-                    'message' => __('Default Schedule can not be deleted', 'fluent-booking')
+                    'message' => __('Default Schedule cannot be deleted', 'fluent-booking')
                 ], 422);
             }
         }

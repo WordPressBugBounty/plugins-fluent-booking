@@ -27,9 +27,10 @@ class CalenderEventCleaner
             ->get();
 
         foreach ($bookings as $booking){
+            $bookingId = $booking->id;
             do_action('fluent_booking/before_delete_booking', $booking);
             $booking->delete();
-            do_action('fluent_booking/after_delete_booking', $booking);
+            do_action('fluent_booking/after_delete_booking', $bookingId);
         }
 
 

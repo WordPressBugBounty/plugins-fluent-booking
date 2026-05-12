@@ -74,7 +74,7 @@ class CartHelper
         return \FluentCart\App\Vite::getAssetUrl('images/placeholder.svg');
     }
 
-    public static function getCartProductPrice($paymentSettings, $defaultDuration)
+    public static function getCartProductPrice($paymentSettings, $defaultDuration, $formatted = true)
     {
         $productId = $paymentSettings['cart_product_id'];
 
@@ -85,7 +85,11 @@ class CartHelper
         $price = '';
         $product = self::getProduct($productId);
         if ($product) {
-            $price = $product->formatted_total;
+            if ($formatted) {
+                $price = $product->formatted_total;
+            } else {
+                $price = floatval($product->item_price / 100) ?? 0;
+            }
         }
 
         return $price;

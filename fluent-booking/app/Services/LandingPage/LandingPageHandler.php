@@ -99,7 +99,7 @@ class LandingPageHandler
             if (!$slot) {
                 return;
             }
-            $this->renderBookingView($calendar, $slot);
+            return $this->renderBookingView($calendar, $slot);
         }
 
         $this->renderHostView($calendar);

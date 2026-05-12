@@ -6,6 +6,8 @@ use FluentBooking\Framework\Support\Arr;
 
 class CurrenciesHelper
 {
+    private static $globalCurrencySettings = null;
+
     public static function getDefaultCurrencySettings()
     {
         return apply_filters('fluent_booking/default_currency_settings', [
@@ -18,8 +20,12 @@ class CurrenciesHelper
         ]);
     }
 
-    public static function getGlobalCurrencySettings()
+    public static function getGlobalCurrencySettings($force = false)
     {
+        if (!$force && self::$globalCurrencySettings !== null) {
+            return self::$globalCurrencySettings;
+        }
+
         $defaultSettings = self::getDefaultCurrencySettings();
 
         $globalSettings = Helper::getGlobalPaymentSettings();
@@ -28,7 +34,9 @@ class CurrenciesHelper
 
         $currencySettings['currency_sign'] = self::getCurrencySign($currencySettings['currency']);
 
-        return apply_filters('fluent_booking/global_currency_settings', $currencySettings);
+        self::$globalCurrencySettings = apply_filters('fluent_booking/global_currency_settings', $currencySettings);
+
+        return self::$globalCurrencySettings;
     }
 
     public static function getGlobalCurrency()

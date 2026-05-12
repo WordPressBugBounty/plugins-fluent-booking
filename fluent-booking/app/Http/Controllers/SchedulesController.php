@@ -4,7 +4,9 @@ namespace FluentBooking\App\Http\Controllers;
 
 use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\Calendar;
+use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Models\BookingActivity;
+use FluentBooking\Framework\Database\Orm\ModelNotFoundException;
 use FluentBooking\App\Services\EmailNotificationService;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\Framework\Support\Arr;
@@ -12,74 +14,17 @@ use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\CalendarService;
+use FluentBooking\App\Services\ExportHelper;
 
 class SchedulesController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->get('filters', []);
+        $author = $this->resolveAuthor($request);
 
-        $search = $request->getSafe('search');
-
-        $eventId = Arr::get($filters, 'event');
-
-        $author = Arr::get($filters, 'author');
-
-        $eventType = sanitize_text_field(Arr::get($filters, 'event_type'));
-
-        $period = sanitize_text_field(Arr::get($filters, 'period', 'upcoming'));
-
-        $range = array_map('sanitize_text_field', Arr::get($filters, 'range', []));
-
-        $query = Booking::with(['calendar_event']);
-
-        if (is_numeric($author)) {
-            $author = (int)$author;
-        } else {
-            $author = sanitize_text_field($author);
-        }
-
-        $currentHostId = get_current_user_id();
-
-        $hasPermission = PermissionManager::userCanSeeAllBookings();
-
-        if (!$hasPermission && (!$author || $author == 'all')) {
-            $authorCalendar = Calendar::where('user_id', $currentHostId)
-                ->where('type', 'simple')
-                ->first();
-
-            $author = $authorCalendar ? $authorCalendar->id : '';
-        }
-
-        if (!$hasPermission || $author == 'me') {
-            $query->where('host_user_id', $currentHostId);
-        }
-
-        if ($author && $author !== 'all') {
-            if ($author != 'me') {
-                $query->where('calendar_id', $author);
-            }
-            if ($eventId && $eventId !== 'all') {
-                $query->where('event_id', (int) $eventId);
-            }
-            if ($eventType && $eventType !== 'all') {
-                $query->where('event_type', $eventType);
-            }
-        }
-
-        do_action_ref_array('fluent_booking/schedules_query', [&$query]);
-
-        $query->applyDateRangeFilter($range);
-
-        $query->applyComputedStatus($period);
-
-        $query->applyBookingOrderByStatus($period);
+        $query = $this->buildSchedulesQuery($request, $author);
 
         $query->groupBy('group_id');
-
-        if (!empty($search)) {
-            $query->searchBy($search);
-        }
 
         $schedules = $query->paginate();
 
@@ -95,7 +40,7 @@ class SchedulesController extends Controller
         $data['calendar_event_lists'] = CalendarService::getCalendarOptionsByTitle();
 
         if ($author == 'me') {
-            $slotOptions = CalendarService::getSlotOptions(null, $currentHostId);
+            $slotOptions = CalendarService::getSlotOptions(null, get_current_user_id());
             $data['slot_options'] = $slotOptions;
         }
 
@@ -104,6 +49,128 @@ class SchedulesController extends Controller
         }
 
         return $data;
+    }
+
+    public function export(Request $request)
+    {
+        $limit = (int) apply_filters('fluent_booking/data_export_limit', 2000);
+
+        $author = $this->resolveAuthor($request);
+
+        $query = $this->buildSchedulesQuery($request, $author);
+
+        $relations = [
+            'calendar_event',
+            'user',
+            'booking_activities' => function ($q) {
+                $q->where('type', 'cancel_reason');
+            },
+            'booking_meta',
+        ];
+
+        if (defined('FLUENT_BOOKING_PRO_DIR_FILE')) {
+            $relations[] = 'payment_order.transaction';
+        }
+
+        $query->with($relations);
+
+        $total   = (clone $query)->withoutEagerLoads()->count();
+        $limited = $total > $limit;
+
+        $bookings = $query->take($limit)->get();
+
+        $rows = $bookings->map(function ($booking) {
+            $row = ExportHelper::mapBooking($booking);
+            return apply_filters('fluent_booking/booking_export_row', $row, $booking);
+        })->all();
+
+        $rows = apply_filters('fluent_booking/booking_export_columns', $rows, $bookings);
+
+        return [
+            'bookings' => $rows,
+            'limited'  => $limited,
+            'total'    => $total,
+        ];
+    }
+
+    protected function resolveAuthor(Request $request)
+    {
+        $author = Arr::get($request->get('filters', []), 'author');
+
+        if (is_numeric($author)) {
+            $author = (int) $author;
+        } else {
+            $author = sanitize_text_field($author);
+        }
+
+        $hasPermission = PermissionManager::userCanSeeAllBookings();
+
+        if ($hasPermission) {
+            return $author;
+        }
+
+        if (!$author || $author == 'all') {
+            $authorCalendar = Calendar::where('user_id', get_current_user_id())
+                ->where('type', 'simple')
+                ->first();
+
+            $author = $authorCalendar ? $authorCalendar->id : '';
+        }
+
+        return $author;
+    }
+
+    protected function buildSchedulesQuery(Request $request, $author = null)
+    {
+        $filters   = $request->get('filters', []);
+        $search    = $request->getSafe('search');
+        $eventVal  = Arr::get($filters, 'event');
+        $eventId   = is_numeric($eventVal) ? (int) $eventVal : 0;
+        $eventType = sanitize_text_field(Arr::get($filters, 'event_type'));
+        $period    = sanitize_text_field(Arr::get($filters, 'period', 'upcoming'));
+        $range     = array_map('sanitize_text_field', Arr::get($filters, 'range', []));
+        $email     = sanitize_email(Arr::get($filters, 'email', ''));
+
+        $allowedPeriods = ['upcoming', 'completed', 'cancelled', 'pending', 'no_show', 'latest_bookings', 'all'];
+        if (!in_array($period, $allowedPeriods, true)) {
+            $period = 'upcoming';
+        }
+
+        $query = Booking::with(['calendar_event']);
+
+        $hasPermission = PermissionManager::userCanSeeAllBookings();
+        
+        if (!$hasPermission || $author == 'me') {
+            $query->where('host_user_id', get_current_user_id());
+        }
+
+        if ($author && $author !== 'all') {
+            if ($author != 'me') {
+                $query->where('calendar_id', $author);
+            }
+            if ($eventId > 0) {
+                $query->where('event_id', $eventId);
+            }
+            if ($eventType && $eventType !== 'all') {
+                $query->where('event_type', $eventType);
+            }
+        }
+
+        if (!empty($email) && is_email($email)) {
+            $query->where('email', $email);
+        }
+
+        do_action_ref_array('fluent_booking/schedules_query', [&$query]);
+
+        $query->applyDateRangeFilter($range);
+        $query->applyComputedStatus($period);
+        $query->applyBookingOrderByStatus($period);
+
+        if (!empty($search)) {
+            $query->searchBy($search);
+        }
+
+        return $query;
     }
 
     private function addCountsForFirstPage($author, &$data)
@@ -369,6 +436,8 @@ class SchedulesController extends Controller
 
     public function getBookingActivities(Request $request, $bookingId)
     {
+        $this->resolveOwnedBookingOrFail($bookingId);
+
         $activities = BookingActivity::where('booking_id', $bookingId)
             ->orderBy('id', 'DESC')
             ->get();
@@ -380,7 +449,7 @@ class SchedulesController extends Controller
 
     public function getBookingMetaInfo(Request $request, $bookingId)
     {
-        $booking = Booking::findOrFail($bookingId);
+        $booking = $this->resolveOwnedBookingOrFail($bookingId);
 
         $activities = BookingActivity::where('booking_id', $booking->id)
             ->orderBy('id', 'DESC')
@@ -426,6 +495,29 @@ class SchedulesController extends Controller
         ];
     }
 
+    private function resolveOwnedBookingOrFail($bookingId)
+    {
+        $booking = Booking::findOrFail($bookingId);
+
+        if (PermissionManager::userCanSeeAllBookings()) {
+            return $booking;
+        }
+
+        $allowedIds = $booking->getHostIds();
+
+        if (PermissionManager::userCan('manage_own_calendar')) {
+            if ($event = CalendarSlot::find($booking->event_id)) {
+                $allowedIds = array_merge($allowedIds, $event->getHostIds());
+            }
+        }
+
+        if (in_array(get_current_user_id(), $allowedIds)) {
+            return $booking;
+        }
+
+        throw (new ModelNotFoundException)->setModel(Booking::class, [$bookingId]);
+    }
+
     private function formatBooking(&$booking)
     {
         $autoCompleteTimeOut = (int) Helper::getGlobalAdminSetting('auto_complete_timing', 60) * 60; // 10 minutes
@@ -434,7 +526,8 @@ class SchedulesController extends Controller
             $bookingStatus = $booking->status == 'pending' ? 'cancelled' : 'completed';
             $booking->status = $bookingStatus;
             $booking->save();
-            do_action('fluent_booking/booking_schedule_' . $bookingStatus, $booking, $booking->calendar_event);
+            $hookName = $bookingStatus === 'cancelled' ? 'auto_cancelled' : $bookingStatus;
+            do_action('fluent_booking/booking_schedule_' . $hookName, $booking, $booking->calendar_event);
         }
 
         if ($booking->isMultiHostBooking()) {

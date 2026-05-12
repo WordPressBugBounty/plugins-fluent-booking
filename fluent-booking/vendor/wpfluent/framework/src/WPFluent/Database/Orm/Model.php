@@ -32,6 +32,7 @@ abstract class Model implements ArrayableInterface, ArrayAccess, CanBeEscapedWhe
         Concerns\HasGlobalScopes,
         Concerns\HasRelationships,
         Concerns\HasTimestamps,
+        Concerns\HasUniqueIds,
         Concerns\HidesAttributes,
         Concerns\GuardsAttributes,
         ForwardsCalls;
@@ -295,8 +296,10 @@ abstract class Model implements ArrayableInterface, ArrayAccess, CanBeEscapedWhe
      */
     protected function initializeTraits()
     {
-        foreach (static::$traitInitializers[static::class] as $method) {
-            $this->{$method}();
+        if (isset(static::$traitInitializers[static::class])) {
+            foreach (static::$traitInitializers[static::class] as $method) {
+                $this->{$method}();
+            }
         }
     }
 
@@ -1614,15 +1617,17 @@ abstract class Model implements ArrayableInterface, ArrayAccess, CanBeEscapedWhe
      */
     public function replicate(?array $except = null)
     {
-        $defaults = [
+        $defaults = array_values(array_filter([
             $this->getKeyName(),
             $this->getCreatedAtColumn(),
             $this->getUpdatedAtColumn(),
-        ];
+            ...$this->uniqueIds(),
+            'laravel_through_key',
+        ]));
 
-        $attributes = Arr::except(
-            $this->getAttributes(), $except ? array_unique(array_merge($except, $defaults)) : $defaults
-        );
+        $excludeKeys = array_unique(array_merge($except ?? [], $defaults));
+        
+        $attributes = Arr::except($this->getAttributes(), $excludeKeys);
 
         return Helper::tap(new static, function ($instance) use ($attributes) {
             $instance->setRawAttributes($attributes);
@@ -2068,6 +2073,17 @@ abstract class Model implements ArrayableInterface, ArrayAccess, CanBeEscapedWhe
     }
 
     /**
+     * Get the relation resolver callback.
+     * 
+     * @param  string $method
+     * @return mixed
+     */
+    public function getRelationResolver($method)
+    {
+        return static::$relationResolvers[get_class($this)][$method] ?? null;
+    }
+
+    /**
      * Handle dynamic method calls into the model.
      *
      * @param  string  $method
@@ -2080,9 +2096,7 @@ abstract class Model implements ArrayableInterface, ArrayAccess, CanBeEscapedWhe
             return $this->$method(...$parameters);
         }
 
-        if ($resolver = (
-            static::$relationResolvers[get_class($this)][$method] ?? null
-        )) {
+        if ($resolver = $this->getRelationResolver($method)) {
             return $resolver($this);
         }
 

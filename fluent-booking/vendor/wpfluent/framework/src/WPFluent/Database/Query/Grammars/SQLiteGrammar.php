@@ -195,6 +195,24 @@ class SQLiteGrammar extends Grammar
     }
 
     /**
+     * Compile a "JSON overlaps" statement into SQL.
+     *
+     * SQLite has no native json_overlaps(), so we emulate it by checking
+     * whether any element in the column's JSON array exists in the given array.
+     *
+     * @param  string  $column
+     * @param  string  $value
+     * @return string
+     */
+    protected function compileJsonOverlaps($column, $value)
+    {
+        [$field, $path] = $this->wrapJsonFieldAndPath($column);
+
+        return 'exists (select 1 from json_each('.$field.$path.') '
+             . 'where json_each.value in (select value from json_each('.$value.')))';
+    }
+
+    /**
      * Prepare the binding for a "JSON contains" statement.
      *
      * @param  mixed  $binding
@@ -456,5 +474,16 @@ class SQLiteGrammar extends Grammar
         [$field, $path] = $this->wrapJsonFieldAndPath($value);
 
         return 'json_extract('.$field.$path.')';
+    }
+
+    /**
+     * SQLite under WordPress does not support SAVEPOINTs via the SQL
+     * translation layer, so nested partial rollbacks are not available.
+     *
+     * @return bool
+     */
+    public function supportsSavepoints()
+    {
+        return false;
     }
 }

@@ -884,13 +884,27 @@ class Helper
 
         $user = get_user_by('ID', $userId);
 
-        $name = trim($user->first_name . ' ' . $user->last_name);
+        return self::getDisplayNameFromUser($user);
+    }
 
-        if ($name) {
+    public static function getDisplayNameFromUser($user)
+    {
+        if (!$user) {
+            return '';
+        }
+
+        $firstName = is_object($user) ? ($user->first_name ?? '') : '';
+        $lastName  = is_object($user) ? ($user->last_name ?? '') : '';
+
+        $name = trim($firstName . ' ' . $lastName);
+
+        if ($name !== '') {
             return $name;
         }
 
-        return $user->display_name;
+        $displayName = is_object($user) ? ($user->display_name ?? '') : '';
+
+        return (string) $displayName;
     }
 
     public static function getUserEmail($userId = null)
@@ -1845,6 +1859,7 @@ class Helper
                         '##booking.cancelation_url##'                           => __('Booking Cancellation URL', 'fluent-booking'),
                         '##booking.reschedule_url##'                            => __('Booking Reschedule URL', 'fluent-booking'),
                         '##booking.admin_booking_url##'                         => __('Booking Details Admin URL', 'fluent-booking'),
+                        '{{booking.source_url}}'                                => __('Source URL', 'fluent-booking'),
                         '{{booking.utm_source}}'                                => __('UTM Source', 'fluent-booking'),
                         '{{booking.utm_medium}}'                                => __('UTM Medium', 'fluent-booking'),
                         '{{booking.utm_campaign}}'                              => __('UTM Campaign', 'fluent-booking'),
@@ -1891,8 +1906,7 @@ class Helper
                         '{{booking.phone}}'        => __('Guest Main Phone Number (if provided)', 'fluent-booking'),
                         '{{guest.note}}'           => __('Guest Note', 'fluent-booking'),
                         '{{guest.timezone}}'       => __('Guest Timezone', 'fluent-booking'),
-                        '{{guest.total_guest}}'    => __('Total Guest Count', 'fluent-booking'),
-                        '{{guest.form_data_html}}' => __('Guest Form Submitted Data (HTML)', 'fluent-booking')
+                        '{{guest.total_guest}}'    => __('Total Guest Count', 'fluent-booking')
                     ]
                 ],
                 'booking' => [
@@ -1912,8 +1926,8 @@ class Helper
                         '{{booking.all_bookings_full_times_guest_timezone}}'    => __('All Bookings Full Times (with guest timezone)', 'fluent-booking'),
                         '{{booking.all_bookings_full_times_host_timezone}}'     => __('All Bookings Full Times (with host timezone)', 'fluent-booking'),
                         '{{booking.start_date_time}}'                           => __('Event Date Time (UTC)', 'fluent-booking'),
-                        '{{booking.start_date_time_for_attendee}}'              => __('Event Date time (with guest timezone)', 'fluent-booking'),
-                        '{{booking.start_date_time_for_host}}'                  => __('Event Date time (with host timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_attendee}}'              => __('Event Date Time (with guest timezone)', 'fluent-booking'),
+                        '{{booking.start_date_time_for_host}}'                  => __('Event Date Time (with host timezone)', 'fluent-booking'),
                         '{{booking.start_date_time_for_attendee.format.Y-m-d}}' => __('Event Date Time (with attendee timezone) (Ex: 2024-05-20)', 'fluent-booking'),
                         '{{booking.start_date_time_for_host.format.Y-m-d}}'     => __('Event Date Time (with host timezone) (Ex: 2024-05-20)', 'fluent-booking'),
                         '{{booking.location_details_html}}'                     => __('Event Location Details (HTML)', 'fluent-booking'),
@@ -1922,6 +1936,7 @@ class Helper
                         '##booking.cancelation_url##'                           => __('Booking Cancellation URL', 'fluent-booking'),
                         '##booking.reschedule_url##'                            => __('Booking Reschedule URL', 'fluent-booking'),
                         '##booking.admin_booking_url##'                         => __('Booking Details Admin URL', 'fluent-booking'),
+                        '{{booking.source_url}}'                                => __('Source URL', 'fluent-booking'),
                         '{{booking.utm_source}}'                                => __('UTM Source', 'fluent-booking'),
                         '{{booking.utm_medium}}'                                => __('UTM Medium', 'fluent-booking'),
                         '{{booking.utm_campaign}}'                              => __('UTM Campaign', 'fluent-booking'),
@@ -2038,9 +2053,15 @@ class Helper
         }
 
         $raw_value = base64_decode($raw_value, true); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+        if ($raw_value === false) {
+            return false;
+        }
 
         $method = 'aes-256-ctr';
         $ivlen = openssl_cipher_iv_length($method);
+        if ($ivlen === false || strlen($raw_value) <= $ivlen) {
+            return false;
+        }
         $iv = substr($raw_value, 0, $ivlen);
 
         $raw_value = substr($raw_value, $ivlen);
@@ -2054,7 +2075,7 @@ class Helper
         $salt = (defined('LOGGED_IN_SALT') && '' !== LOGGED_IN_SALT) ? LOGGED_IN_SALT : 'this-is-a-fallback-salt-but-not-secure';
 
         $value = openssl_decrypt($raw_value, $method, $key, 0, $iv);
-        if (!$value || substr($value, -strlen($salt)) !== $salt) {
+        if (!is_string($value) || substr($value, -strlen($salt)) !== $salt) {
             return false;
         }
 

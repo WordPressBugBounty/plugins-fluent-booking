@@ -17,7 +17,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/wpfluent/framework"
+            "url": "https://github.com/wpfluent/framework2x"
         },
         {
             "type": "vcs",
@@ -25,7 +25,7 @@
         }
     ],
     "require": {
-        "wpfluent/framework": "^2.0",
+        "wpfluent/framework": "2.11.19",
         "woocommerce/action-scheduler": "3.7.0",
         "wpfluent/caldav": "*"
     },

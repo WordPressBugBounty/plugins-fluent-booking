@@ -42,10 +42,13 @@ class CalendarIntegrationService
             $settings = apply_filters('fluent_booking/get_integration_defaults_' . $integrationName, false, $slotId);
         }
 
-        if ('true' == $settings['enabled']) {
+        $enabled = Arr::get($settings, 'enabled');
+        if ('true' === $enabled) {
             $settings['enabled'] = true;
-        } elseif ('false' == $settings['enabled'] || $settings['enabled']) {
+        } elseif ('false' === $enabled) {
             $settings['enabled'] = false;
+        } else {
+            $settings['enabled'] = (bool) $enabled;
         }
 
         $settingsFields = apply_filters('fluent_booking/get_integration_settings_fields_' . $integrationName, $settings, $slotId, $settings);
@@ -180,8 +183,15 @@ class CalendarIntegrationService
         ];
     }
 
-    public function delete($id)
+    public function delete($integrationId, $eventId = null)
     {
-        Meta::where('id', $id)->delete();
+        $query = Meta::where('id', $integrationId);
+
+        if ($eventId !== null) {
+            $query->where('object_id', $eventId)
+                ->where('object_type', 'integration');
+        }
+
+        return $query->delete();
     }
 }

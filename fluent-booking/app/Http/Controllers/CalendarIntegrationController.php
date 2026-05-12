@@ -6,6 +6,7 @@ use Exception;
 use FluentBooking\App\Models\Meta;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\Helper;
+use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\Integrations\CalendarIntegrationService;
 
 class CalendarIntegrationController extends Controller
@@ -13,7 +14,7 @@ class CalendarIntegrationController extends Controller
     public function index(CalendarIntegrationService $integrationService, $calendarId, $eventId)
     {
         try {
-            $calendarEvent = CalendarSlot::findOrFail($eventId);
+            $calendarEvent = $this->getCalendarEvent($calendarId, $eventId);
             $settings = $integrationService->get($eventId);
 
             $settings['smart_codes'] = [
@@ -32,6 +33,7 @@ class CalendarIntegrationController extends Controller
     public function find(CalendarIntegrationService $integrationService, $calendarId, $slotId, $integrationId)
     {
         try {
+            $this->getCalendarEvent($calendarId, $slotId);
             $data = $this->request->all();
             $data['slot_id'] = $slotId;
             $integration = $integrationService->find($data);
@@ -64,8 +66,13 @@ class CalendarIntegrationController extends Controller
     public function delete(CalendarIntegrationService $integrationService, $calendarId, $slotId, $integrationId)
     {
         try {
-            $id = $this->request->get('integration_id');
-            $integrationService->delete($id);
+            $deleted = $integrationService->delete($integrationId, $slotId);
+
+            if (!$deleted) {
+                return $this->sendError([
+                    'message' => __('Integration not found for this event.', 'fluent-booking'),
+                ], 404);
+            }
 
             return $this->sendSuccess([
                 'message' => __('Successfully deleted the Integration.', 'fluent-booking'),
@@ -82,7 +89,13 @@ class CalendarIntegrationController extends Controller
         $calendarEvent = CalendarSlot::where('calendar_id', $calendarId)->findOrFail($slotId);
 
         $fromEventId = intval($this->request->get('from_event_id'));
-        
+
+        if (!$fromEventId || !PermissionManager::canUpdateCalendarEvent($fromEventId)) {
+            return $this->sendError([
+                'message' => __('You do not have permission to clone from the selected event.', 'fluent-booking')
+            ], 403);
+        }
+
         $fromEventIntegrations = Meta::where('object_id', $fromEventId)
             ->where('object_type', 'integration')
             ->get();
@@ -100,13 +113,14 @@ class CalendarIntegrationController extends Controller
         }
 
         return [
-            'message' => __('Integrations has been successfully cloned.', 'fluent-booking')
+            'message' => __('Integrations have been successfully cloned.', 'fluent-booking')
         ];
     }
 
     public function integrationListComponent($calendarId, $slotId, $integrationId)
     {
         try {
+            $this->getCalendarEvent($calendarId, $slotId);
             $integrationName = $this->request->get('integration_name');
             $listId = $this->request->get('list_id');
             $merge_fields = false;
@@ -126,6 +140,7 @@ class CalendarIntegrationController extends Controller
     public function getConfigFieldOptions($calendarId, $calendarEventId, $integrationId)
     {
         try {
+            $this->getCalendarEvent($calendarId, $calendarEventId);
             $integrationName = $this->request->get('integration_name');
             $settings = $this->request->get('settings');
             
@@ -139,5 +154,10 @@ class CalendarIntegrationController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    private function getCalendarEvent($calendarId, $eventId)
+    {
+        return CalendarSlot::where('calendar_id', $calendarId)->findOrFail($eventId);
     }
 }

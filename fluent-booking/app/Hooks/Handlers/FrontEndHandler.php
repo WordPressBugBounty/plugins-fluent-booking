@@ -1025,11 +1025,11 @@ class FrontEndHandler
             'is_display_spots'   => $calendarEvent->isDisplaySpots(),
             'duration'           => $calendarEvent->getDefaultDuration(),
             'title'              => $calendarEvent->title,
-            'location_settings'  => $calendarEvent->location_settings,
+            'location_settings'  => $this->sanitizePublicLocationSettings($calendarEvent->location_settings),
             'location_icon_html' => $calendarEvent->location_icon_html,
             'description'        => $calendarEvent->description,
             'pre_selects'        => null,
-            'settings'           => $calendarEvent->settings,
+            'settings'           => $this->sanitizePublicEventSettings($calendarEvent->settings),
             'type'               => $calendarEvent->type,
             'event_type'         => $calendarEvent->event_type,
             'time_format'        => Arr::get(get_option('_fluent_booking_settings'), 'time_format', '12'),
@@ -1061,6 +1061,72 @@ class FrontEndHandler
         }
 
         return apply_filters('fluent_booking/public_event_vars', $eventVars, $calendarEvent);
+    }
+
+    private function sanitizePublicLocationSettings($locationSettings)
+    {
+        if (!is_array($locationSettings)) {
+            return [];
+        }
+
+        $safe = [];
+        foreach ($locationSettings as $location) {
+            if (!is_array($location)) {
+                continue;
+            }
+
+            $type = Arr::get($location, 'type');
+            $displayOnBooking = Arr::get($location, 'display_on_booking') === 'yes';
+
+            $sanitized = [
+                'type'               => $type,
+                'title'              => Arr::get($location, 'title'),
+                'display_on_booking' => Arr::get($location, 'display_on_booking', 'no'),
+            ];
+
+            // Only expose host-private fields when the host explicitly opted
+            // in to display them before booking.
+            if ($displayOnBooking) {
+                if ($type === 'online_meeting') {
+                    $sanitized['meeting_link'] = Arr::get($location, 'meeting_link');
+                } elseif ($type === 'phone_organizer') {
+                    $sanitized['host_phone_number'] = Arr::get($location, 'host_phone_number');
+                } elseif (in_array($type, ['in_person_organizer', 'custom'], true)) {
+                    $sanitized['description'] = Arr::get($location, 'description');
+                }
+            }
+
+            $safe[] = $sanitized;
+        }
+
+        return $safe;
+    }
+
+    private function sanitizePublicEventSettings($settings)
+    {
+        if (!is_array($settings)) {
+            return [];
+        }
+
+        $publicKeys = [
+            'recurring_config',
+            'multiple_booking',
+            'multi_duration',
+            'lock_timezone',
+            'requires_confirmation',
+            'submit_button_text',
+        ];
+
+        $publicKeys = apply_filters('fluent_booking/public_event_settings_keys', $publicKeys);
+
+        $safe = [];
+        foreach ($publicKeys as $key) {
+            if (array_key_exists($key, $settings)) {
+                $safe[$key] = $settings[$key];
+            }
+        }
+
+        return $safe;
     }
 
     public function ajaxHandleCancelMeeting()

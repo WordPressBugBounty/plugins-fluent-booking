@@ -4,12 +4,20 @@ namespace FluentBooking\Framework\Database;
 
 use RuntimeException;
 use FluentBooking\Framework\Support\Helper;
+use FluentBooking\Framework\Database\Schema;
 use FluentBooking\Framework\Support\MacroableTrait;
 use FluentBooking\Framework\Database\Query\Expression;
 
 abstract class BaseGrammar
 {
     use MacroableTrait;
+
+    /**
+     * Cache of aliased table names.
+     * 
+     * @var array
+     */
+    protected $alias = [];
 
     /**
      * The connection used for escaping values.
@@ -33,6 +41,17 @@ abstract class BaseGrammar
     protected $tablePrefix = '';
 
     /**
+     * Check if the given table is a built-in table.
+     * 
+     * @param  string  $table
+     * @return boolean
+     */
+    public function isAliasedTable($table)
+    {
+        return in_array("`$table`", $this->alias);
+    }
+
+    /**
      * Wrap an array of values.
      *
      * @param  array  $values
@@ -41,6 +60,35 @@ abstract class BaseGrammar
     public function wrapArray(array $values)
     {
         return array_map([$this, 'wrap'], $values);
+    }
+
+    /**
+     * Wrap a value in keyword identifiers.
+     *
+     * @param  \FluentBooking\Framework\Database\Query\Expression|string  $value
+     * @return string
+     */
+    public function wrap($value)
+    {
+        if ($this->isExpression($value)) {
+            return $this->getValue($value);
+        }
+
+        // If the value being wrapped has a column alias we will need to separate // out the pieces so we can wrap each of the segments of the
+        // expression on its own, and then join these both
+        // back together using the "as" connector.
+        if (stripos($value, ' as ') !== false) {
+            return $this->wrapAliasedValue($value);
+        }
+
+        // If the given value is a JSON selector we will wrap it differently than a
+        // traditional value. We will need to split this path and wrap each part
+        // wrapped, etc. Otherwise, we will simply wrap the value as a string.
+        if ($this->isJsonSelector($value)) {
+            return $this->wrapJsonSelector($value);
+        }
+
+        return $this->wrapSegments(explode('.', $value));
     }
 
     /**
@@ -69,7 +117,7 @@ abstract class BaseGrammar
         // and eventually join them both back together using the dot connector.
         if (str_contains($table, '.')) {
             $table = substr_replace(
-                $table, '.'.$tablePrefix, strrpos($table, '.'), 1
+                $table, '.' . $tablePrefix, strrpos($table, '.'), 1
             );
 
             return Helper::collect(explode('.', $table))
@@ -77,6 +125,10 @@ abstract class BaseGrammar
                     return $this->wrapValue($value);
                 })
                 ->implode('.');
+        }
+
+        if ($this->isAliasedTable($table)) {
+            return $table;
         }
 
         return $this->wrapValue($tablePrefix.$table);
@@ -90,6 +142,10 @@ abstract class BaseGrammar
      */
     protected function resolveTablePrefix($table)
     {
+        if ($this->isAliasedTable($table)) {
+            return '';
+        }
+        
         if (!is_multisite()) {
             return $this->tablePrefix;
         }
@@ -111,35 +167,6 @@ abstract class BaseGrammar
     }
 
     /**
-     * Wrap a value in keyword identifiers.
-     *
-     * @param  \FluentBooking\Framework\Database\Query\Expression|string  $value
-     * @return string
-     */
-    public function wrap($value)
-    {
-        if ($this->isExpression($value)) {
-            return $this->getValue($value);
-        }
-
-        // If the value being wrapped has a column alias we will need to separate out
-        // the pieces so we can wrap each of the segments of the expression on its
-        // own, and then join these both back together using the "as" connector.
-        if (stripos($value, ' as ') !== false) {
-            return $this->wrapAliasedValue($value);
-        }
-
-        // If the given value is a JSON selector we will wrap it differently than a
-        // traditional value. We will need to split this path and wrap each part
-        // wrapped, etc. Otherwise, we will simply wrap the value as a string.
-        if ($this->isJsonSelector($value)) {
-            return $this->wrapJsonSelector($value);
-        }
-
-        return $this->wrapSegments(explode('.', $value));
-    }
-
-    /**
      * Wrap a value that has an alias.
      *
      * @param  string  $value
@@ -149,7 +176,9 @@ abstract class BaseGrammar
     {
         $segments = preg_split('/\s+as\s+/i', $value);
 
-        return $this->wrap($segments[0]).' as '.$this->wrapValue($segments[1]);
+        return $this->wrap(
+            $segments[0]
+        ) . ' as ' . $this->wrapValue($segments[1]);
     }
 
     /**
@@ -162,11 +191,9 @@ abstract class BaseGrammar
     {
         $segments = preg_split('/\s+as\s+/i', $value);
 
-        $tablePrefix = $this->resolveTablePrefix($segments[0]);
+        $this->alias[] = $alias = $this->wrapValue($segments[1]);
 
-        return $this->wrapTable(
-            $tablePrefix.$segments[0]
-        ).' as '.$this->wrapValue($segments[1]);
+        return $this->wrapTable($segments[0]) . ' as ' . $alias;
     }
 
     /**
@@ -177,7 +204,9 @@ abstract class BaseGrammar
      */
     protected function wrapSegments($segments)
     {
-        return Helper::collect($segments)->map(function ($segment, $key) use ($segments) {
+        return Helper::collect($segments)->map(function (
+            $segment, $key
+        ) use ($segments) {
             return $key == 0 && count($segments) > 1
                             ? $this->wrapTable($segment)
                             : $this->wrapValue($segment);
@@ -340,7 +369,7 @@ abstract class BaseGrammar
     /**
      * Set the grammar's table prefix.
      *
-     * @param  string  $prefix
+     * @param object $wpdb WordPress database object
      * @return $this
      */
     public function setTablePrefix($wpdb)
@@ -363,5 +392,15 @@ abstract class BaseGrammar
         $this->connection = $connection;
 
         return $this;
+    }
+
+    /**
+     * Track table aliases.
+     * 
+     * @param void
+     */
+    public function addAlias($alias)
+    {
+        $this->alias[] = "`$alias`";
     }
 }

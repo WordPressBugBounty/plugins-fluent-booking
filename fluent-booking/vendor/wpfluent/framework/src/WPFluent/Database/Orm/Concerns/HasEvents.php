@@ -6,7 +6,6 @@ use FluentBooking\Framework\Events\DispatcherInterface;
 use FluentBooking\Framework\Events\NullDispatcher;
 use FluentBooking\Framework\Support\Arr;
 use InvalidArgumentException;
-use ReflectionClass;
 
 trait HasEvents
 {

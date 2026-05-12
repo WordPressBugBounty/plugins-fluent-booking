@@ -103,26 +103,8 @@ class DataExporter
                 $this->sanitizeCsvCell($attendee->payment_status),
             ];
 
-            if ($attendee->payment_status) {
-                $order = $attendee->payment_order;
-                if ($order) {
-                    $order->load(['items', 'transaction']);
-                    $row[] = $this->sanitizeCsvCell($order->status);
-                    $row[] = $this->sanitizeCsvCell($order->payment_method);
-                    $row[] = $this->sanitizeCsvCell($order->currency);
-                    $row[] = $order->total_amount / 100;
-                    $row[] = $this->sanitizeCsvCell($order->created_at);
-                    $row[] = $this->sanitizeCsvCell($order->transaction->id);
-                    $row[] = $this->sanitizeCsvCell($order->transaction->vendor_charge_id);
-                    $row[] = $this->sanitizeCsvCell($order->transaction->payment_method);
-                    $row[] = $this->sanitizeCsvCell($order->transaction->status);
-                    $row[] = $order->transaction->total / 100;
-                    $row[] = $this->sanitizeCsvCell($order->transaction->created_at);
-                }
-            } else {
-                // Fill empty columns for payment related data if payment_status is false
-                $row = array_pad($row, 11, '');
-            }
+            $paymentOrder = $attendee->payment_status ? $attendee->payment_order : null;
+            $row          = array_merge($row, $this->buildPaymentColumns($paymentOrder));
 
             $csvData[] = $row;
         }
@@ -186,6 +168,30 @@ class DataExporter
         $calendarData = apply_filters('fluent_booking/exporting_calendar_data_json', $calendarData, $calendar);
 
         return $calendarData;
+    }
+
+    private function buildPaymentColumns($order)
+    {
+        if (!$order) {
+            return array_fill(0, 11, '');
+        }
+
+        $order->load(['items', 'transaction']);
+        $trans = $order->transaction;
+
+        return [
+            $this->sanitizeCsvCell($order->status),
+            $this->sanitizeCsvCell($order->payment_method),
+            $this->sanitizeCsvCell($order->currency),
+            $order->total_amount / 100,
+            $this->sanitizeCsvCell($order->created_at),
+            $this->sanitizeCsvCell($trans ? $trans->id : ''),
+            $this->sanitizeCsvCell($trans ? $trans->vendor_charge_id : ''),
+            $this->sanitizeCsvCell($trans ? $trans->payment_method : ''),
+            $this->sanitizeCsvCell($trans ? $trans->status : ''),
+            $trans ? $trans->total / 100 : '',
+            $this->sanitizeCsvCell($trans ? $trans->created_at : ''),
+        ];
     }
 
     /**

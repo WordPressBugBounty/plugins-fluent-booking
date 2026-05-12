@@ -147,7 +147,7 @@ class CalendarService
 
         if ($isHostCalendar && $firstCalendar) {
             if ($isFileInput) {
-                return new \WP_Error('calendar_exists', esc_html__('The user already have a calendar. Please delete it first to create a new one', 'fluent-booking'));
+                return new \WP_Error('calendar_exists', esc_html__('The user already has a calendar. Please delete it first to create a new one', 'fluent-booking'));
             }
             return $firstCalendar;
         }

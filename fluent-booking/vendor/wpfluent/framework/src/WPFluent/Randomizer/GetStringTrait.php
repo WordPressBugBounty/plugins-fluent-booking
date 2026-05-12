@@ -2,7 +2,7 @@
 
 namespace FluentBooking\Framework\Randomizer;
 
-use InvalidArgumentException;
+use FluentBooking\Framework\Support\InvalidArgumentException;
 
 trait GetStringTrait
 {

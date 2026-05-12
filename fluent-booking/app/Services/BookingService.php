@@ -92,6 +92,10 @@ class BookingService
         $totalBooking = count($data['start_time']);
         $bookingTimes = array_combine($data['start_time'], $data['end_time']);
 
+        if ($bookingTimes === false) {
+            throw new \InvalidArgumentException(esc_html__('Booking start and end times are invalid.', 'fluent-booking'));
+        }
+
         foreach ($bookingTimes as $startTime => $endTime) {
             $bookingData = $data;
 
@@ -133,6 +137,10 @@ class BookingService
         $lastBooking = end($data['email']);
         $totalBooking = count($data['email']);
         $guests = array_combine($data['email'], $data['first_name']);
+
+        if ($guests === false) {
+            throw new \InvalidArgumentException(esc_html__('Guest names and emails are invalid.', 'fluent-booking'));
+        }
 
         foreach ($guests as $email => $name) {
             $bookingData = $data;
@@ -434,13 +442,13 @@ class BookingService
         $icsContent .= "VERSION:2.0\r\n";
         $icsContent .= "PRODID:-//Google Inc//Fluent Booking//EN\r\n";
         $icsContent .= "METHOD:REQUEST\r\n";
-        $icsContent .= "STATUS:CONFIRMED\r\n";
 
         $icsContent .= "BEGIN:VEVENT\r\n";
+        $icsContent .= "STATUS:CONFIRMED\r\n";
         $icsContent .= "UID:" . md5($booking->hash) . "\r\n"; // Unique ID for the event
 
         $icsContent .= "SUMMARY:" . self::escapeIcsText($booking->getBookingTitle()) . "\r\n";
-        $icsContent .= "DESCRIPTION:" . $booking->getIcsBookingDescription() . "\r\n";
+        $icsContent .= "DESCRIPTION:" . self::escapeIcsText($booking->getIcsBookingDescription()) . "\r\n";
 
         // Date and time formatting (assuming eventStart and eventEnd are DateTime objects)
         $icsContent .= "DTSTART:" . gmdate('Ymd\THis\Z', strtotime($booking->start_time)) . "\r\n";

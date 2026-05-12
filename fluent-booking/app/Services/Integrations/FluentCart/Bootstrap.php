@@ -27,7 +27,6 @@ class Bootstrap
     {
         add_filter('fluent_booking/public_event_vars', [$this, 'maybePushPaymentVars'], 11, 2);
         add_filter('fluent_booking/booking_data', [$this, 'maybePushPaymentData'], 10, 2);
-        add_action('fluent_cart/cart/cart_data_items_updated', [$this, 'maybeSaveBookingID'], 10, 1);
 
         add_action('fluent_cart/receipt/thank_you/after_order_items', [$this, 'maybeShowBookingDetailsInReceipt'], 10, 1);
         add_action('fluent_booking/booking_meta_info_main_meta_cart', [$this, 'pushOrderDataToBookingView'], 10, 2);
@@ -54,6 +53,25 @@ class Bootstrap
         // after order confirmation
         add_action('fluent_booking/cart/booking_order_completed', [$this, 'maybeScheduleBooking'], 10, 1);
 
+        add_filter('fluent_cart/checkout_page_name_fields_schema', [$this, 'maybeFillSplitNameFields'], 10, 2);
+    }
+
+    public function maybeFillSplitNameFields($nameFields, $context)
+    {
+        $cart = Arr::get($context, 'cart');
+        if (!$cart || empty($cart->checkout_data['fluent_booking_data'])) {
+            return $nameFields;
+        }
+
+        if (isset($nameFields['billing_first_name']) && empty($nameFields['billing_first_name']['value'])) {
+            $nameFields['billing_first_name']['value'] = $cart->first_name;
+        }
+
+        if (isset($nameFields['billing_last_name']) && empty($nameFields['billing_last_name']['value'])) {
+            $nameFields['billing_last_name']['value'] = $cart->last_name;
+        }
+
+        return $nameFields;
     }
 
 
@@ -168,36 +186,6 @@ class Bootstrap
         return $bookingData;
     }
 
-    public function maybeSaveBookingID($cart)
-    {
-        $bookingHash = '';
-        if (isset($_REQUEST['fcal_hash'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-            $bookingHash = sanitize_text_field(wp_unslash($_REQUEST['fcal_hash'])); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        }
-
-        if (!$bookingHash || empty($cart['cart'])) {
-            return;
-        }
-
-        $cartData = $cart['cart']->cart_data;
-        if (!empty(Arr::get($cartData[0], 'fcal_booking_id'))) {
-            return;
-        }
-
-        $booking = Booking::where('hash', $bookingHash)->first();
-        if (!$booking) {
-            return;
-        }
-
-        if (!CartHelper::isEnabled($booking->calendar_event)) {
-            return;
-        }
-
-        $cartData[0]['fcal_booking_id'] = $booking->id;
-        $cart['cart']->cart_data = $cartData;
-        $cart['cart']->save();
-    }
-
     public function maybeRenderBookingInfoOnCartItem($eventInfo)
     {
         $item = Arr::get($eventInfo, 'item', []);
@@ -208,7 +196,7 @@ class Bootstrap
 
         $bookingId = $item['fcal_booking_id'];
         $booking = Booking::find($bookingId);
-        if (!$booking || $booking->status !== 'pending') {
+        if (!$booking || !$booking->calendar_event || $booking->status !== 'pending') {
             return;
         }
 

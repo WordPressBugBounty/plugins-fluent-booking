@@ -237,8 +237,10 @@ class Booking extends Model
         }
 
         if (!empty($range['time_zone']) && $range['time_zone'] != 'UTC') {
-            $range['start_date'] = gmdate('Y-m-d H:i:s', strtotime($range['start_date'] . ' -1 day'));
-            $range['end_date'] = gmdate('Y-m-d H:i:s', strtotime($range['end_date'] . ' +1 day'));
+            if (in_array($range['time_zone'], timezone_identifiers_list(), true)) {
+                $range['start_date'] = gmdate('Y-m-d H:i:s', strtotime($range['start_date'] . ' -1 day'));
+                $range['end_date']   = gmdate('Y-m-d H:i:s', strtotime($range['end_date'] . ' +1 day'));
+            }
         }
 
         return $query->whereBetween('start_time', [$range['start_date'], $range['end_date']]);
@@ -600,9 +602,13 @@ class Booking extends Model
 
     public function getCancelReason($isText = false, $isHtml = false)
     {
-        $row = BookingActivity::where('booking_id', $this->id)
-            ->where('type', 'cancel_reason')
-            ->first();
+        if ($this->relationLoaded('booking_activities')) {
+            $row = $this->booking_activities->firstWhere('type', 'cancel_reason');
+        } else {
+            $row = BookingActivity::where('booking_id', $this->id)
+                ->where('type', 'cancel_reason')
+                ->first();
+        }
 
         if ($row) {
             if ($isText) {
@@ -812,9 +818,13 @@ class Booking extends Model
 
     public function getMeta($key, $default = '')
     {
-        $exist = BookingMeta::where('booking_id', $this->id)
-            ->where('meta_key', $key)
-            ->first();
+        if ($this->relationLoaded('booking_meta')) {
+            $exist = $this->booking_meta->firstWhere('meta_key', $key);
+        } else {
+            $exist = BookingMeta::where('booking_id', $this->id)
+                ->where('meta_key', $key)
+                ->first();
+        }
 
         if ($exist) {
             return $exist->value;
@@ -831,22 +841,28 @@ class Booking extends Model
     public function scopeSearchBy($query, $search)
     {
         if ($search) {
+            $escape = function ($value) {
+                return addcslashes((string) $value, '%_\\');
+            };
+
             $fields = $this->searchable;
-            $query->where(function ($query) use ($fields, $search) {
-                $query->where(array_shift($fields), 'LIKE', "%$search%");
+            $searchEsc = $escape($search);
+
+            $query->where(function ($query) use ($fields, $search, $searchEsc, $escape) {
+                $query->where(array_shift($fields), 'LIKE', "%$searchEsc%");
 
                 $nameArray = explode(' ', $search);
                 if (count($nameArray) >= 2) {
-                    $query->orWhere(function ($q) use ($nameArray) {
-                        $fname = array_shift($nameArray);
-                        $lastName = implode(' ', $nameArray);
+                    $query->orWhere(function ($q) use ($nameArray, $escape) {
+                        $fname = $escape(array_shift($nameArray));
+                        $lastName = $escape(implode(' ', $nameArray));
                         $q->where('first_name', 'LIKE', "%$fname%")
                             ->orWhere('last_name', 'LIKE', "%$lastName%");
                     });
                 }
 
                 foreach ($fields as $field) {
-                    $query->orWhere($field, 'LIKE', "%$search%");
+                    $query->orWhere($field, 'LIKE', "%$searchEsc%");
                 }
             });
         }
@@ -1118,11 +1134,26 @@ class Booking extends Model
                 ->first();
 
             if (!$calendar) {
-                return '';
+                return 'UTC';
             }
             return $calendar->author_timezone;
         }
-        return '';
+        return 'UTC';
+    }
+
+    public function getCalendarLinkDescription()
+    {
+        $description = str_replace(PHP_EOL, '<br>', $this->getConfirmationData());
+
+        if ($this->message) {
+            $description .= __('Note: ', 'fluent-booking') . '<br>' . esc_html($this->message) . '<br><br>';
+        }
+
+        if ($additionalData = $this->getAdditionalData(false)) {
+            $description .= '<br>' . str_replace(PHP_EOL, '<br>', $additionalData);
+        }
+
+        return $description;
     }
 
     public function getIcsBookingDescription()
@@ -1223,43 +1254,50 @@ class Booking extends Model
     {
         $bookingTitle = $this->getBookingTitle();
 
-        $eventTitle = $this->calendar_event->title;
+        $eventDescription = $this->getCalendarLinkDescription();
+
+        $eventLocation = LocationService::getBookingLocationUrl($this);
+
+        $startTimestamp = strtotime($this->start_time);
+        $endTimestamp   = strtotime($this->end_time);
+
+        $compactStart = gmdate('Ymd\THis\Z', $startTimestamp);
+        $compactEnd   = gmdate('Ymd\THis\Z', $endTimestamp);
+
+        $isoStart = gmdate('Y-m-d\TH:i:s\Z', $startTimestamp);
+        $isoEnd   = gmdate('Y-m-d\TH:i:s\Z', $endTimestamp);
+
+        $googleParams = http_build_query([
+            'dates'    => $compactStart . '/' . $compactEnd,
+            'text'     => $bookingTitle,
+            'details'  => $eventDescription,
+            'location' => $eventLocation,
+        ], '', '&', PHP_QUERY_RFC3986);
+
+        $outlookParams = http_build_query([
+            'path'     => '/calendar/action/compose',
+            'rru'      => 'addevent',
+            'startdt'  => $isoStart,
+            'enddt'    => $isoEnd,
+            'subject'  => $bookingTitle,
+            'body'     => $eventDescription,
+            'location' => $eventLocation,
+        ], '', '&', PHP_QUERY_RFC3986);
 
         return apply_filters('fluent_booking/meeting_bookmarks', [
             'google'   => [
                 'title' => __('Google Calendar', 'fluent-booking'),
-                'url'   => add_query_arg([
-                    'dates'    => gmdate('Ymd\THis\Z', strtotime($this->start_time)) . '/' . gmdate('Ymd\THis\Z', strtotime($this->end_time)),
-                    'text'     => $bookingTitle,
-                    'details'  => $eventTitle,
-                    'location' => urlencode(LocationService::getBookingLocationUrl($this)),
-                ], 'https://calendar.google.com/calendar/r/eventedit'),
+                'url'   => 'https://calendar.google.com/calendar/r/eventedit?' . $googleParams,
                 'icon'  => $assetsUrl . 'images/g-icon.svg'
             ],
             'outlook'  => [
                 'title' => __('Outlook', 'fluent-booking'),
-                'url'   => add_query_arg([
-                    'startdt'  => gmdate('Ymd\THis\Z', strtotime($this->start_time)),
-                    'enddt'    => gmdate('Ymd\THis\Z', strtotime($this->end_time)),
-                    'subject'  => $bookingTitle,
-                    'path'     => '/calendar/action/compose',
-                    'body'     => $eventTitle,
-                    'rru'      => 'addevent',
-                    'location' => urlencode(LocationService::getBookingLocationUrl($this)),
-                ], 'https://outlook.live.com/calendar/0/deeplink/compose'),
+                'url'   => 'https://outlook.live.com/calendar/0/deeplink/compose?' . $outlookParams,
                 'icon'  => $assetsUrl . 'images/ol-icon.svg'
             ],
             'msoffice' => [
                 'title' => __('Microsoft Office', 'fluent-booking'),
-                'url'   => add_query_arg([
-                    'startdt'  => gmdate('Ymd\THis\Z', strtotime($this->start_time)),
-                    'enddt'    => gmdate('Ymd\THis\Z', strtotime($this->end_time)),
-                    'subject'  => $bookingTitle,
-                    'path'     => '/calendar/action/compose',
-                    'body'     => $eventTitle,
-                    'rru'      => 'addevent',
-                    'location' => urlencode(LocationService::getBookingLocationUrl($this)),
-                ], 'https://outlook.office.com/calendar/0/deeplink/compose'),
+                'url'   => 'https://outlook.office.com/calendar/0/deeplink/compose?' . $outlookParams,
                 'icon'  => $assetsUrl . 'images/msoffice.svg'
             ],
             'other'    => [

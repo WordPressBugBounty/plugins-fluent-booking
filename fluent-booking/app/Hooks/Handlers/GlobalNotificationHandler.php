@@ -48,6 +48,7 @@ class GlobalNotificationHandler
         add_action('fluent_booking/booking_schedule_cancelled', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
         add_action('fluent_booking/booking_schedule_completed', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
         add_action('fluent_booking/booking_schedule_rejected', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
+        add_action('fluent_booking/booking_schedule_no_show', [$this, 'maybeHandleGlobalIntegration'], 10, 2);
         add_action('fluent_booking/after_booking_rescheduled', [$this, 'checkGlobalIntegration'], 10, 3);
     }
 
@@ -60,7 +61,8 @@ class GlobalNotificationHandler
             'cancelled'   => 'booking_schedule_cancelled',
             'completed'   => 'booking_schedule_completed',
             'rescheduled' => 'after_booking_rescheduled',
-            'rejected'    => 'booking_schedule_rejected'
+            'rejected'    => 'booking_schedule_rejected',
+            'no_show'     => 'booking_schedule_no_show',
         ];
 
         if (!isset($maps[$status])) {

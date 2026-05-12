@@ -55,7 +55,7 @@ class SummaryReportService
             'totalCompleted' => $totalCompleted,
         ];
 
-        $adminEmail = str_replace('{{wp.admin_email}}', get_option('admin_email'), $adminEmail);
+        $adminEmail = str_replace('{{wp.admin_email}}', (string) get_option('admin_email', ''), $adminEmail);
         if(!$adminEmail) {
             return;
         }

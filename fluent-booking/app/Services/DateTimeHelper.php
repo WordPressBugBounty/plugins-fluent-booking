@@ -175,12 +175,12 @@ class DateTimeHelper
     public static function formatToLocale($dateTime, $for = 'date')
     {
         // $for can be date | date_time | time
-        $dateFormat = get_option('date_format');
+        $dateFormat = (string) get_option('date_format', '');
 
         if ($for == 'date_time') {
-            $dateFormat .= ' ' . get_option('time_format');
+            $dateFormat .= ' ' . (string) get_option('time_format', '');
         } elseif ($for == 'time') {
-            $dateFormat = get_option('time_format');
+            $dateFormat = (string) get_option('time_format', '');
         }
 
         return date_i18n($dateFormat, strtotime($dateTime)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
@@ -189,7 +189,7 @@ class DateTimeHelper
     public static function getFormattedDate($date, $from = '', $to = 'Y-m-d')
     {
         if (!$from) {
-            $from = get_option('date_format');
+            $from = (string) get_option('date_format', '');
         }
 
         $date = \DateTime::createFromFormat($from, $date);

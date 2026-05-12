@@ -62,14 +62,15 @@ $router->prefix('events')->withPolicy('CalendarEventPolicy')->group(function ($r
 $router->prefix('bookings')->withPolicy('CalendarEventPolicy')->group(function ($router) {
     $router->get('/', 'BookingController@getBookings');
     $router->get('event/{event_id}', 'BookingController@getEvent')->int('event_id');
+    $router->get('slots/{event_id}', 'BookingController@getSlots')->int('event_id');
     $router->post('create/{event_id}', 'BookingController@createBooking')->int('event_id');
 });
 
 $router->prefix('schedules')->withPolicy('MeetingPolicy')->group(function ($router) {
     $router->get('/', 'SchedulesController@index'); // Need to check permission on the controller method
+    $router->get('/export', 'SchedulesController@export');
     $router->get('/{id}', 'SchedulesController@getBooking')->int('id');
     $router->delete('/{id}', 'SchedulesController@deleteBooking')->int('id');
-    $router->get('/{id}/slot', 'SchedulesController@getScheduleSpot')->int('id');
     $router->put('/{id}', 'SchedulesController@patchBooking')->int('id');
     $router->get('/{id}/activities', 'SchedulesController@getBookingActivities')->int('id');
     $router->get('/{id}/meta-info', 'SchedulesController@getBookingMetaInfo')->int('id');

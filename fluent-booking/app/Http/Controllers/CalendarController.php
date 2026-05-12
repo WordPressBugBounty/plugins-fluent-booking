@@ -65,13 +65,15 @@ class CalendarController extends Controller
                 if (!$hasPermission && !CalendarEventService::isSharedCalendarEvent($slot)) {
                     unset($calendar->slots[$key]);
                 }
+                $slot->setRelation('calendar', $calendar);
                 $slot->shortcode = '[fluent_booking id="' . $slot->id . '"]';
                 $slot->public_url = $slot->getPublicUrl();
                 $slot->duration = $slot->getDefaultDuration();
-                $slot->price_total = $slot->getPricingTotal();
+                $slot->price_total = $slot->getEventPrice();
                 $slot->location_fields = $slot->getLocationFields();
                 $slot->author_profiles = $slot->isMultiHostEvent() ? $slot->getAuthorProfiles() : [];
                 do_action_ref_array('fluent_booking/calendar_slot', [&$slot]);
+                $slot->unsetRelation('calendar');
             }
 
             if(empty($calendar->author_profile['ID'])) {
@@ -173,7 +175,7 @@ class CalendarController extends Controller
 
         if ($isHostCalendar && Calendar::where('user_id', $user->ID)->where('type', 'simple')->first()) {
             return $this->sendError([
-                'message' => __('The user already have a calendar. Please delete it first to create a new one', 'fluent-booking')
+                'message' => __('The user already has a calendar. Please delete it first to create a new one', 'fluent-booking')
             ], 422);
         }
 
@@ -698,6 +700,12 @@ class CalendarController extends Controller
     {
         $newCalendarId = intval($request->get('new_calendar_id')) ?: $calendarId;
 
+        if (!PermissionManager::canWriteCalendar($newCalendarId)) {
+            return $this->sendError([
+                'message' => __('You do not have permission to write to the destination calendar.', 'fluent-booking')
+            ], 403);
+        }
+
         $calendar = Calendar::findOrFail($newCalendarId);
 
         $originalEvent = CalendarSlot::with('event_metas')->where('calendar_id', $calendarId)->findOrFail($eventId);
@@ -751,6 +759,12 @@ class CalendarController extends Controller
         $calendarEvent = CalendarSlot::where('calendar_id', $calendarId)->findOrFail($eventId);
 
         $fromEventId = intval($request->get('from_event_id'));
+
+        if (!$fromEventId || !PermissionManager::canUpdateCalendarEvent($fromEventId)) {
+            return $this->sendError([
+                'message' => __('You do not have permission to clone from the selected event.', 'fluent-booking')
+            ], 403);
+        }
 
         $fromCalendarEvent = CalendarSlot::findOrFail($fromEventId);
 

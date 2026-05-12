@@ -41,71 +41,71 @@ class ConditionAssesor
     public static function assess(&$conditional, &$inputs)
     {
         if ($conditional['field']) {
-            $inputValue = Arr::get($inputs, $conditional['field']);
+            $inputValue = Arr::get($inputs, $conditional['field'], '');
+            $conditionValue = Arr::get($conditional, 'value', '');
+            $stringInputValue = is_scalar($inputValue) ? (string) $inputValue : '';
+            $stringConditionValue = is_scalar($conditionValue) ? (string) $conditionValue : '';
 
             switch ($conditional['operator']) {
                 case '=':
                     if(is_array($inputValue)) {
-                       return in_array($conditional['value'], $inputValue);
+                       return in_array($conditionValue, $inputValue);
                     }
-                    return $inputValue == $conditional['value'];
+                    return $inputValue == $conditionValue;
                     break;
                 case '!=':
                     if(is_array($inputValue)) {
-                        return !in_array($conditional['value'], $inputValue);
+                        return !in_array($conditionValue, $inputValue);
                     }
-                    return $inputValue != $conditional['value'];
+                    return $inputValue != $conditionValue;
                     break;
                 case '>':
-                    return $inputValue > $conditional['value'];
+                    return $inputValue > $conditionValue;
                     break;
                 case '<':
-                    return $inputValue < $conditional['value'];
+                    return $inputValue < $conditionValue;
                     break;
                 case '>=':
-                    return $inputValue >= $conditional['value'];
+                    return $inputValue >= $conditionValue;
                     break;
                 case '<=':
-                    return $inputValue <= $conditional['value'];
+                    return $inputValue <= $conditionValue;
                     break;
                 case 'startsWith':
-                    return Str::startsWith($inputValue, $conditional['value']);
+                    return Str::startsWith($stringInputValue, $stringConditionValue);
                     break;
                 case 'endsWith':
-                    return Str::endsWith($inputValue, $conditional['value']);
+                    return Str::endsWith($stringInputValue, $stringConditionValue);
                     break;
                 case 'contains':
-                    return Str::contains($inputValue, $conditional['value']);
+                    return Str::contains($stringInputValue, $stringConditionValue);
                     break;
                 case 'doNotContains':
-                    return !Str::contains($inputValue, $conditional['value']);
+                    return !Str::contains($stringInputValue, $stringConditionValue);
                     break;
                 case 'length_equal':
                     if(is_array($inputValue)) {
-                        return count($inputValue) == $conditional['value'];
+                        return count($inputValue) == $conditionValue;
                     }
-                    $inputValue = strval($inputValue);
-                    return strlen($inputValue) == $conditional['value'];
+                    return strlen($stringInputValue) == $conditionValue;
                     break;
                 case 'length_less_than':
                     if(is_array($inputValue)) {
-                        return count($inputValue) < $conditional['value'];
+                        return count($inputValue) < $conditionValue;
                     }
-                    $inputValue = strval($inputValue);
-                    return strlen($inputValue) < $conditional['value'];
+                    return strlen($stringInputValue) < $conditionValue;
                     break;
                 case 'length_greater_than':
                     if(is_array($inputValue)) {
-                        return count($inputValue) > $conditional['value'];
+                        return count($inputValue) > $conditionValue;
                     }
-                    $inputValue = strval($inputValue);
-                    return strlen($inputValue) > $conditional['value'];
+                    return strlen($stringInputValue) > $conditionValue;
                     break;
                 case 'test_regex':
                     if(is_array($inputValue)) {
-                        $inputValue = implode(' ', $inputValue);
+                        $stringInputValue = implode(' ', $inputValue);
                     }
-                    $result = preg_match('/'.$conditional['value'].'/', $inputValue);
+                    $result = preg_match('/'.$stringConditionValue.'/', $stringInputValue);
                     return !!$result;
                     break;
             }

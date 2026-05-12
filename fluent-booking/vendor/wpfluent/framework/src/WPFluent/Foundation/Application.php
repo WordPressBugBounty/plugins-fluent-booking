@@ -1,4 +1,13 @@
 <?php
+/**
+ * @package WPFluent
+ * @author  Sheikh Heera <heera.sheikh77@gmail.com> (https://heera.it)
+ * @author  Sheikh Heera <mail@heera.it>
+ * @author  Sheikh Heera <heera@authlab.io>
+ * @link    https://github.com/wpfluent/framework2x
+ * @license MIT https://opensource.org/licenses/MIT
+ * @license GPL-2.0-or-later https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 namespace FluentBooking\Framework\Foundation;
 
@@ -11,6 +20,31 @@ use FluentBooking\Framework\Container\Container;
 use FluentBooking\Framework\Foundation\ComponentBinder;
 use FluentBooking\Framework\Foundation\Concerns\FoundationTrait;
 
+/**
+ * Application — service container with magic property access via __get.
+ *
+ * Properties below are bound in {@see ComponentBinder::bindComponents()} and
+ * {@see Application::init()}/{@see Application::setAppLevelNamespace()}. Each
+ * `@property` declaration teaches PHPStan about a runtime container binding so
+ * `$app->view->render(...)` and similar access can be type-checked.
+ *
+ * @property \FluentBooking\Framework\Foundation\Config        $config
+ * @property \FluentBooking\Framework\View\View                $view
+ * @property \FluentBooking\Framework\Cache\Cache              $cache
+ * @property \FluentBooking\Framework\Http\Router\Router       $router
+ * @property \FluentBooking\Framework\Http\Request\Request     $request
+ * @property \FluentBooking\Framework\Http\Response\Response   $response
+ * @property \FluentBooking\Framework\Validator\Validator      $validator
+ * @property \FluentBooking\Framework\Events\Dispatcher        $events
+ * @property \FluentBooking\Framework\Encryption\Encrypter     $encrypter
+ * @property \FluentBooking\Framework\Encryption\Encrypter     $crypt
+ * @property \FluentBooking\Framework\Database\DatabaseManager $db
+ * @property \FluentBooking\Framework\Http\URL                 $url
+ * @property \FluentBooking\Framework\Support\Mail             $mail
+ * @property \FluentBooking\Framework\Support\Pipeline         $pipeline
+ * @property string                             $__pluginfile__
+ * @property string                             $__namespace__
+ */
 class Application extends Container
 {
     use FoundationTrait;
@@ -55,7 +89,7 @@ class Application extends Container
      * 
      * @var string
      */
-    protected $permissionNamespace = null;
+    protected $policyNamespace = null;
 
     /**
      * Composer JSON
@@ -70,6 +104,13 @@ class Application extends Container
      * @var array
      */
     protected $onReady = [];
+
+    /**
+     * Flag to check if components are bound.
+     * 
+     * @var boolean
+     */
+    protected $componentsBound = false;
 
     /**
      * Construct the application instance
@@ -230,15 +271,15 @@ class Application extends Container
      */
     protected function loadConfigIfExists()
     {
-        $data = [];
+        $files = [];
 
         if (is_dir($this['path.config'])) {
             foreach (glob($this['path.config'] . '*.php') as $file) {
-                $data[basename($file, '.php')] = require($file);
+                $files[basename($file, '.php')] = $file;
             }
         }
 
-        $this->instance('config', new Config($data));
+        $this->instance('config', new Config([], $files));
     }
 
     /**
@@ -297,7 +338,10 @@ class Application extends Container
      */
     protected function bindCoreComponents()
     {
-        (new ComponentBinder($this))->bindComponents();
+        if (!$this->componentsBound) {
+            $this->componentsBound = true;
+            (new ComponentBinder($this))->bindComponents();
+        }
     }
 
     /**
@@ -315,9 +359,9 @@ class Application extends Container
 
         require_once $this->basePath . 'app/Hooks/actions.php';
         require_once $this->basePath . 'app/Hooks/filters.php';
-
-        if (file_exists($includes = $this->basePath . 'app/Hooks/includes.php')) {
-            require_once $includes;
+        
+        if (file_exists($f = $this->basePath . 'app/Hooks/includes.php')) {
+            require_once $f;
         }
     }
 
@@ -325,9 +369,9 @@ class Application extends Container
      * Handler for rest_pre_serve_request filter.
      * 
      * @param  bool $served  (default: false)
-     * @param  \WP_Rest_Response $result
-     * @param  \WP_Rest_Request  $request
-     * @param  \WP_Rest_Server   $server
+     * @param  \WP_REST_Response $result
+     * @param  \WP_REST_Request  $request
+     * @param  \WP_REST_Server   $server
      * @return bool (false to intercept, otherwise true)
      */
     public function preServeRequest($served, $result, $request, $server)
@@ -340,6 +384,7 @@ class Application extends Container
                 if ($this->isRequestForEndpoints($route)) {
                     status_header(200);
                     $result->set_status(200);
+                    // @phpstan-ignore-next-line
                     $result->set_data($this->endpoints);
                 } else {
                     $result->set_data(
@@ -407,8 +452,8 @@ class Application extends Container
     /**
      * Prepare a custom not found response.
      * 
-     * @param  \WP_Rest_Response $result
-     * @param  \WP_Rest_Request  $request
+     * @param  \WP_REST_Response $result
+     * @param  \WP_REST_Request  $request
      * 
      * @return array
      */
@@ -467,10 +512,11 @@ class Application extends Container
      * 
      * @param \FluentBooking\Framework\Http\Router $router
      * 
-     * @return null
+     * @return void
      */
     protected function registerRestRoutes($router)
     {
+        // @phpstan-ignore-next-line
         $router->registerRoutes(
             $this->requireRouteFile($router)
         );
@@ -488,12 +534,12 @@ class Application extends Container
     }
 
     /**
-     * Register plugin booted callbacks.
+     * Register plugin ready (booted) callbacks.
      * 
      * @param  callable $callback
      * @return void
      */
-    protected function ready(callable $callback)
+    public function ready(callable $callback)
     {
         $this->onReady[] = $callback;
     }
@@ -501,13 +547,14 @@ class Application extends Container
     /**
      * Execute plugin booted callbacks.
      * 
-     * @param  callable $callback
      * @return void
      */
     protected function callPluginReadyCallbacks()
     {
-        while ($callback = array_shift($this->onReady)) {
-            $callback($this);
-        }
+        $this->addAction('init', function() {
+            while ($callback = array_pop($this->onReady)) {
+                $callback($this);
+            }
+        });
     }
 }

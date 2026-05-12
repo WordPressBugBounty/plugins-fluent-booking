@@ -14,50 +14,54 @@ class LocationService
         $app = App::getInstance();
 
         foreach ($details as $location) {
-
-            $displayOnBooking = Arr::get($location, 'display_on_booking') == 'yes';
+            $locationType = Arr::get($location, 'type', '');
+            $displayOnBooking = Arr::get($location, 'display_on_booking') === 'yes';
+            $meetingLink = esc_html(Arr::get($location, 'meeting_link', ''));
+            $description = esc_html(Arr::get($location, 'description', ''));
+            $title = esc_html(Arr::get($location, 'title', ''));
+            $hostPhoneNumber = esc_html(Arr::get($location, 'host_phone_number', ''));
 
             $html .= '<div class="slot_location fcal_icon_item fcal_img_item fcal_loc_google_meet">';
-            if ($location['type'] == 'google_meet') {
+            if ($locationType == 'google_meet') {
                 $html .= '<img class="fcal_loc_icon" src="' . $app['url.assets'] . 'images/g-meet.svg" alt="Google Meet" />';
                 $html .= '<span class="fcal_loc_text">' . __('Google Meet', 'fluent-booking') . '</span>';
-            } else if ($location['type'] == 'ms_teams') {
+            } else if ($locationType == 'ms_teams') {
                 $html .= '<img class="fcal_loc_icon" src="' . $app['url.assets'] . 'images/ms-teams.svg" alt="MS Teams" />';
                 $html .= '<span class="fcal_loc_text">' . __('MS Teams', 'fluent-booking') . '</span>';
-            } else if ($location['type'] == 'zoom_meeting') {
+            } else if ($locationType == 'zoom_meeting') {
                 $html .= '<img class="fcal_loc_icon zoom_icon" src="' . $app['url.assets'] . 'images/zoom.svg" alt="Zoom Icon" />';
                 $html .= '<span class="fcal_loc_text">' . __('Zoom Video', 'fluent-booking') . '</span>';
-            } else if ($location['type'] == 'online_meeting') {
+            } else if ($locationType == 'online_meeting') {
                 $html .= '<img class="fcal_loc_icon link_icon" src="' . $app['url.assets'] . 'images/link.svg" alt="Online Meeting" />';
-                if ($displayOnBooking == 'yes') {
-                    $html .= '<span class="fcal_loc_text">' . '<span class="fcal_loc_title">' . $location['meeting_link'] . '</span>';
+                if ($displayOnBooking) {
+                    $html .= '<span class="fcal_loc_text"><span class="fcal_loc_title">' . $meetingLink . '</span>';
                 } else {
                     $html .= '<span class="fcal_loc_text">' . __('Online Meeting', 'fluent-booking') . '</span>';
                 }
-            } else if ($location['type'] == 'in_person_guest') {
+            } else if ($locationType == 'in_person_guest') {
                 $html .= '<img class="fcal_loc_icon location_icon" src="' . $app['url.assets'] . 'images/physical_location.svg" alt="' . __('In Person', 'fluent-booking') . '" />';
                 $html .= '<span class="fcal_loc_text">' . __('In Person (Attendee Address)', 'fluent-booking') . '</span>';
-            } else if ($location['type'] == 'custom') {
+            } else if ($locationType == 'custom') {
                 $html .= '<img class="fcal_loc_icon location_icon" src="' . $app['url.assets'] . 'images/physical_location.svg" alt="' . __('Custom Icon', 'fluent-booking') . '" />';
-                if ($displayOnBooking == 'yes') {
-                    $html .= '<span class="fcal_loc_text">' . $location['description'] . '</span>';
+                if ($displayOnBooking) {
+                    $html .= '<span class="fcal_loc_text">' . $description . '</span>';
                 } else {
-                    $html .= '<span class="fcal_loc_text">' . $location['title'] . '</span>';
+                    $html .= '<span class="fcal_loc_text">' . $title . '</span>';
                 }
-            } else if ($location['type'] == 'in_person_organizer') {
+            } else if ($locationType == 'in_person_organizer') {
                 $html .= '<img class="fcal_loc_icon location_icon" src="' . $app['url.assets'] . 'images/physical_location.svg" alt="' . __('In Person', 'fluent-booking') . '" />';
-                if ($displayOnBooking == 'yes') {
-                    $html .= '<span class="fcal_loc_text">' . $location['description'] . '</span>';
+                if ($displayOnBooking) {
+                    $html .= '<span class="fcal_loc_text">' . $description . '</span>';
                 } else {
                     $html .= '<span class="fcal_loc_text">' . __('In Person (Organizer Address)', 'fluent-booking') . '</span>';
                 }
-            } else if ($location['type'] == 'phone_guest') {
+            } else if ($locationType == 'phone_guest') {
                 $html .= '<img class="fcal_loc_icon phone_icon" src="' . $app['url.assets'] . 'images/phone_call.svg" alt="' . __('Phone', 'fluent-booking') . '" />';
                 $html .= '<span class="fcal_loc_text">' . __('Attendee Phone Number', 'fluent-booking') . '</span>';
-            } else if ($location['type'] == 'phone_organizer') {
+            } else if ($locationType == 'phone_organizer') {
                 $html .= '<img class="fcal_loc_icon phone_icon" src="' . $app['url.assets'] . 'images/phone_call.svg" alt="' . __('Phone', 'fluent-booking') . '" />';
-                if ($displayOnBooking == 'yes') {
-                    $html .= '<span class="fcal_loc_text">' . $location['host_phone_number'] . '</span>';
+                if ($displayOnBooking) {
+                    $html .= '<span class="fcal_loc_text">' . $hostPhoneNumber . '</span>';
                 } else {
                     $html .= '<span class="fcal_loc_text">' . __('Phone Call', 'fluent-booking') . '</span>';
                 }
@@ -190,7 +194,7 @@ class LocationService
         foreach ($locationSettings as $index => $location) {
             $title = Arr::get($location, 'title');
 
-            $locationType = Arr::get($location, 'type');
+            $locationType = (string) Arr::get($location, 'type', '');
 
             if ($locationType == 'custom') {
                 if (Arr::get($location, 'display_on_booking') == 'yes') {
@@ -201,7 +205,7 @@ class LocationService
             }
 
             if (!$title) {
-                $title = str_replace('_', ' ', ucfirst($locationType));
+                $title = $locationType === '' ? '' : str_replace('_', ' ', ucfirst($locationType));
             }
 
             $slug = Arr::get($location, 'type') . '__:__' . $index;

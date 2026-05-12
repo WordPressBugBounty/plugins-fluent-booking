@@ -26,7 +26,7 @@ class DataImporter
 
         $data = $app->request->all();
 
-        if (empty($data['type'] || empty($data['user_id'] || empty($data['author_timezone'])))) {
+        if (empty($data['type']) || empty($data['user_id']) || empty($data['author_timezone'])) {
             wp_send_json_error([
                 'message' => __('Please provide all required data', 'fluent-booking'),
             ]);

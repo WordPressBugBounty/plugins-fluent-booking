@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.3
-Stable tag: 2.0.05
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,40 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.1.0 (Date: 12 May 2026)
+- Introduced: Bookings CSV Export with Filter Hooks
+- Added: Persist Author and Status Filters in Local Storage
+- Added: FluentCart Slot Icon and Unified Event Price Source
+- Added: Uploaded File Cleanup on Booking Deletion
+- Added: Recurring Default Occurrence Filter
+- Added: No-Show Option to FluentCRM Event Trigger Feed
+- Added: Disable Start Date Option in Fluent Boards Integration
+- Added: PHP 8.4 Compatibility Support
+- Improved: Scheduler Performance with Batched Writes and Bounded Sweeps
+- Improved: Aggregate SQL for Report Stats and Widget Numbers
+- Improved: Batched User Lookups in Team and Zoom Listings
+- Improved: Calendar Deeplink Body Renders with Proper Line Breaks
+- Security: Authorization Hardened Across Calendars, Events and Integrations
+- Security: OAuth State Validated Against Current User
+- Security: Ownership Proof for File Delete
+- Security: ICS Description and Location Output Escaped Against Injection
+- Fixed: Host CSV Export Column Mismatch and Null Transaction Crash
+- Fixed: Apple Calendar Event Renders with Host Timezone
+- Fixed: Outlook Add-to-Calendar Wrong Time and Missing Details
+- Fixed: FluentCart Checkout Split First/Last Name Prefill
+- Fixed: FluentCart Checkout Conflict with Woo Flow
+- Fixed: Stripe Sub-cent Truncation and Coupon Amount Conversion
+- Fixed: Date Field Not Selectable on iPhone
+- Fixed: Webhook Selected Fields Missing Source URL Option
+- Fixed: System-Expired Pending Bookings Fire auto_cancelled Hook
+- Fixed: Report Next-Meetings Ordering and Per-Group Identity
+- Fixed: No-Availability Flash on Auto-Advancing to Next Month
+- Fixed: Slot Booking View Fallthrough to Host Page
+- Fixed: Multi-Time, Multi-Guest, Cart and Calendar Null Safety
+- Fixed: Imported Calendar Required Fields Validation
+- Fixed: Integration Enabled Flag Preserved on Save
+- Fixed: Minor Dark Mode and Responsive Issue
 
 = 2.0.05 (Date: 17 Feb 2026)
 - Added: File Upload Option in Admin Booking

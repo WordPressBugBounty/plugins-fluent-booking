@@ -195,7 +195,7 @@ class FluentCartController extends Controller
         $calendarEvent->updateMeta('payment_settings', $settings);
 
         return [
-            'message' => __('Settings has been saved', 'fluent-booking')
+            'message' => __('Settings have been saved', 'fluent-booking')
         ];
     }
 }
