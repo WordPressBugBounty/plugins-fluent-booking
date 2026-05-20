@@ -1103,7 +1103,8 @@ class TransStrings
             'Export CSV'                                                                       => __('Export CSV', 'fluent-booking'),
             'Export Guests'                                                                    => __('Export Guests', 'fluent-booking'),
             'Export limited'                                                                   => __('Export limited', 'fluent-booking'),
-            'Exported first %s of %s bookings. Use filters to narrow down.'                    => __('Exported first %s of %s bookings. Use filters to narrow down.', 'fluent-booking'),
+            /* translators: 1: exported count, 2: total count */
+            'Exported first %1$s of %2$s bookings. Use filters to narrow down.' => __('Exported first %1$s of %2$s bookings. Use filters to narrow down.', 'fluent-booking'),
             'Failed to generate CSV.'                                                          => __('Failed to generate CSV.', 'fluent-booking'),
             'From Email'                                                                       => __('From Email', 'fluent-booking'),
             'From Name'                                                                        => __('From Name', 'fluent-booking'),

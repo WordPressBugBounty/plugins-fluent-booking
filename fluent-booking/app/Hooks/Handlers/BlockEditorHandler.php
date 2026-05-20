@@ -321,11 +321,11 @@ class BlockEditorHandler
 
     public function fcalRenderBookingManagementBlock($attributes)
     {
-        $calendarIds = Arr::get($attributes, 'calendarIds', []);
+        $calendarIds = array_map('intval', (array) Arr::get($attributes, 'calendarIds', []));
 
         $title = sanitize_text_field(Arr::get($attributes, 'title'));
 
-        $period = sanitize_text_field(Arr::get($attributes, 'period', 'all'));
+        $period = sanitize_key(Arr::get($attributes, 'period', 'all'));
 
         $perPage = intval(Arr::get($attributes, 'perPage', 10));
 
@@ -335,23 +335,43 @@ class BlockEditorHandler
 
         $noBookingsMessage = sanitize_text_field(Arr::get($attributes, 'noBookingsMessage'));
 
-        return do_shortcode("[fluent_booking_lists title=\"$title\" period=$period per_page=$perPage filter=$showFilter pagination=$showPagination no_bookings=\"$noBookingsMessage\" calendar_ids=" . implode(',', $calendarIds) . "]");
+        $shortcode = sprintf(
+            '[fluent_booking_lists title="%s" period=%s per_page=%d filter=%s pagination=%s no_bookings="%s" calendar_ids=%s]',
+            esc_attr($title),
+            $period,
+            $perPage,
+            $showFilter,
+            $showPagination,
+            esc_attr($noBookingsMessage),
+            implode(',', $calendarIds)
+        );
+
+        return do_shortcode($shortcode);
     }
 
     public function fcalRenderBlock($attributes)
     {
-        $output = '<style>
-            :root {
-                --fcal_primary_color: ' . esc_attr($attributes['primary_color']) . ' !important;
-                --fcal_date_radius: ' . esc_attr($attributes['date_round']) . ' !important;
-                --fcal_avatar_radius: ' . esc_attr($attributes['avatarStyle']) . ' !important;
-            }
-        </style>';
+        $primaryColor = sanitize_hex_color(Arr::get($attributes, 'primary_color', ''));
+        $dateRadius   = self::sanitizeCssLength(Arr::get($attributes, 'date_round', ''));
+        $avatarRadius = self::sanitizeCssLength(Arr::get($attributes, 'avatarStyle', ''));
 
-        $slotId = (int) $attributes['slotId'];
-        $disableHost = $attributes['hideHostInfo'];
-        $theme = Arr::get($attributes, 'theme', 'light');
-        $eventHash = Arr::get($attributes, 'eventHash');
+        $output = '<style>:root {';
+        if ($primaryColor) {
+            $output .= '--fcal_primary_color: ' . $primaryColor . ' !important;';
+        }
+        if ($dateRadius) {
+            $output .= '--fcal_date_radius: ' . $dateRadius . ' !important;';
+        }
+        if ($avatarRadius) {
+            $output .= '--fcal_avatar_radius: ' . $avatarRadius . ' !important;';
+        }
+        $output .= '}</style>';
+
+        $slotId = (int) Arr::get($attributes, 'slotId');
+        $disableHost = Arr::isTrue($attributes, 'hideHostInfo') ? 'yes' : 'no';
+        $theme = sanitize_key(Arr::get($attributes, 'theme', 'light'));
+        $eventHash = sanitize_text_field(Arr::get($attributes, 'eventHash', ''));
+        $align = sanitize_html_class(Arr::get($attributes, 'align', ''));
 
         $slot = CalendarSlot::find($slotId);
 
@@ -360,14 +380,28 @@ class BlockEditorHandler
             if (!$slot) {
                 return '';
             }
-            $slotId = $slot->id;
+            $slotId = (int) $slot->id;
+            $eventHash = (string) $slot->hash;
         }
 
-        $output .= '<div class="fluent-booking-calendar-block align' . Arr::get($attributes, 'align') . '">';
+        $output .= '<div class="fluent-booking-calendar-block align' . esc_attr($align) . '">';
 
-        $output .= do_shortcode("[fluent_booking id=$slotId disable_author=$disableHost theme=$theme hash=$eventHash]");
+        $output .= do_shortcode(sprintf(
+            '[fluent_booking id=%d disable_author=%s theme=%s hash=%s]',
+            $slotId,
+            $disableHost,
+            $theme,
+            esc_attr($eventHash)
+        ));
 
         $output .= '</div>';
         return $output;
+    }
+
+    private static function sanitizeCssLength($value)
+    {
+        $value = trim((string) $value);
+
+        return preg_match('/^\d{1,3}(\.\d+)?(px|%|em|rem)$/', $value) ? $value : '';
     }
 }

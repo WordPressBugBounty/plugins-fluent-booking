@@ -3,9 +3,9 @@ Contributors: techjewel, wpmanageninja
 Author URI: https://fluentbooking.com/
 Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
-Tested up to: 6.9
-Requires PHP: 7.3
-Stable tag: 2.1.0
+Tested up to: 7.0
+Requires PHP: 7.4
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,12 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.1.1 (Date: 20 May 2026)
+- Fixed: Multiple Calendar Creation Issue
+- Fixed: WordPress Plugin Directory Compliance
+- Security: Tightened Permission Checks Across Booking APIs
+- Security: Hardened Block Editor Against CSS Injection
 
 = 2.1.0 (Date: 12 May 2026)
 - Introduced: Bookings CSV Export with Filter Hooks

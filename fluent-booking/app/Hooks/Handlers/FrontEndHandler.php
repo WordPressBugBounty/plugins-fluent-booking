@@ -699,7 +699,7 @@ class FrontEndHandler
 
     public function ajaxScheduleMeeting()
     {
-        if (!$this->checkPublicAjaxRateLimit('schedule_meeting', 15)) {
+        if (!Helper::checkRateLimit('schedule_meeting', 15)) {
             wp_send_json_error(['message' => __('Too many requests. Please try again in a minute.', 'fluent-booking')], 429);
         }
 
@@ -949,7 +949,7 @@ class FrontEndHandler
 
     public function ajaxGetAvailableDates()
     {
-        if (!$this->checkPublicAjaxRateLimit('available_dates', 30)) {
+        if (!Helper::checkRateLimit('available_dates', 30)) {
             wp_send_json_error(['message' => __('Too many requests. Please try again in a minute.', 'fluent-booking')], 429);
         }
 
@@ -1131,7 +1131,7 @@ class FrontEndHandler
 
     public function ajaxHandleCancelMeeting()
     {
-        if (!$this->checkPublicAjaxRateLimit('cancel_meeting', 15)) {
+        if (!Helper::checkRateLimit('cancel_meeting', 15)) {
             wp_send_json_error(['message' => __('Too many requests. Please try again in a minute.', 'fluent-booking')], 429);
         }
 
@@ -1184,37 +1184,6 @@ class FrontEndHandler
 
         wp_safe_redirect($meeting->getConfirmationUrl());
         exit;
-    }
-
-    /**
-     * Per-IP rate limit for public booking AJAX. Uses transients; 60s window.
-     *
-     * @param string $action Action name (e.g. schedule_meeting, available_dates, cancel_meeting).
-     * @param int    $limit  Max requests per window.
-     * @param int    $window Window in seconds.
-     * @return bool True if under limit (and count incremented), false if over limit.
-     */
-    private function checkPublicAjaxRateLimit($action, $limit, $window = 60)
-    {
-        $args = apply_filters('fluent_booking/public_ajax_ratelimit', [
-            'limit'  => $limit,
-            'window' => $window,
-        ], $action);
-
-        $limit  = max(1, (int) (isset($args['limit']) ? $args['limit'] : $limit));
-        $window = max(1, (int) (isset($args['window']) ? $args['window'] : $window));
-
-        $ip    = Helper::getIp();
-        $key   = 'fcal_ratelimit_' . $action . '_' . md5($ip);
-        $count = (int) get_transient($key);
-
-        if ($count >= $limit) {
-            return false;
-        }
-
-        set_transient($key, $count + 1, $window);
-
-        return true;
     }
 
     private static function sanitize_mapped_data($settings)

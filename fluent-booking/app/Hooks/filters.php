@@ -1,5 +1,7 @@
 <?php
 
+defined('ABSPATH') || exit;
+
 use FluentBooking\Framework\Support\Arr;
 use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\App\Services\DateTimeHelper;

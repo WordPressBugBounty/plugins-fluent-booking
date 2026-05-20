@@ -515,6 +515,7 @@ class SchedulesController extends Controller
             return $booking;
         }
 
+        // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
         throw (new ModelNotFoundException)->setModel(Booking::class, [$bookingId]);
     }
 

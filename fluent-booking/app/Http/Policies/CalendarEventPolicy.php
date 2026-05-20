@@ -20,8 +20,14 @@ class CalendarEventPolicy extends Policy
             return true;
         }
 
-        if ($request->event_id) {
-            $calendarEvent = CalendarSlot::find($request->event_id);
+        // Resolve event_id from the URL route only — request-body values
+        // must not be permitted to redirect the authorization target.
+        // The /bookings/ index route has no placeholder so guard the access.
+        $urlParams = (array) $request->get_url_params();
+        $eventId = isset($urlParams['event_id']) ? (int) $urlParams['event_id'] : 0;
+
+        if ($eventId) {
+            $calendarEvent = CalendarSlot::find($eventId);
             if (!$calendarEvent) {
                 return false;
             }

@@ -1,5 +1,7 @@
 <?php
 
+defined('ABSPATH') || exit;
+
 /*
  * Global Modules Intialization
  */

@@ -2352,7 +2352,38 @@ class Helper
         if ($ins) {
             return sanitize_text_field($ins);
         }
-        
+
         return get_option('template');
+    }
+
+    /**
+     * Per-IP fixed-window rate limiter for public AJAX/REST endpoints.
+     *
+     * @param string $action Action name (e.g. apply_coupon, schedule_meeting).
+     * @param int    $limit  Max requests per window.
+     * @param int    $window Window in seconds.
+     * @return bool True if under the limit (and the count was incremented),
+     *              false if over.
+     */
+    public static function checkRateLimit($action, $limit, $window = 60)
+    {
+        $args = apply_filters('fluent_booking/public_ajax_ratelimit', [
+            'limit'  => $limit,
+            'window' => $window,
+        ], $action);
+
+        $limit  = max(1, (int) (isset($args['limit']) ? $args['limit'] : $limit));
+        $window = max(1, (int) (isset($args['window']) ? $args['window'] : $window));
+
+        $key   = 'fcal_ratelimit_' . $action . '_' . md5(self::getIp());
+        $count = (int) get_transient($key);
+
+        if ($count >= $limit) {
+            return false;
+        }
+
+        set_transient($key, $count + 1, $window);
+
+        return true;
     }
 }

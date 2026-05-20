@@ -21,13 +21,14 @@ class CalendarPolicy extends Policy
             return true;
         }
 
-        $calendarId = $request->id ?: $request->calendar_id;
+        // Resolve IDs strictly from URL route params; request-body values
+        // must never be allowed to redirect the authorization target.
+        $calendarId = (int) $this->getRouteParam($request, 'id');
+        $eventId    = (int) $this->getRouteParam($request, 'event_id');
 
         if (!$calendarId) {
             return apply_filters('fluent_booking/verify_calendar_api', current_user_can('manage_options'), $request);
         }
-
-        $eventId = $request->event_id;
 
         if ($eventId && !CalendarSlot::where('calendar_id', $calendarId)->where('id', $eventId)->exists()) {
             return false;
@@ -80,7 +81,7 @@ class CalendarPolicy extends Policy
             return true;
         }
 
-        $calendarId = $request->id;
+        $calendarId = (int) $this->getRouteParam($request, 'id');
 
         $calendar = Calendar::find($calendarId);
 
@@ -102,15 +103,26 @@ class CalendarPolicy extends Policy
             return true;
         }
 
-        $eventId = $request->event_id;
+        $eventId = (int) $this->getRouteParam($request, 'event_id');
 
         if (!$eventId || !PermissionManager::canUpdateCalendarEvent($eventId)) {
             return false;
         }
 
-        $sourceCalendarId = intval($request->id);
+        $sourceCalendarId = (int) $this->getRouteParam($request, 'id');
         $destinationCalendarId = intval($request->get('new_calendar_id')) ?: $sourceCalendarId;
 
         return PermissionManager::canWriteCalendar($destinationCalendarId);
+    }
+
+    /**
+     * Read a URL-only route parameter safely. Some routes under this prefix
+     * (event-lists, root listing, create) have no path placeholder, so a
+     * direct array access would emit an undefined-array-key warning.
+     */
+    private function getRouteParam(Request $request, $key)
+    {
+        $params = (array) $request->get_url_params();
+        return isset($params[$key]) ? $params[$key] : null;
     }
 }

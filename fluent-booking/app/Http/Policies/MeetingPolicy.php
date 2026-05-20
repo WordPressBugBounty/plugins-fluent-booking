@@ -21,19 +21,23 @@ class MeetingPolicy extends Policy
             return true;
         }
 
+        // Authorize only against the URL route parameter so request-body
+        // values cannot override the resource being acted on.
+        $bookingId = $this->getRouteBookingId($request);
+
         if ($request->method() == 'GET') {
             if (PermissionManager::userCan(['manage_own_calendar','read_all_bookings'])) {
                 return true;
             }
 
-            if ($request->id) {
-                $booking = Booking::find($request->id);
+            if ($bookingId) {
+                $booking = Booking::find($bookingId);
                 return $this->hasBookingAccess($booking);
             }
         }
 
-        if ($request->id) {
-            $booking = Booking::find($request->id);
+        if ($bookingId) {
+            $booking = Booking::find($bookingId);
             return $this->hasBookingAccess($booking);
         }
 
@@ -50,7 +54,13 @@ class MeetingPolicy extends Policy
             return true;
         }
 
-        $booking = Booking::where('group_id', $request->group_id)->first();
+        $groupId = $this->getRouteParam($request, 'group_id');
+
+        if (!$groupId) {
+            return false;
+        }
+
+        $booking = Booking::where('group_id', $groupId)->first();
 
         return $this->hasBookingAccess($booking);
     }
@@ -71,13 +81,38 @@ class MeetingPolicy extends Policy
             return true;
         }
 
-        if (!$request->id) {
+        $bookingId = $this->getRouteBookingId($request);
+
+        if (!$bookingId) {
             return false;
         }
 
-        $booking = Booking::find($request->id);
+        $booking = Booking::find($bookingId);
 
         return $this->hasBookingAccess($booking);
+    }
+
+    /**
+     * Resolve the booking ID from the URL route parameter only.
+     *
+     * Why: merged request inputs let JSON body values shadow URL params,
+     * which previously allowed authorizing against an attacker-owned ID
+     * while the controller acted on the URL-targeted victim ID.
+     */
+    private function getRouteBookingId(Request $request)
+    {
+        return $this->getRouteParam($request, 'id');
+    }
+
+    /**
+     * Read a URL-only route parameter safely. Routes such as /schedules/
+     * and /schedules/export have no path placeholders, so a direct
+     * access would emit an undefined-array-key warning under PHP 8.
+     */
+    private function getRouteParam(Request $request, $key)
+    {
+        $params = (array) $request->get_url_params();
+        return isset($params[$key]) ? $params[$key] : null;
     }
 
     private function hasBookingAccess($booking)

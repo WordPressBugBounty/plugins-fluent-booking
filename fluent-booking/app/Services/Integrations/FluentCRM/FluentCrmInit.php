@@ -149,6 +149,7 @@ class FluentCrmInit
         $url = admin_url('admin.php?page=fluent-booking#/scheduled-events?email=' . rawurlencode($contact->email) . '&period=all&author=all');
 
         return '<p class="fcal_crm_view_all"><a style="color:#2271b1;padding:0 12px;text-decoration:underline" href="' . esc_url($url) . '">'
+            /* translators: %d: total number of meetings */
             . sprintf(esc_html__('View all meetings (%d)', 'fluent-booking'), (int) $total)
             . '</a></p>';
     }
