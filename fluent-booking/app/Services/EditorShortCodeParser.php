@@ -109,13 +109,13 @@ class EditorShortCodeParser
             return $booking->start_time;
         }
 
-        if (str_starts_with($key, 'start_date_time_for_attendee')) {
+        if (strpos($key, 'start_date_time_for_attendee') === 0) {
             $format = preg_match('/format\.([a-zA-Z\-: ]+)/', $key, $matches) ? $matches[1] : 'Y-m-d H:i:s';
             $dateTime = DateTimeHelper::convertFromUtc($booking->start_time, $booking->person_time_zone, 'Y-m-d H:i:s');
             return date_i18n($format, strtotime($dateTime));
         }
 
-        if (str_starts_with($key, 'start_date_time_for_host')) {
+        if (strpos($key, 'start_date_time_for_host') === 0) {
             $format = preg_match('/format\.([a-zA-Z\-: ]+)/', $key, $matches) ? $matches[1] : 'Y-m-d H:i:s';
             $dateTime = DateTimeHelper::convertFromUtc($booking->start_time, $booking->getHostTimezone(), 'Y-m-d H:i:s');
             return date_i18n($format, strtotime($dateTime));

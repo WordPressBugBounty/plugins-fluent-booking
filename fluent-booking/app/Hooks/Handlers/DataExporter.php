@@ -47,10 +47,6 @@ class DataExporter
             wp_die(esc_html__('Security check failed. Please refresh and try again.', 'fluent-booking'), 403);
         }
 
-        if (!PermissionManager::hasAllCalendarAccess()) {
-            die(esc_html__('You do not have permission to export data', 'fluent-booking'));
-        }
-
         $groupId = isset($_REQUEST['group_id']) ? (int)$_REQUEST['group_id'] : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
         if (!$groupId) {
@@ -58,6 +54,14 @@ class DataExporter
         }
 
         $attendees = Booking::where('group_id', $groupId)->get();
+
+        if ($attendees->isEmpty()) {
+            die(esc_html__('No bookings found for the provided Group ID', 'fluent-booking'));
+        }
+
+        if (!PermissionManager::userCanSeeAllBookings() && !$attendees->first()->hasBookingAccess()) {
+            die(esc_html__('You do not have permission to export this group\'s attendees', 'fluent-booking'));
+        }
 
         $csvData[] = [
             'First Name',

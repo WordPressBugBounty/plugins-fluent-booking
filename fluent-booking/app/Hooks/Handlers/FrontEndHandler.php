@@ -17,7 +17,6 @@ use FluentBooking\App\Services\CalendarEventService;
 use FluentBooking\App\Services\LocationService;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\CurrenciesHelper;
-use FluentBooking\App\Services\SanitizeService;
 use FluentBooking\Framework\Support\Arr;
 
 class FrontEndHandler
@@ -330,20 +329,20 @@ class FrontEndHandler
             'no_bookings'  => __('No bookings found', 'fluent-booking'),
             'per_page'     => 10
         ], $atts);
-        
+
         $atts['title'] = sanitize_text_field($atts['title']);
         $atts['filter'] = sanitize_text_field($atts['filter']);
         $atts['pagination'] = sanitize_text_field($atts['pagination']);
         $atts['no_bookings'] = sanitize_text_field($atts['no_bookings']);
 
         $userData = get_userdata(get_current_user_id());
-        
+
         $userEmail = $userData ? $userData->user_email : null;
-        
+
         if (!$userEmail) {
             return __('Please login to view your bookings', 'fluent-booking');
         }
-        
+
         $data = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
         $perPage       = intval(Arr::get($data, 'booking_per_page', $atts['per_page']));
@@ -422,7 +421,7 @@ class FrontEndHandler
             return;
         }
 
-        add_filter('fluent_booking/schedule_custom_field_data', function ($array) {
+        add_filter('fluent_booking/schedule_custom_field_data', function ($data) {
             return [];
         });
 
@@ -805,7 +804,7 @@ class FrontEndHandler
         }
 
         $customFieldsData = BookingFieldService::getCustomFieldsData($postedData, $calendarEvent);
-        $customFieldsData = apply_filters('fluent_booking/schedule_custom_field_data', $customFieldsData, $customFieldsData, $calendarEvent);
+        $customFieldsData = apply_filters('fluent_booking/schedule_custom_field_data', $customFieldsData, $calendarEvent);
 
         if (is_wp_error($customFieldsData)) {
             wp_send_json([

@@ -70,6 +70,7 @@ class BookingMigrator
 
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange -- dbDelta() is the safe schema-change wrapper.
             dbDelta($sql);
         } else {
             $isUtmContentMigrated = $wpdb->get_col($wpdb->prepare("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND COLUMN_NAME='utm_content' AND TABLE_NAME=%s",$table)); // phpcs:ignore WordPress.DB.DirectDatabaseQuery

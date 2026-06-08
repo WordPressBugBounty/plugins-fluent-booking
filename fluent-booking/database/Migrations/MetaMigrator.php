@@ -35,6 +35,7 @@ class MetaMigrator
 
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange -- dbDelta() is the safe schema-change wrapper.
             dbDelta($sql);
         }
     }

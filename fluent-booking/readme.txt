@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,14 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.1.2 (Date: 05 Jun 2026)
+- Added: Placeholder Option for Multi-Select Field
+- Improved: WordPress 7.0 Compatibility
+- Security: Gated Group Attendee Export by Booking Access
+- Fixed: Bookings Block Not Showing Any Bookings
+- Fixed: Phone Location Field Allowed Empty Submission
+- Fixed: Duplicate Argument in Custom Field Data Filter
 
 = 2.1.1 (Date: 20 May 2026)
 - Fixed: Multiple Calendar Creation Issue

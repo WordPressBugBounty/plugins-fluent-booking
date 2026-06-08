@@ -321,7 +321,13 @@ class BlockEditorHandler
 
     public function fcalRenderBookingManagementBlock($attributes)
     {
-        $calendarIds = array_map('intval', (array) Arr::get($attributes, 'calendarIds', []));
+        $calendarIds = (array) Arr::get($attributes, 'calendarIds', []);
+
+        if (!$calendarIds || in_array('all', $calendarIds, true)) {
+            $calendarIds = 'all';
+        } else {
+            $calendarIds = implode(',', array_map('intval', $calendarIds));
+        }
 
         $title = sanitize_text_field(Arr::get($attributes, 'title'));
 
@@ -343,7 +349,7 @@ class BlockEditorHandler
             $showFilter,
             $showPagination,
             esc_attr($noBookingsMessage),
-            implode(',', $calendarIds)
+            $calendarIds
         );
 
         return do_shortcode($shortcode);

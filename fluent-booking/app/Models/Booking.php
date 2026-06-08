@@ -958,11 +958,23 @@ class Booking extends Model
         ], Helper::getBookingReceiptLandingBaseUrl());
     }
 
+    /**
+     * Whether the current user may access this booking: a host of the booking,
+     * or a manage_own_calendar user who hosts the booking's event.
+     */
     public function hasBookingAccess()
     {
-        $hostIds = $this->getHostIds();
-        $hasAccess = PermissionManager::userCan(['manage_all_data', 'manage_all_bookings']);
-        return in_array(get_current_user_id(), $hostIds) || $hasAccess;
+        $userId = get_current_user_id();
+
+        if (in_array($userId, $this->getHostIds())) {
+            return true;
+        }
+
+        if (!PermissionManager::userCan('manage_own_calendar')) {
+            return false;
+        }
+
+        return $this->calendar_event && in_array($userId, $this->calendar_event->getHostIds());
     }
 
     private function canPerformAction($settings)
