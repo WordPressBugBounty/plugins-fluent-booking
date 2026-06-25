@@ -15,6 +15,8 @@ use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\CalendarService;
 use FluentBooking\App\Services\ExportHelper;
+use FluentBooking\App\Services\Integrations\FluentCRM\CrmContactService;
+use FluentCrm\App\Services\PermissionManager as CrmPermissionManager;
 
 class SchedulesController extends Controller
 {
@@ -337,9 +339,7 @@ class SchedulesController extends Controller
         $booking = Booking::with('calendar_event');
 
         if (!PermissionManager::userCanSeeAllBookings()) {
-            $booking->whereHas('calendar', function ($q) {
-                $q->where('user_id', get_current_user_id());
-            });
+            $booking->whereHostAccess(get_current_user_id());
         }
 
         $booking = $booking->findOrFail($bookingId);
@@ -406,9 +406,7 @@ class SchedulesController extends Controller
         $booking = Booking::with('slot');
 
         if (!PermissionManager::userCanSeeAllBookings()) {
-            $booking->whereHas('calendar', function ($q) {
-                $q->where('user_id', get_current_user_id());
-            });
+            $booking->whereHostAccess(get_current_user_id());
         }
 
         $booking = $booking->where('group_id', $groupId)->first();
@@ -462,15 +460,14 @@ class SchedulesController extends Controller
         $sidebarContents = [];
         $mainBodyContents = [];
 
-        if (defined('FLUENTCRM')) {
-            $profileHtml = fluentcrm_get_crm_profile_html($booking->email, false);
-            if ($profileHtml) {
-                $sidebarContents[] = [
-                    'id'      => 'fluent_crm_profule',
-                    'title'   => __('CRM Profile', 'fluent-booking'),
-                    'content' => $profileHtml
-                ];
-            }
+        $crmProfile = CrmContactService::getProfileData($booking->email);
+        if ($crmProfile) {
+            $sidebarContents[] = [
+                'id'      => 'fluent_crm_profule',
+                'title'   => __('CRM Profile', 'fluent-booking'),
+                'type'    => 'crm_profile',
+                'profile' => $crmProfile,
+            ];
         }
 
         $order = null;
@@ -493,6 +490,152 @@ class SchedulesController extends Controller
             'payment_order'      => $order,
             'main_body_contents' => $mainBodyContents
         ];
+    }
+
+    /**
+     * Return the CRM contact state for a booking plus the full tag/list option
+     * sets, so the admin can manage tags/lists inline from the CRM Profile card.
+     */
+    public function getCrmContact(Request $request, $bookingId)
+    {
+        $booking = $this->resolveOwnedBookingOrFail($bookingId);
+
+        if (!CrmContactService::isActive()) {
+            return $this->sendError([
+                'message' => __('FluentCRM is not active.', 'fluent-booking')
+            ]);
+        }
+
+        $state = CrmContactService::getContactState($booking->email);
+
+        if (!$state) {
+            return $this->sendError([
+                'message' => __('No CRM contact found for this booking.', 'fluent-booking')
+            ], 404);
+        }
+
+        return $state;
+    }
+
+    /**
+     * Guest-field prefill for the CRM "Book Appointment" action.
+     * Keyed by contact id, so it carries its own CRM-read gate.
+     */
+    public function getCrmContactPrefill(Request $request)
+    {
+        if (!CrmContactService::isActive()) {
+            return $this->sendError([
+                'message' => __('FluentCRM is not active.', 'fluent-booking')
+            ]);
+        }
+
+        if (!CrmPermissionManager::currentUserCan('fcrm_read_contacts')) {
+            return $this->sendError([
+                'message' => __('You do not have permission to read CRM contacts.', 'fluent-booking')
+            ], 403);
+        }
+
+        $contactId = absint($request->get('contact_id'));
+
+        if (!$contactId) {
+            return $this->sendError([
+                'message' => __('Invalid contact.', 'fluent-booking')
+            ], 422);
+        }
+
+        $prefill = CrmContactService::getBookingPrefillData($contactId);
+
+        if (!$prefill) {
+            return $this->sendError([
+                'message' => __('No CRM contact found.', 'fluent-booking')
+            ], 404);
+        }
+
+        return [
+            'prefill' => $prefill,
+        ];
+    }
+
+    /**
+     * Typeahead search for the admin booking modal's CRM contact picker.
+     * Same intersection gate as getCrmContactPrefill: booking access (policy) AND fcrm_read_contacts.
+     */
+    public function searchCrmContacts(Request $request)
+    {
+        if (!CrmContactService::isActive()) {
+            return $this->sendError([
+                'message' => __('FluentCRM is not active.', 'fluent-booking')
+            ]);
+        }
+
+        if (!CrmPermissionManager::currentUserCan('fcrm_read_contacts')) {
+            return $this->sendError([
+                'message' => __('You do not have permission to read CRM contacts.', 'fluent-booking')
+            ], 403);
+        }
+
+        $search = sanitize_text_field($request->get('search', ''));
+
+        return [
+            'contacts' => CrmContactService::searchContacts($search),
+        ];
+    }
+
+    /**
+     * Bounded, searchable tag/list options for the CRM Profile picker.
+     */
+    public function getCrmOptions(Request $request, $bookingId)
+    {
+        $this->resolveOwnedBookingOrFail($bookingId);
+
+        if (!CrmContactService::isActive()) {
+            return $this->sendError([
+                'message' => __('FluentCRM is not active.', 'fluent-booking')
+            ]);
+        }
+
+        $type   = $request->get('type') === 'lists' ? 'lists' : 'tags';
+        $search = sanitize_text_field($request->get('search', ''));
+
+        return [
+            'options' => CrmContactService::getOptions($type, $search),
+        ];
+    }
+
+    public function updateCrmTags(Request $request, $bookingId)
+    {
+        return $this->updateCrmTaxonomy($request, $bookingId, 'tags');
+    }
+
+    public function updateCrmLists(Request $request, $bookingId)
+    {
+        return $this->updateCrmTaxonomy($request, $bookingId, 'lists');
+    }
+
+    private function updateCrmTaxonomy(Request $request, $bookingId, $type)
+    {
+        $booking = $this->resolveOwnedBookingOrFail($bookingId);
+
+        if (!CrmContactService::isActive()) {
+            return $this->sendError([
+                'message' => __('FluentCRM is not active.', 'fluent-booking')
+            ]);
+        }
+
+        $requestKey = $type === 'tags' ? 'tag_ids' : 'list_ids';
+        $desired    = (array) $request->get($requestKey, []);
+
+        $result = CrmContactService::syncTaxonomy($booking->email, $type, $desired);
+
+        if ($result === null) {
+            return $this->sendError([
+                'message' => __('No CRM contact found for this booking.', 'fluent-booking')
+            ], 404);
+        }
+
+        return $this->sendSuccess(array_merge([
+            'message' => __('CRM contact updated successfully.', 'fluent-booking'),
+        ], $result));
     }
 
     private function resolveOwnedBookingOrFail($bookingId)

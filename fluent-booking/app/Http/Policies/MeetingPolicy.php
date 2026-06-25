@@ -75,6 +75,28 @@ class MeetingPolicy extends Policy
         return $this->authorizeBookingAccess($request);
     }
 
+    public function getCrmContact(Request $request)
+    {
+        return $this->authorizeBookingAccess($request);
+    }
+
+    public function getCrmOptions(Request $request)
+    {
+        return $this->authorizeBookingAccess($request);
+    }
+
+    // State-changing: use verifyRequest so read-only roles (read_all_bookings)
+    // cannot mutate CRM data; only host access or manage_all_* passes for POST.
+    public function updateCrmTags(Request $request)
+    {
+        return $this->verifyRequest($request);
+    }
+
+    public function updateCrmLists(Request $request)
+    {
+        return $this->verifyRequest($request);
+    }
+
     private function authorizeBookingAccess(Request $request)
     {
         if (PermissionManager::userCan(['manage_all_bookings', 'manage_all_data', 'read_all_bookings'])) {

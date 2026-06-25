@@ -1154,7 +1154,23 @@ class TransStrings
             'We highly recommend to enable this feature.'                                      => __('We highly recommend to enable this feature.', 'fluent-booking'),
             'We recommend this for reliable email delivery.'                                   => __('We recommend this for reliable email delivery.', 'fluent-booking'),
             'You don\'t have any feeds configured. Let\'s go'                                  => __('You don\'t have any feeds configured. Let\'s go', 'fluent-booking'),
-            'to install and activate FluentCart.'                                              => __('to install and activate FluentCart.', 'fluent-booking')
+            'to install and activate FluentCart.'                                              => __('to install and activate FluentCart.', 'fluent-booking'),
+            'Are you sure to remove this list?'                                                => __('Are you sure to remove this list?', 'fluent-booking'),
+            'Are you sure to remove this tag?'                                                 => __('Are you sure to remove this tag?', 'fluent-booking'),
+            'Are you sure you want to delete this question? This action cannot be undone.'     => __('Are you sure you want to delete this question? This action cannot be undone.', 'fluent-booking'),
+            'Clicks'                                                                           => __('Clicks', 'fluent-booking'),
+            'CRM Profile'                                                                      => __('CRM Profile', 'fluent-booking'),
+            'Delete Question'                                                                  => __('Delete Question', 'fluent-booking'),
+            'Emails'                                                                           => __('Emails', 'fluent-booking'),
+            'Loading'                                                                          => __('Loading', 'fluent-booking'),
+            'No data available to export.'                                                     => __('No data available to export.', 'fluent-booking'),
+            'No lists found'                                                                   => __('No lists found', 'fluent-booking'),
+            'No tags found'                                                                    => __('No tags found', 'fluent-booking'),
+            'Opens'                                                                            => __('Opens', 'fluent-booking'),
+            'Seamlessly integrate FluentCart to sell paid bookings and manage products directly from your appointments.' => __('Seamlessly integrate FluentCart to sell paid bookings and manage products directly from your appointments.', 'fluent-booking'),
+            'Search CRM contact or type an email'                                              => __('Search CRM contact or type an email', 'fluent-booking'),
+            'Search lists...'                                                                  => __('Search lists...', 'fluent-booking'),
+            'Search tags...'                                                                   => __('Search tags...', 'fluent-booking')
         );
     }
 }

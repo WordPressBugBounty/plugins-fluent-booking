@@ -380,9 +380,7 @@ class ReportController extends Controller
             ->orderBy('start_time', 'ASC');
 
         if (!PermissionManager::userCanSeeAllBookings()) {
-            $bookingQuery->whereHas('calendar', function ($q) {
-                $q->where('user_id', get_current_user_id());
-            });
+            $bookingQuery->whereHostAccess(get_current_user_id());
         }
 
         $nextMeetings = $bookingQuery->limit(50)->get()
@@ -415,9 +413,7 @@ class ReportController extends Controller
         $bookingQuery = Booking::whereIn('status', ['pending', 'scheduled', 'completed']);
 
         if (!PermissionManager::userCanSeeAllBookings()) {
-            $bookingQuery->whereHas('calendar', function ($q) {
-                $q->where('user_id', get_current_user_id());
-            });
+            $bookingQuery->whereHostAccess(get_current_user_id());
         }
 
         return $bookingQuery->latest()->take(5)->get();

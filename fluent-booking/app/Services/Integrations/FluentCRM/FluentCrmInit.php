@@ -7,6 +7,7 @@ use FluentBooking\Framework\Support\Arr;
 use FluentBooking\App\Services\DateTimeHelper;
 use FluentCrm\App\Models\Subscriber;
 use FluentCrm\App\Services\Html\TableBuilder;
+use FluentCrm\App\Services\PermissionManager as CrmPermissionManager;
 
 class FluentCrmInit
 {
@@ -59,7 +60,7 @@ class FluentCrmInit
 
     public function getProfileSection($sections, Subscriber $contact)
     {
-        if (!current_user_can('fcrm_read_contacts') && !current_user_can('manage_options')) {
+        if (!CrmPermissionManager::currentUserCan('fcrm_read_contacts')) {
             return $sections;
         }
 
@@ -106,8 +107,10 @@ class FluentCrmInit
             ],
         ], $meetings, $contact);
 
+        $bookButton = $this->getBookAppointmentButton($contact);
+
         if (empty($response['data'])) {
-            $sections['content_html'] = '<p style="padding:0 20px;">' . esc_html__('No scheduled meetings found for this contact.', 'fluent-booking') . '</p>';
+            $sections['content_html'] = $bookButton . '<p style="padding:0 20px;">' . esc_html__('No scheduled meetings found for this contact.', 'fluent-booking') . '</p>';
             return $sections;
         }
 
@@ -122,9 +125,19 @@ class FluentCrmInit
             $table->addRow($row);
         }
 
-        $sections['content_html'] = $table->getHtml() . $this->getViewAllLink($contact, $total, $limit);
+        $sections['content_html'] = $bookButton . $table->getHtml() . $this->getViewAllLink($contact, $total, $limit);
 
         return $sections;
+    }
+
+    private function getBookAppointmentButton(Subscriber $contact)
+    {
+        $url = admin_url('admin.php?page=fluent-booking#/scheduled-events?new_booking=1&crm_contact_id=' . (int) $contact->id);
+
+        return '<p class="fcal_crm_book_appointment" style="padding:0px 20px;margin-top:-36px;text-align:end;">'
+            . '<a class="el-button el-button--small" target="_blank" rel="noopener noreferrer" href="' . esc_url($url) . '">'
+            . esc_html__('Book Appointment', 'fluent-booking')
+            . '</a></p>';
     }
 
     private function mapMeetingRow($meeting, $host)

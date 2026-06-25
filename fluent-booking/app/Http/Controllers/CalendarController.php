@@ -61,10 +61,14 @@ class CalendarController extends Controller
             $calendar->author_profile = $calendar->getAuthorProfile();
             $calendar->public_url = $calendar->getLandingPageUrl();
             $calendar->event_order = $calendar->getMeta('event_order');
-            foreach ($calendar->slots as $key => $slot) {
-                if (!$hasPermission && !CalendarEventService::isSharedCalendarEvent($slot)) {
-                    unset($calendar->slots[$key]);
-                }
+
+            if (!$hasPermission) {
+                $calendar->setRelation('slots', $calendar->slots->filter(function ($slot) {
+                    return CalendarEventService::isSharedCalendarEvent($slot);
+                })->values());
+            }
+
+            foreach ($calendar->slots as $slot) {
                 $slot->setRelation('calendar', $calendar);
                 $slot->shortcode = '[fluent_booking id="' . $slot->id . '"]';
                 $slot->public_url = $slot->getPublicUrl();

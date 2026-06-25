@@ -69,11 +69,17 @@ $router->prefix('bookings')->withPolicy('CalendarEventPolicy')->group(function (
 $router->prefix('schedules')->withPolicy('MeetingPolicy')->group(function ($router) {
     $router->get('/', 'SchedulesController@index'); // Need to check permission on the controller method
     $router->get('/export', 'SchedulesController@export');
+    $router->get('/crm-contact-prefill', 'SchedulesController@getCrmContactPrefill');
+    $router->get('/crm-contact-search', 'SchedulesController@searchCrmContacts');
     $router->get('/{id}', 'SchedulesController@getBooking')->int('id');
     $router->delete('/{id}', 'SchedulesController@deleteBooking')->int('id');
     $router->put('/{id}', 'SchedulesController@patchBooking')->int('id');
     $router->get('/{id}/activities', 'SchedulesController@getBookingActivities')->int('id');
     $router->get('/{id}/meta-info', 'SchedulesController@getBookingMetaInfo')->int('id');
+    $router->get('/{id}/crm-contact', 'SchedulesController@getCrmContact')->int('id');
+    $router->get('/{id}/crm-options', 'SchedulesController@getCrmOptions')->int('id');
+    $router->post('/{id}/crm-contact/tags', 'SchedulesController@updateCrmTags')->int('id');
+    $router->post('/{id}/crm-contact/lists', 'SchedulesController@updateCrmLists')->int('id');
     $router->post('/{id}/send-confirmation-email', 'SchedulesController@sendConfirmationEmail')->int('id');
 
     $router->get('/group-bookings/{group_id}/attendees', 'SchedulesController@getGroupAttendees')->int('group_id');

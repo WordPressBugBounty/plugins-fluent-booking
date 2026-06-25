@@ -89,6 +89,7 @@ return array(
     'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\BookingRescheduledTrigger' => $baseDir . '/app/Services/Integrations/FluentCRM/BookingRescheduledTrigger.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\Bootstrap' => $baseDir . '/app/Services/Integrations/FluentCRM/Bootstrap.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\CancelBookingTrigger' => $baseDir . '/app/Services/Integrations/FluentCRM/CancelBookingTrigger.php',
+    'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\CrmContactService' => $baseDir . '/app/Services/Integrations/FluentCRM/CrmContactService.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\CrmSmartCode' => $baseDir . '/app/Services/Integrations/FluentCRM/CrmSmartCode.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\FluentCrmInit' => $baseDir . '/app/Services/Integrations/FluentCRM/FluentCrmInit.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\NewBookingTrigger' => $baseDir . '/app/Services/Integrations/FluentCRM/NewBookingTrigger.php',

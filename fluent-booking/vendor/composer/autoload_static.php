@@ -115,6 +115,7 @@ class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
         'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\BookingRescheduledTrigger' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/BookingRescheduledTrigger.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\Bootstrap' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/Bootstrap.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\CancelBookingTrigger' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/CancelBookingTrigger.php',
+        'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\CrmContactService' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/CrmContactService.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\CrmSmartCode' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/CrmSmartCode.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\FluentCrmInit' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/FluentCrmInit.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\NewBookingTrigger' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/NewBookingTrigger.php',

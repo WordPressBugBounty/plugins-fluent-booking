@@ -440,15 +440,22 @@ class BookingService
         // Initialize the ICS content
         $icsContent = "BEGIN:VCALENDAR\r\n";
         $icsContent .= "VERSION:2.0\r\n";
-        $icsContent .= "PRODID:-//Google Inc//Fluent Booking//EN\r\n";
-        $icsContent .= "METHOD:REQUEST\r\n";
+        $icsContent .= "PRODID:-//FluentBooking//Fluent Booking//EN\r\n";
+
+        // PUBLISH = plain "add to calendar" event. METHOD:REQUEST makes it an iTIP
+        // invitation bound to the ATTENDEE, which Google Calendar then rejects/mishandles.
+        $icsContent .= "METHOD:PUBLISH\r\n";
 
         $icsContent .= "BEGIN:VEVENT\r\n";
         $icsContent .= "STATUS:CONFIRMED\r\n";
         $icsContent .= "UID:" . md5($booking->hash) . "\r\n"; // Unique ID for the event
+        $icsContent .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n"; // Required by RFC5545; Google rejects ICS without it
 
         $icsContent .= "SUMMARY:" . self::escapeIcsText($booking->getBookingTitle()) . "\r\n";
-        $icsContent .= "DESCRIPTION:" . self::escapeIcsText($booking->getIcsBookingDescription()) . "\r\n";
+
+        // Escape per segment so the existing "\n" line-break escapes are not double-escaped.
+        $descriptionSegments = array_map([self::class, 'escapeIcsText'], explode('\n', $booking->getIcsBookingDescription()));
+        $icsContent .= "DESCRIPTION:" . implode('\n', $descriptionSegments) . "\r\n";
 
         // Date and time formatting (assuming eventStart and eventEnd are DateTime objects)
         $icsContent .= "DTSTART:" . gmdate('Ymd\THis\Z', strtotime($booking->start_time)) . "\r\n";
@@ -457,9 +464,7 @@ class BookingService
         $icsContent .= "LOCATION:" . self::escapeIcsText($booking->getLocationAsText()) . "\r\n";
 
         $organizerEmail = sanitize_email($author['email']) ?: $author['email'];
-        $attendeeEmail  = sanitize_email($booking->email) ?: $booking->email;
         $icsContent .= "ORGANIZER;CN=\"" . self::escapeIcsText($author['name']) . "\":mailto:" . $organizerEmail . "\r\n";
-        $icsContent .= "ATTENDEE;CN=\"" . $attendeeEmail . "\";ROLE=REQ-PARTICIPANT;RSVP=TRUE;PARTSTAT=ACCEPTED:mailto:" . $attendeeEmail . "\r\n";
 
         $icsContent .= "END:VEVENT\r\n";
 

@@ -220,6 +220,27 @@ class Booking extends Model
         return $this->hosts()->pluck('user_id')->toArray();
     }
 
+    public function bookingHosts()
+    {
+        return $this->hasMany(BookingHost::class, 'booking_id');
+    }
+
+    /**
+     * Limit to bookings the given user may access as a host: either they own
+     * the booking's calendar, or they are a host on the booking (team events
+     * such as round-robin/collective put non-owner hosts on fcal_booking_hosts).
+     */
+    public function scopeWhereHostAccess($query, $userId)
+    {
+        return $query->where(function ($q) use ($userId) {
+            $q->whereHas('calendar', function ($c) use ($userId) {
+                $c->where('user_id', $userId);
+            })->orWhereHas('bookingHosts', function ($h) use ($userId) {
+                $h->where('user_id', $userId);
+            });
+        });
+    }
+
     public function scopeUpcoming($query)
     {
         return $query->where('end_time', '>=', gmdate('Y-m-d H:i:s')); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
@@ -1299,7 +1320,7 @@ class Booking extends Model
         return apply_filters('fluent_booking/meeting_bookmarks', [
             'google'   => [
                 'title' => __('Google Calendar', 'fluent-booking'),
-                'url'   => 'https://calendar.google.com/calendar/r/eventedit?' . $googleParams,
+                'url'   => 'https://calendar.google.com/calendar/render?action=TEMPLATE&' . $googleParams,
                 'icon'  => $assetsUrl . 'images/g-icon.svg'
             ],
             'outlook'  => [

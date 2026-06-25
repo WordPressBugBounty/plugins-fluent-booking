@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,21 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.2.0 (Date: 25 Jun 2026)
+- Added: CRM Contact Search and Prefill in Admin Booking
+- Added: Book Appointment for a FluentCRM Contact
+- Added: Manage CRM Tags and Lists From Booking Details
+- Added: Question Delete Confirmation
+- Improved: CRM Picker Empty State and Search
+- Improved: Mobile Toolbar Button and Scheduler Backgrounds
+- Security: Hardened Booking Reschedule Against Mismatched Event Requests
+- Fixed: ICS Description Formatting Issue
+- Fixed: Add-to-Calendar Reliability for Google calendar
+- Fixed: Shared Calendar Events Not Showing for Limited Users
+- Fixed: Team-Member Hosts Blocked From Their Own Bookings
+- Fixed: CRM Profile Card Overflow in Booking Details
+- Fixed: Admin Dark Mode Footer Background Color
 
 = 2.1.2 (Date: 05 Jun 2026)
 - Added: Placeholder Option for Multi-Select Field

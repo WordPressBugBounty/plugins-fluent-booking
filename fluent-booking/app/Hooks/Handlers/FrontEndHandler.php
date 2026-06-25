@@ -451,6 +451,16 @@ class FrontEndHandler
                 ], 422);
             }
 
+            // The booking must be rescheduled against its own event. Reject mixed-object
+            // requests where the posted event_id differs from the booking's event so the
+            // availability validation cannot be performed under a different event than the
+            // one actually being modified.
+            if ((int) $existingBooking->event_id !== (int) $calendarEvent->id) {
+                wp_send_json([
+                    'message' => __('Invalid rescheduling request', 'fluent-booking')
+                ], 422);
+            }
+
             $rescheduleBy = 'guest';
             $hostIds = $existingBooking->getHostIds();
             if (in_array(get_current_user_id(), $hostIds) || PermissionManager::userCan(['manage_all_data', 'manage_all_bookings'])) {
