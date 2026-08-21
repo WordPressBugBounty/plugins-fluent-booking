@@ -66,7 +66,7 @@ class LandingPageHelper
 
         $html = '<div class="fcal_powered_by">';
         $html .= esc_html__('Powered By', 'fluent-booking');
-        $html .= ' <span><a target="_blank" href="' . esc_url(Helper::getUpgradeUrl()) . '">';
+        $html .= ' <span><a target="_blank" href="' . esc_url(Helper::getUpgradeUrl('powered_by')) . '">';
         $html .= esc_html__('FluentBooking', 'fluent-booking');
         $html .= '</a></span>';
         $html .= '</div>';

@@ -288,15 +288,17 @@ class Booking extends Model
         }
 
         if ($status == 'completed') {
-            return $query->where('end_time', '<', gmdate('Y-m-d H:i:s')) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-                ->where('status', '!=', 'cancelled')
-                ->where('status', '!=', 'rejected')
-                ->orWhere('status', 'completed'); // maybe cron did not mark few as completed yet
+            return $query->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->where('end_time', '<', gmdate('Y-m-d H:i:s')) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+                        ->where('status', '!=', 'cancelled')
+                        ->where('status', '!=', 'rejected');
+                })->orWhere('status', 'completed'); // maybe cron did not mark few as completed yet
+            });
         }
 
         if ($status == 'cancelled') {
-            return $query->where('status', 'cancelled')
-                ->orWhere('status', 'rejected');
+            return $query->whereIn('status', ['cancelled', 'rejected']);
         }
 
         if ($status == 'pending') {
@@ -535,7 +537,9 @@ class Booking extends Model
 
     public function getLocationDetailsAttribute($locationDetails)
     {
-        return \maybe_unserialize($locationDetails);
+        $value = \maybe_unserialize($locationDetails);
+
+        return is_array($value) ? $value : [];
     }
 
     public function setOtherInfoAttribute($otherInfo)
@@ -543,6 +547,9 @@ class Booking extends Model
         $originalOtherInfo = $this->getOriginal('other_info');
 
         $originalOtherInfo = \maybe_unserialize($originalOtherInfo);
+        $originalOtherInfo = is_array($originalOtherInfo) ? $originalOtherInfo : [];
+
+        $otherInfo = is_array($otherInfo) ? $otherInfo : (array) \maybe_unserialize($otherInfo);
 
         foreach ($otherInfo as $key => $value) {
             $originalOtherInfo[$key] = $value;
@@ -1018,6 +1025,8 @@ class Booking extends Model
             $conditionTime = $conditionValue * 60;
             if ($conditionUnit == 'hours') {
                 $conditionTime = $conditionTime * 60;
+            } elseif ($conditionUnit == 'days') {
+                $conditionTime = $conditionTime * 60 * 24;
             }
     
             return $bookingStartTime - $currentTime > $conditionTime;
@@ -1064,10 +1073,18 @@ class Booking extends Model
     {
         $hostIds = $this->getHostIds();
 
+        cache_users($hostIds);
+
+        $calendars = Calendar::whereIn('user_id', $hostIds)
+            ->where('type', 'simple')
+            ->orderBy('id', 'desc')
+            ->with(['metas', 'user', 'user.metas'])
+            ->get()
+            ->keyBy('user_id');
+
         $hosts = [];
         foreach ($hostIds as $hostId) {
-            $calendar = Calendar::where('user_id', $hostId)->where('type', 'simple')->first();
-            if ($calendar) {
+            if ($calendar = $calendars->get($hostId)) {
                 $hosts[] = $calendar->getAuthorProfile($public);
             }
         }

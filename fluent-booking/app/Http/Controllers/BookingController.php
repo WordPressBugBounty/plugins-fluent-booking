@@ -88,11 +88,13 @@ class BookingController extends Controller
         $locationType = Arr::get($postedData, 'location_type');
 
         if ($calendarEvent->isPhoneRequired()) {
-            $rules['location_description'] = 'required';
+            $rules['location_description'] = ['required', $this->validPhoneNumberRule()];
             $messages['location_description.required'] = __('Please provide attendee\'s phone number', 'fluent-booking');
         } else if ($calendarEvent->isAddressRequired()) {
             $rules['location_description'] = 'required';
             $messages['location_description.required'] = __('Please provide attendee\'s address', 'fluent-booking');
+        } else if ($locationType === 'phone_guest') {
+            $rules['location_description'] = [$this->validPhoneNumberRule()];
         }
 
         $additionalGuests = Arr::get($postedData, 'guests', []);
@@ -251,6 +253,18 @@ class BookingController extends Controller
             'booking' => $booking,
             'message' => __('Booking has been created', 'fluent-booking'),
         ];
+    }
+
+    /**
+     * @return \Closure
+     */
+    private function validPhoneNumberRule()
+    {
+        return function ($attribute, $value) {
+            if (!empty($value) && !Helper::isValidPhoneNumber($value)) {
+                return __('Please provide a valid phone number', 'fluent-booking');
+            }
+        };
     }
 
     public function getEvent(Request $request, $eventId)

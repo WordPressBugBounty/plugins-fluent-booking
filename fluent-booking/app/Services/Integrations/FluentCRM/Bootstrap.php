@@ -100,6 +100,8 @@ class Bootstrap extends IntegrationManagerController
         unset($fieldOptions['full_name']);
         unset($fieldOptions['company_id']);
 
+        $canCreateTaxonomy = \FluentCrm\App\Services\PermissionManager::currentUserCan('fcrm_manage_contact_cats');
+
         $fields = [
             [
                 'key'         => 'name',
@@ -144,23 +146,29 @@ class Bootstrap extends IntegrationManagerController
                 'options'            => $fieldOptions,
             ],
             [
-                'key'         => 'list_ids',
-                'label'       => __('FluentCRM Lists', 'fluent-booking'),
-                'placeholder' => __('Select FluentCRM Lists', 'fluent-booking'),
-                'tips'        => __('Select the FluentCRM Lists you would like to add your contacts to.', 'fluent-booking'),
-                'component'   => 'select',
-                'is_multiple' => true,
-                'required'    => false,
-                'options'     => $this->getLists(),
+                'key'                => 'list_ids',
+                'label'              => __('FluentCRM Lists', 'fluent-booking'),
+                'placeholder'        => __('Select FluentCRM Lists', 'fluent-booking'),
+                'tips'               => __('Select the FluentCRM Lists you would like to add your contacts to.', 'fluent-booking'),
+                'component'          => 'select',
+                'is_multiple'        => true,
+                'required'           => false,
+                'options'            => $this->getLists(),
+                'creatable'          => $canCreateTaxonomy,
+                'taxonomy'           => 'lists',
+                'create_placeholder' => __('New list name', 'fluent-booking'),
             ],
             [
-                'key'          => 'tag_ids',
-                'require_list' => false,
-                'label'        => __('Contact Tags', 'fluent-booking'),
-                'placeholder'  => __('Select Tags', 'fluent-booking'),
-                'component'    => 'select',
-                'is_multiple'  => true,
-                'options'      => $this->getTags(),
+                'key'                => 'tag_ids',
+                'require_list'       => false,
+                'label'              => __('Contact Tags', 'fluent-booking'),
+                'placeholder'        => __('Select Tags', 'fluent-booking'),
+                'component'          => 'select',
+                'is_multiple'        => true,
+                'options'            => $this->getTags(),
+                'creatable'          => $canCreateTaxonomy,
+                'taxonomy'           => 'tags',
+                'create_placeholder' => __('New tag name', 'fluent-booking'),
             ],
             [
                 'key'            => 'skip_if_exists',

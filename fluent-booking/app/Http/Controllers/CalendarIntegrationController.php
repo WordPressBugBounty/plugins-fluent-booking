@@ -8,6 +8,8 @@ use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\Integrations\CalendarIntegrationService;
+use FluentBooking\App\Services\Integrations\FluentCRM\CrmContactService;
+use FluentCrm\App\Services\PermissionManager as CrmPermissionManager;
 
 class CalendarIntegrationController extends Controller
 {
@@ -148,6 +150,57 @@ class CalendarIntegrationController extends Controller
 
             return $this->sendSuccess([
                 'field_options' => $fieldOptions,
+            ]);
+        } catch (Exception $e) {
+            return $this->sendError([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    public function createCrmTaxonomy($calendarId, $slotId, $integrationId)
+    {
+        try {
+            $this->getCalendarEvent($calendarId, $slotId);
+
+            if (!CrmContactService::isActive()) {
+                return $this->sendError([
+                    'message' => __('FluentCRM is not active.', 'fluent-booking'),
+                ], 422);
+            }
+
+            if (!CrmPermissionManager::currentUserCan('fcrm_manage_contact_cats')) {
+                return $this->sendError([
+                    'message' => __('You do not have permission to create FluentCRM tags or lists.', 'fluent-booking'),
+                ], 403);
+            }
+
+            $type  = $this->request->get('type');
+            $title = trim((string) $this->request->get('title'));
+
+            if (!in_array($type, ['tags', 'lists'], true)) {
+                return $this->sendError([
+                    'message' => __('Invalid taxonomy type.', 'fluent-booking'),
+                ], 422);
+            }
+
+            if ($title === '') {
+                return $this->sendError([
+                    'message' => __('Please provide a name.', 'fluent-booking'),
+                ], 422);
+            }
+
+            $item = CrmContactService::createTaxonomy($type, $title);
+
+            if (!$item) {
+                return $this->sendError([
+                    'message' => __('Please use a name that contains letters or numbers.', 'fluent-booking'),
+                ], 422);
+            }
+
+            return $this->sendSuccess([
+                'item'    => $item,
+                'message' => __('Successfully created.', 'fluent-booking'),
             ]);
         } catch (Exception $e) {
             return $this->sendError([

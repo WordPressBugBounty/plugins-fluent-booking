@@ -46,7 +46,10 @@ $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($rou
     $router->get('/{id}/events/{event_id}/booking-fields', 'CalendarController@getEventBookingFields')->int('id')->int('event_id');
     $router->post('/{id}/events/{event_id}/booking-fields', 'CalendarController@saveEventBookingFields')->int('id')->int('event_id');
 
-    $router->get('/{id}/events/{event_id}/payment-settings', 'CalendarController@getEventPaymentSettings')->int('id')->int('event_id');
+    if (!defined('FLUENT_BOOKING_PRO_DIR_FILE')) {
+        // Pro registers this path (plus the POST) via PaymentMethodController; only own it standalone.
+        $router->get('/{id}/events/{event_id}/payment-settings', 'CalendarController@getEventPaymentSettings')->int('id')->int('event_id');
+    }
 });
 
 $router->prefix('admin')->withPolicy('AdminPolicy')->group(function ($router) {
@@ -134,6 +137,7 @@ $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($rou
             $router->delete('/', 'CalendarIntegrationController@delete')->int('id')->int('event_id')->int('integration_id');
             $router->get('/merge-fields', 'CalendarIntegrationController@integrationListComponent');
             $router->get('/config-field-options', 'CalendarIntegrationController@getConfigFieldOptions');
+            $router->post('/crm-taxonomy', 'CalendarIntegrationController@createCrmTaxonomy')->int('id')->int('event_id');
         });
     });
 });

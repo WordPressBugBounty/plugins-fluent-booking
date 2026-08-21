@@ -232,9 +232,17 @@ class CalendarSlot extends Model
         $teamMembers = [];
         $teamMemberIds = $this->getHostIds();
 
+        cache_users($teamMemberIds);
+
+        $calendars = Calendar::whereIn('user_id', $teamMemberIds)
+            ->where('type', 'simple')
+            ->orderBy('id', 'desc')
+            ->with(['metas', 'user', 'user.metas'])
+            ->get()
+            ->keyBy('user_id');
+
         foreach ($teamMemberIds as $teamMemberId) {
-            $calendar = Calendar::where('user_id', $teamMemberId)->where('type', 'simple')->first();
-            if ($calendar) {
+            if ($calendar = $calendars->get($teamMemberId)) {
                 $teamMembers[] = $calendar->getAuthorProfile($public);
             }
         }
@@ -439,8 +447,10 @@ class CalendarSlot extends Model
         }
 
         if ($this->availability_type == 'existing_schedule') {
-            $schedule = Availability::findOrFail($this->availability_id);
-            return Arr::get($schedule, 'value.timezone', 'UTC');
+            $schedule = Availability::find($this->availability_id);
+            if ($schedule) {
+                return Arr::get($schedule, 'value.timezone', 'UTC');
+            }
         }
 
         return $this->calendar->author_timezone;
@@ -636,7 +646,9 @@ class CalendarSlot extends Model
             return 0;
         }
 
-        return strtotime('+' . $conditions['value'] . ' ' . $conditions['unit'], 0) - strtotime('+0 seconds', 0);
+        $value = max(0, (int) Arr::get($conditions, 'value', 0));
+
+        return strtotime('+' . $value . ' ' . $conditions['unit'], 0) - strtotime('+0 seconds', 0);
     }
 
     public function getHostIds($hostId = null)
@@ -814,6 +826,8 @@ class CalendarSlot extends Model
         $conditionTime = $conditionValue * 60;
         if ($conditionUnit == 'hours') {
             $conditionTime = $conditionTime * 60;
+        } elseif ($conditionUnit == 'days') {
+            $conditionTime = $conditionTime * 60 * 24;
         }
 
         return $bookingStartTime - $bookingCreatedTime < $conditionTime;
@@ -1062,8 +1076,10 @@ class CalendarSlot extends Model
         }
 
         if ($this->availability_type === 'existing_schedule') {
-            $schedule = Availability::findOrFail($this->availability_id);
-            return $this->getProcessedWeeklySlots($schedule);
+            $schedule = Availability::find($this->availability_id);
+            if ($schedule) {
+                return $this->getProcessedWeeklySlots($schedule);
+            }
         }
 
         $scheduleData = Arr::get($this->settings, 'weekly_schedules', []);
@@ -1079,8 +1095,10 @@ class CalendarSlot extends Model
         }
 
         if ($this->availability_type === 'existing_schedule') {
-            $schedule = Availability::findOrFail($this->availability_id);
-            return $this->getProcessedDateOverrides($schedule);
+            $schedule = Availability::find($this->availability_id);
+            if ($schedule) {
+                return $this->getProcessedDateOverrides($schedule);
+            }
         }
 
         $scheduleData = Arr::get($this->settings, 'date_overrides', []);

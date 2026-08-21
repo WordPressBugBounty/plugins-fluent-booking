@@ -131,7 +131,7 @@ class AvailabilityService
                 ->where('user_id', $availability->object_id)
                 ->first();
 
-            if ($calendar) {
+            if ($calendar && $calendar->user) {
                 $hostName = $calendar->user->full_name;
                 if ($calendar->user_id == get_current_user_id()) {
                     $hostName = __('My Schedules', 'fluent-booking');

@@ -34,7 +34,7 @@ class CalendarEventPolicy extends Policy
             return in_array(get_current_user_id(), $calendarEvent->getHostIds());
         }
 
-        if ($request->method() == 'GET') {
+        if ($request->getMethod() == 'GET') {
             return PermissionManager::userCan(['manage_all_data', 'read_other_calendars']);
         }
 

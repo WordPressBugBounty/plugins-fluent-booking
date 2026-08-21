@@ -3,6 +3,7 @@
 namespace FluentBooking\App\Hooks\Handlers;
 
 use FluentBooking\App\App;
+use FluentBooking\App\Vite;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\CalendarEventService;
@@ -14,46 +15,23 @@ class BlockEditorHandler
     public function init()
     {
         add_action('enqueue_block_editor_assets', function () {
-            $app = App::getInstance();
-            $assets = $app['url.assets'];
+            $blockDeps = array('wp-blocks', 'wp-components', 'wp-block-editor', 'wp-element');
 
-            wp_enqueue_script(
-                'fluent-booking/calendar',
-                $assets . 'admin/fluent-booking-index.js',
-                array('wp-blocks', 'wp-components', 'wp-block-editor', 'wp-element'),
-                FLUENT_BOOKING_ASSETS_VERSION,
-                true
-            );
+            $assetsVersion = Vite::isDev() ? time() : FLUENT_BOOKING_ASSETS_VERSION;
+
+            Vite::enqueueScript('fluent-booking/calendar', 'fb_index', $blockDeps, $assetsVersion);
 
             wp_localize_script('fluent-booking/calendar', 'fluentCalendarGutenbergVars', [
                 'ajaxurl' => admin_url('admin-ajax.php'),
             ]);
 
-            wp_enqueue_script(
-                'fluent-booking/team-management',
-                $assets . 'admin/fluent-booking-team-management-index.js',
-                array('wp-blocks', 'wp-components', 'wp-block-editor', 'wp-element'),
-                FLUENT_BOOKING_ASSETS_VERSION,
-                true
-            );
+            Vite::enqueueScript('fluent-booking/team-management', 'fb_team', $blockDeps, $assetsVersion);
 
-            wp_enqueue_script(
-                'fluent-booking/calendar-management',
-                $assets . 'admin/fluent-booking-calendar-management-index.js',
-                array('wp-blocks', 'wp-components', 'wp-block-editor', 'wp-element'),
-                FLUENT_BOOKING_ASSETS_VERSION,
-                true
-            );
+            Vite::enqueueScript('fluent-booking/calendar-management', 'fb_calendar', $blockDeps, $assetsVersion);
 
-            wp_enqueue_script(
-                'fluent-booking/booking-management',
-                $assets . 'admin/fluent-booking-booking-management-index.js',
-                array('wp-blocks', 'wp-components', 'wp-block-editor', 'wp-element'),
-                FLUENT_BOOKING_ASSETS_VERSION,
-                true
-            );
+            Vite::enqueueScript('fluent-booking/booking-management', 'fb_booking', $blockDeps, $assetsVersion);
 
-            $calendars = Calendar::with(['events' => function ($query) {
+            $calendars = Calendar::with(['metas', 'events' => function ($query) {
                 $query->where('status', 'active');
             }])->where('status', 'active')->get();
 
@@ -89,9 +67,22 @@ class BlockEditorHandler
             }
 
             wp_localize_script('fluent-booking/calendar', 'fluent_booking_block', [
-                'assets_url' => $assets,
+                'assets_url' => App::getInstance()['url.assets'] ?? '',
                 'hosts'      => $formattedCalendars
             ]);
+        });
+
+        add_action('enqueue_block_assets', function () {
+            if (!is_admin()) {
+                return;
+            }
+
+            $assetsVersion = Vite::isDev() ? time() : FLUENT_BOOKING_ASSETS_VERSION;
+
+            Vite::enqueueStyle('fluent-booking/calendar-style', 'fb_index_css', [], $assetsVersion);
+            Vite::enqueueStyle('fluent-booking/team-management-style', 'fb_team_css', [], $assetsVersion);
+            Vite::enqueueStyle('fluent-booking/calendar-management-style', 'fb_calendar_css', [], $assetsVersion);
+            Vite::enqueueStyle('fluent-booking/booking-management-style', 'fb_booking_css', [], $assetsVersion);
         });
 
         register_block_type('fluent-booking/calendar', array(
@@ -240,7 +231,7 @@ class BlockEditorHandler
         $hostItems = [];
 
         foreach ($hosts as $config) {
-            $calendar = Calendar::find($config['id']);
+            $calendar = Calendar::with('metas')->find($config['id']);
             if (!$calendar) {
                 continue;
             }

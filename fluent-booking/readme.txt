@@ -3,9 +3,9 @@ Contributors: techjewel, wpmanageninja
 Author URI: https://fluentbooking.com/
 Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,49 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.2.5 (Date: 21 Aug 2026)
+- Added: Days Unit for Booking Cutoff Limits
+- Added: Cart Profile Widget in Booking Details Sidebar
+- Added: Inline Tag and List Creation in CRM Feed Editor
+- Added: Collapsible Booking Activity and Sidebar Widgets
+- Added: Event Types Tab in Host and Team Settings
+- Added: Help Tooltips for Event Limit Settings
+- Improved: License Management Screen and Keyboard Access
+- Improved: Dark and Light Mode Color Palette and Contrast
+- Improved: Distinct Status Badge Colors in Bookings
+- Improved: Booking and Host Queries Batched to Remove N+1 Lookups
+- Improved: Bounded Auto-Expire and Reservation Cleanup Batches
+- Security: Hardened Access Control, Payment Webhooks and Verification
+- Fixed: Availability Endpoint Returning a Fatal Error
+- Fixed: Negative Minimum Notice Opening Past Slots
+- Fixed: Meeting Time Shown in UTC on CRM Card
+- Fixed: Booking Form Auto-Focus Scroll Jump on Load
+- Fixed: Keyboard Access and Screen Reader Names on Booking Form
+- Fixed: FluentBooking Blocks Missing Styles in the Editor
+- Fixed: Duplicate Event API Call in Editor Block
+- Fixed: Dark Mode Contrast Across Modals, Badges and Notices
+- Fixed: Bookings Toolbar Overflow on Tablet Widths
+- Fixed: Export Button Stretching to Page Height on iOS
+- Fixed: Escaped Literals in Date Format Conversion
+- Fixed: Phone Number Validation and New Area Codes
+- Fixed: Deactivation Error Cleared by the Refresh Behind It
+- Fixed: User Not Found Warning in Availability Service
+- Fixed: Stale Editor State and Provider Mismatch on History Navigation
+- Fixed: Empty Slug Accepted When Creating CRM Tag or List
+- Fixed: Duplicate Payment Settings Route When Pro Is Active
+- Fixed: Booking Eligibility Re-Applied on Scheduler Mutations
+- Fixed: Location and Extra Info Accessors on Non-Array Input
+- Fixed: Microsoft Teams Join Link Missing in Booking Notifications
+- Fixed: Meeting URL Stripped From Twilio SMS
+- Fixed: Twilio Reschedule SMS Recipient Mapping
+- Fixed: Reversed Outlook Activity Log Types
+- Fixed: Integration Feed Routes Fatal Error on Load and Disconnect
+- Fixed: Recurring Config Lost When Disabling Multiple-Booking
+- Fixed: Webhook Feed Save Warning and Transport Error Logging
+
+= 2.2.1 (Date: 26 Jun 2026)
+- Security: Gate CRM Profile Endpoints On FluentCRM Capabilities
 
 = 2.2.0 (Date: 25 Jun 2026)
 - Added: CRM Contact Search and Prefill in Admin Booking

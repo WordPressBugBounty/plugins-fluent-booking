@@ -19,7 +19,7 @@ class AvailabilityPolicy extends Policy
             return true;
         }
 
-        if ($request->method() == 'GET' && PermissionManager::userCan('read_and_use_other_availabilities')) {
+        if ($request->getMethod() == 'GET' && PermissionManager::userCan('read_and_use_other_availabilities')) {
             return true;
         }
 

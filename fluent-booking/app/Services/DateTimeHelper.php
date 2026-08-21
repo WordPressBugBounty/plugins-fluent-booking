@@ -297,20 +297,12 @@ class DateTimeHelper
         for ($i = 0; $i < strlen($phpFormat); $i++) {
             $char = $phpFormat[$i];
 
-            // Special handling for G\hi pattern
-            if ($char === 'G' && $i + 2 < strlen($phpFormat) && 
-                $phpFormat[$i + 1] === '\\' && $phpFormat[$i + 2] === 'h') {
-                $dayjsFormat .= 'H[h]';
-                $i += 2;
-                continue;
-            }
-
             // Check if the character is escaped
             if ($char === "\\") {
-                // Add the next character to the result as is, without mapping
+                // Day.js escapes literal text with square brackets, not backslashes
                 $i++;
                 if ($i < strlen($phpFormat)) {
-                    $dayjsFormat .= "\\" . $phpFormat[$i];
+                    $dayjsFormat .= "[" . $phpFormat[$i] . "]";
                 }
                 continue;
             }

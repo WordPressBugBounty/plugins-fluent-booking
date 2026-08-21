@@ -16,6 +16,7 @@ use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Hooks\Handlers\FrontEndHandler;
 use FluentForm\App\Services\FormBuilder\BaseFieldManager;
 use FluentForm\Framework\Helpers\ArrayHelper;
+use FluentBooking\App\Vite;
 
 class BookingElement extends BaseFieldManager
 {
@@ -155,14 +156,10 @@ class BookingElement extends BaseFieldManager
 
         $assetUrl = App::getInstance('url.assets');
 
-        wp_enqueue_script(
-            'fluentform-calendar-public',
-            $assetUrl . 'public/js/fluentform.js', [],
-            FLUENT_BOOKING_ASSETS_VERSION, true
-        );
+        Vite::enqueueScript('fluentform-calendar-public', 'ff_public', [], FLUENT_BOOKING_ASSETS_VERSION);
 
         if (BookingFieldService::hasPhoneNumberField($localizeData['form_fields'])) {
-            wp_enqueue_script('fluent-booking-phone-field', $assetUrl . 'public/js/phone-field.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+            Vite::enqueueScript('fluent-booking-phone-field', 'phone_field', [], FLUENT_BOOKING_ASSETS_VERSION);
             ?>
             <style>
                 .fcal_phone_wrapper .flag {

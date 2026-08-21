@@ -60,7 +60,7 @@
     </style>
 
     <?php foreach ($header_js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
-        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>" src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"></script>
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>"<?php echo \FluentBooking\App\Vite::isDev() ? ' type="module"' : ''; ?> src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"></script>
     <?php endforeach; ?>
 
     <?php do_action('fluent_booking/main_landing'); ?>
@@ -82,7 +82,7 @@
     </script>
 
     <?php foreach ($js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
-        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>" src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>" defer="defer"></script>
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>"<?php echo \FluentBooking\App\Vite::isDev() ? ' type="module"' : ''; ?> src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>" defer="defer"></script>
     <?php endforeach; ?>
 
     <?php do_action('fluent_booking/main_landing_footer'); ?>

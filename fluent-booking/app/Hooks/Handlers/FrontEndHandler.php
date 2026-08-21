@@ -18,6 +18,7 @@ use FluentBooking\App\Services\LocationService;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\Framework\Support\Arr;
+use FluentBooking\App\Vite;
 
 class FrontEndHandler
 {
@@ -71,17 +72,15 @@ class FrontEndHandler
             return __('Calendar not found', 'fluent-booking');
         }
 
-        $assetUrl = App::getInstance('url.assets');
-
         $localizeData = $this->getCalendarEventVars($calendar, $calendarEvent);
         $localizeData['disable_author'] = $atts['disable_author'] == 'yes';
         $localizeData['theme'] = $atts['theme'];
 
         if (BookingFieldService::hasPhoneNumberField($localizeData['form_fields'])) {
-            wp_enqueue_script('fluent-booking-phone-field', $assetUrl . 'public/js/phone-field.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+            Vite::enqueueScript('fluent-booking-phone-field', 'phone_field', [], FLUENT_BOOKING_ASSETS_VERSION);
         }
 
-        wp_enqueue_script('fluent-booking-public', $assetUrl . 'public/js/app.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+        Vite::enqueueScript('fluent-booking-public', 'public_app', [], FLUENT_BOOKING_ASSETS_VERSION);
 
         $this->loadGlobalVars();
         wp_localize_script(
@@ -131,7 +130,7 @@ class FrontEndHandler
             $calendarEvents[$event->calendar_id][] = $event;
         }
 
-        $calendars = Calendar::query()->whereIn('id', $calendarIds)->get();
+        $calendars = Calendar::query()->with('metas')->whereIn('id', $calendarIds)->get();
 
         foreach ($calendars as $calendar) {
             $calendar->activeEvents = $calendarEvents[$calendar->id] ?? [];
@@ -158,7 +157,7 @@ class FrontEndHandler
     public function renderTeamHosts($calendars, $headerConfig = [])
     {
         $wrapperId = 'fcal_team_' . Helper::getNextIndex();
-        wp_enqueue_script('fluent-booking-team', App::getInstance('url.assets') . 'public/js/team_app.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+        Vite::enqueueScript('fluent-booking-team', 'team_app', [], FLUENT_BOOKING_ASSETS_VERSION);
 
         $vars = [];
         foreach ($calendars as $calendar) {
@@ -190,8 +189,7 @@ class FrontEndHandler
 
         wp_localize_script('fluent-booking-team', $wrapperId, $vars);
 
-        $assetUrl = App::getInstance('url.assets');
-        wp_enqueue_script('fluent-booking-public', $assetUrl . 'public/js/app.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+        Vite::enqueueScript('fluent-booking-public', 'public_app', [], FLUENT_BOOKING_ASSETS_VERSION);
         $this->loadGlobalVars();
 
         return App::make('view')->make('public.team_page', [
@@ -274,7 +272,7 @@ class FrontEndHandler
     public function renderCalendarBlock($calendar, $headerConfig = [])
     {
         $wrapperId = 'fcal_calendar_' . Helper::getNextIndex();
-        wp_enqueue_script('fluent-booking-calendar', App::getInstance('url.assets') . 'public/js/calendar_app.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+        Vite::enqueueScript('fluent-booking-calendar', 'calendar_app', [], FLUENT_BOOKING_ASSETS_VERSION);
 
         $calendarHtml = (string)(string)\FluentBooking\App\App::getInstance('view')->make('landing.author_html', [
             'author'   => $calendar->getAuthorProfile(),
@@ -303,8 +301,7 @@ class FrontEndHandler
 
         wp_localize_script('fluent-booking-calendar', $wrapperId, $vars);
 
-        $assetUrl = App::getInstance('url.assets');
-        wp_enqueue_script('fluent-booking-public', $assetUrl . 'public/js/app.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+        Vite::enqueueScript('fluent-booking-public', 'public_app', [], FLUENT_BOOKING_ASSETS_VERSION);
         $this->loadGlobalVars();
 
         return App::make('view')->make('public.calendar_page', [
@@ -390,7 +387,7 @@ class FrontEndHandler
 
         $pageOptions = apply_filters('fluent_booking/booking_per_page_options', [5, 10, 15, 20, 50, 100]);
 
-        wp_enqueue_script('fluent-booking-list', App::getInstance('url.assets') . 'public/js/bookings.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+        Vite::enqueueScript('fluent-booking-list', 'bookings', [], FLUENT_BOOKING_ASSETS_VERSION);
 
         return App::make('view')->make('public.bookings', [
             'bookings'       => $bookings,
@@ -686,6 +683,14 @@ class FrontEndHandler
                 'No availability in'                   => __('No availability in', 'fluent-booking'),
                 'View next month'                      => __('View next month', 'fluent-booking'),
                 'View previous month'                  => __('View previous month', 'fluent-booking'),
+                'Back to Date Selection'               => __('Back to Date Selection', 'fluent-booking'),
+                'Go to previous page'                  => __('Go to previous page', 'fluent-booking'),
+                'Remove this time slot'                => __('Remove this time slot', 'fluent-booking'),
+                'Remove coupon'                        => __('Remove coupon', 'fluent-booking'),
+                'Select this time'                     => __('Select this time', 'fluent-booking'),
+                'Confirm Time'                         => __('Confirm Time', 'fluent-booking'),
+                '12 hour time format'                  => __('12 hour time format', 'fluent-booking'),
+                '24 hour time format'                  => __('24 hour time format', 'fluent-booking'),
                 'No_payment_method_description'        => __('No activated payment method found. If you are an admin please check the event payment settings', 'fluent-booking'),
                 'Please fill up the required data'     => __('Please fill up the required data', 'fluent-booking'),
                 'Please select a valid payment method' => __('Please select a valid payment method', 'fluent-booking'),
@@ -751,7 +756,7 @@ class FrontEndHandler
         ];
 
         if ($calendarEvent->isPhoneRequired()) {
-            $rules['phone_number'] = 'required';
+            $rules['phone_number'] = ['required', $this->validPhoneNumberRule()];
             $messages['phone_number.required'] = __('Please provide your phone number', 'fluent-booking');
         } else if ($calendarEvent->isAddressRequired()) {
             $rules['address'] = 'required';
@@ -764,10 +769,11 @@ class FrontEndHandler
             $selectedLocationDriver = Arr::get($selectedLocation, 'type');
             // is user input required
             if (in_array($selectedLocationDriver, ['in_person_guest', 'phone_guest'])) {
-                $rules['location_config.user_location_input'] = 'required';
                 if ($selectedLocationDriver == 'in_person_guest') {
+                    $rules['location_config.user_location_input'] = 'required';
                     $messages['location_config.user_location_input.required'] = __('Please provide your address', 'fluent-booking');
                 } else {
+                    $rules['location_config.user_location_input'] = ['required', $this->validPhoneNumberRule()];
                     $messages['location_config.user_location_input.required'] = __('Please provide your phone number', 'fluent-booking');
                 }
             }
@@ -956,6 +962,18 @@ class FrontEndHandler
         ], $booking), 200);
     }
 
+    /**
+     * @return \Closure
+     */
+    private function validPhoneNumberRule()
+    {
+        return function ($attribute, $value) {
+            if (!empty($value) && !Helper::isValidPhoneNumber($value)) {
+                return __('Please provide a valid phone number', 'fluent-booking');
+            }
+        };
+    }
+
     public function ajaxGetAvailableDates()
     {
         if (!Helper::checkRateLimit('available_dates', 30)) {
@@ -966,11 +984,11 @@ class FrontEndHandler
 
         $request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-        $eventId = (int)$request['event_id'];
+        $eventId = (int)Arr::get($request, 'event_id');
 
         $rescheduling = Arr::get($request, 'rescheduling', 'no');
 
-        $calendarEvent = CalendarSlot::findOrfail($eventId);
+        $calendarEvent = $eventId ? CalendarSlot::find($eventId) : null;
 
         if (!$calendarEvent || ($calendarEvent->status != 'active' && $rescheduling == 'no')) {
             wp_send_json([
@@ -1022,6 +1040,18 @@ class FrontEndHandler
 
     public function getCalendarEventVars(Calendar $calendar, CalendarSlot $calendarEvent)
     {
+        static $globalConfig = null;
+        if ($globalConfig === null) {
+            $globalConfig = [
+                'time_format'           => Arr::get(get_option('_fluent_booking_settings'), 'time_format', '12'),
+                'date_formatter'        => DateTimeHelper::getDateFormatter(true),
+                'isRtl'                 => Helper::fluentbooking_is_rtl(),
+                'has_pro'               => defined('FLUENT_BOOKING_PRO_DIR_FILE'),
+                'duration_lookup'       => Helper::getDurationLookup(),
+                'multi_duration_lookup' => Helper::getDurationLookup(true),
+            ];
+        }
+
         $calendarEvent->description = wpautop($calendarEvent->description);
         $calendarEvent->location_icon_html = $calendarEvent->defaultLocationHtml();
         $formFields = BookingFieldService::getBookingFields($calendarEvent);
@@ -1041,7 +1071,7 @@ class FrontEndHandler
             'settings'           => $this->sanitizePublicEventSettings($calendarEvent->settings),
             'type'               => $calendarEvent->type,
             'event_type'         => $calendarEvent->event_type,
-            'time_format'        => Arr::get(get_option('_fluent_booking_settings'), 'time_format', '12'),
+            'time_format'        => $globalConfig['time_format'],
         ];
 
         $author = $calendar->getAuthorProfile(true);
@@ -1056,11 +1086,11 @@ class FrontEndHandler
                 'Continue_to_Payments' => __('Continue to Payments', 'fluent-booking'),
                 'Confirm_Payment'      => __('Confirm Payment', 'fluent-booking'),
             ],
-            'date_formatter'  => DateTimeHelper::getDateFormatter(true),
-            'isRtl'           => Helper::fluentbooking_is_rtl(),
-            'has_pro'         => defined('FLUENT_BOOKING_PRO_DIR_FILE'),
-            'duration_lookup' => Helper::getDurationLookup(),
-            'multi_duration_lookup' => Helper::getDurationLookup(true)
+            'date_formatter'  => $globalConfig['date_formatter'],
+            'isRtl'           => $globalConfig['isRtl'],
+            'has_pro'         => $globalConfig['has_pro'],
+            'duration_lookup' => $globalConfig['duration_lookup'],
+            'multi_duration_lookup' => $globalConfig['multi_duration_lookup']
         ];
 
         $eventVars['form_fields'] = array_values($eventVars['form_fields']);

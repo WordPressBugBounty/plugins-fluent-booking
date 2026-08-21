@@ -34,7 +34,7 @@ class CalendarPolicy extends Policy
             return false;
         }
 
-        $method = $request->method();
+        $method = $request->getMethod();
 
         if ($method == 'GET') {
             return PermissionManager::canReadCalendar($calendarId);

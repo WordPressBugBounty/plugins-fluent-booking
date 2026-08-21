@@ -33,7 +33,7 @@ class CalendarController extends Controller
             }
         };
 
-        $calendarsQuery = Calendar::with(['slots' => function($query) use ($applySearchFilter) {
+        $calendarsQuery = Calendar::with(['metas', 'slots' => function($query) use ($applySearchFilter) {
             $query->where($applySearchFilter);
         }])
         ->where('status', '!=', 'expired');
@@ -295,6 +295,25 @@ class CalendarController extends Controller
         }])->findOrFail($calendarId);
 
         $calendar->author_profile = $calendar->getAuthorProfile();
+        $calendar->event_order = $calendar->getMeta('event_order');
+
+        if (!PermissionManager::hasAllCalendarAccess(true)) {
+            $calendar->setRelation('slots', $calendar->slots->filter(function ($slot) {
+                return CalendarEventService::isSharedCalendarEvent($slot);
+            })->values());
+        }
+
+        foreach ($calendar->slots as $slot) {
+            $slot->setRelation('calendar', $calendar);
+            $slot->shortcode = '[fluent_booking id="' . $slot->id . '"]';
+            $slot->public_url = $slot->getPublicUrl();
+            $slot->duration = $slot->getDefaultDuration();
+            $slot->price_total = $slot->getEventPrice();
+            $slot->location_fields = $slot->getLocationFields();
+            $slot->author_profiles = $slot->isMultiHostEvent() ? $slot->getAuthorProfiles() : [];
+            do_action_ref_array('fluent_booking/calendar_slot', [&$slot]);
+            $slot->unsetRelation('calendar');
+        }
 
         $data = [
             'calendar' => $calendar

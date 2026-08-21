@@ -47,6 +47,12 @@ class BookingFieldService
                 $value = sanitize_text_field($value);
             }
 
+            if ($customField['type'] === 'phone' && $value && !Helper::isValidPhoneNumber($value)) {
+                /* translators: %s: Field label */
+                $errors[$fieldKey . '.valid_phone_number'] = sprintf(__('%s is not a valid phone number', 'fluent-booking'), $customField['label']);
+                continue;
+            }
+
             $formattedValues[$fieldKey] = $value;
         }
 

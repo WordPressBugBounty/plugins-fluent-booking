@@ -694,9 +694,42 @@ class Helper
         return self::getAppBaseUrl('scheduled-events?booking_id=' . $bookingId);
     }
 
-    public static function getUpgradeUrl()
+    /**
+     * Build a spec-compliant "Upgrade to Pro" URL.
+     *
+     * Follows the shared Fluent* UTM spec:
+     *   utm_source  = fluent-booking (fixed vocabulary, never the wp.org slug)
+     *   utm_medium  = free_plugin | pro_plugin (acquisition vs cross-sell)
+     *   utm_campaign= upgrade_pro (override for xsell_<target> / license_* )
+     *   utm_content = the exact placement, e.g. feature_lock_team_calendar, upgrade_page
+     *   utm_term    = plugin version that generated the link
+     *   utm_id      = promo id, blank normally (omit unless passed)
+     *
+     * @param string $content   The utm_content placement.
+     * @param array  $overrides Override any utm_* param (e.g. utm_campaign for cross-sell).
+     * @return string
+     */
+    public static function getUpgradeUrl($content = 'upgrade_page', $overrides = [])
     {
-        return 'https://fluentbooking.com/pricing/?utm_source=plugin&utm_medium=wp_install&utm_campaign=fcal_upgrade&theme=' . self::getActiveThemeName();
+        $baseUrl = apply_filters(
+            'fluent_booking/pro_upgrade_base_url',
+            'https://fluentbooking.com/pricing/'
+        );
+
+        $params = wp_parse_args($overrides, [
+            'utm_source'   => 'fluent-booking',
+            'utm_medium'   => defined('FLUENT_BOOKING_PRO_VERSION') ? 'pro_plugin' : 'free_plugin',
+            'utm_campaign' => 'upgrade_pro',
+            'utm_content'  => $content,
+            'utm_term'     => FLUENT_BOOKING_VERSION,
+        ]);
+
+        // Drop any blank params (e.g. an unset utm_id) so they never hit the URL.
+        $params = array_filter($params, function ($value) {
+            return $value !== '' && $value !== null;
+        });
+
+        return add_query_arg($params, $baseUrl);
     }
 
     public static function getNextBookingGroup()
@@ -1003,6 +1036,36 @@ class Helper
         $ipAddress = sanitize_text_field(wp_unslash($ipAddress));
 
         return $ipAddress;
+    }
+
+    /**
+     * Valid E.164 number: 7-15 significant digits.
+     *
+     * @param string $phone
+     * @return bool
+     */
+    public static function isValidPhoneNumber($phone)
+    {
+        if (!apply_filters('fluent_booking/enforce_phone_validation', true)) {
+            return true;
+        }
+
+        $phone = trim((string)$phone);
+
+        if ($phone === '') {
+            return false;
+        }
+
+        if (!preg_match('/^\+?[0-9\s().\-]+$/', $phone)) {
+            return false;
+        }
+
+        $digitCount = strlen(preg_replace('/\D/', '', $phone));
+
+        $min = (int)apply_filters('fluent_booking/phone_min_digits', 7);
+        $max = (int)apply_filters('fluent_booking/phone_max_digits', 15);
+
+        return $digitCount >= $min && $digitCount <= $max;
     }
 
     private static function isCfIp($ip = '')

@@ -50,12 +50,22 @@ class User extends Model
         return $this->hasOne(Staff::class, 'object_id');
     }
 
+    public function metas()
+    {
+        return $this->hasMany(Meta::class, 'object_id', 'ID')
+            ->where('object_type', 'user_meta');
+    }
+
     public function getMeta($key, $default = null)
     {
-        $meta = Meta::where('object_type', 'user_meta')
-            ->where('object_id', $this->ID)
-            ->where('key', $key)
-            ->first();
+        if ($this->relationLoaded('metas')) {
+            $meta = $this->metas->firstWhere('key', $key);
+        } else {
+            $meta = Meta::where('object_type', 'user_meta')
+                ->where('object_id', $this->ID)
+                ->where('key', $key)
+                ->first();
+        }
 
         if (!$meta) {
             return $default;

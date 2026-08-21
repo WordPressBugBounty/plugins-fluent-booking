@@ -49,11 +49,6 @@
             }
         }
     },
-    "scripts": {
-        "post-update-cmd": [
-            "FluentBooking\\App\\ComposerScript::postUpdate"
-        ]
-    },
     "minimum-stability": "dev",
     "prefer-stable": true
 }

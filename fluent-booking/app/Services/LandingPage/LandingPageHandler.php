@@ -13,6 +13,7 @@ use FluentBooking\App\Services\BookingService;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\Framework\Support\Arr;
 use FluentBooking\Framework\Support\Collection;
+use FluentBooking\App\Vite;
 
 class LandingPageHandler
 {
@@ -154,7 +155,6 @@ class LandingPageHandler
             do_action_ref_array('fluent_booking/landing_page_event', [&$activeEvent]);
         }
 
-        $assetUrl = App::getInstance('url.assets');
         $data = [
             'calendar'    => $calendar,
             'events'      => $activeEvents,
@@ -164,14 +164,14 @@ class LandingPageHandler
             'url'         => home_url($wp->request),
             'embedded'    => isset($_GET['embedded']) ? true : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             'css_files'   => [
-                App::getInstance('url.assets') . 'public/saas.css'
+                Vite::styleUrl('saas_css')
             ],
             'js_files'    => [
-                'fluent-booking-public-js' => $assetUrl . 'public/js/app.js',
+                'fluent-booking-public-js' => Vite::scriptUrl('public_app'),
             ],
             'js_vars'     => $jsVars,
             'header_js_files' => [
-                'fluent_booking_team_app-js' => $assetUrl. 'public/js/team_app.js'
+                'fluent_booking_team_app-js' => Vite::scriptUrl('team_app')
             ]
         ];
 
@@ -229,9 +229,7 @@ class LandingPageHandler
 
         $eventVars = (new FrontEndHandler())->getCalendarEventVars($calendar, $calendarEvent);
 
-        $isRtl = Helper::fluentbooking_is_rtl();
-
-        $publicCss = $isRtl ? 'public/saas-rtl.css' : 'public/saas.css';
+        $publicCss = 'saas_css';
 
         $title = $calendarEvent->title . ' ' . __('with', 'fluent-booking') . ' ' . $authorProfile['name'];
 
@@ -246,10 +244,10 @@ class LandingPageHandler
             'url'            => home_url($wp->request),
             'embedded'       => isset($_GET['embedded']) ? true : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             'css_files'      => [
-                $assetUrl . $publicCss
+                Vite::styleUrl($publicCss)
             ],
             'js_files'       => [
-                'fluent-booking-public-js' => $assetUrl . 'public/js/app.js',
+                'fluent-booking-public-js' => Vite::scriptUrl('public_app'),
             ],
             'js_vars'        => [
                 'fluentCalendarPublicVars'                                     => (new FrontEndHandler())->getGlobalVars(),
@@ -315,17 +313,14 @@ class LandingPageHandler
 
         $authorProfile = $calendarEvent->getAuthorProfile(true);
 
-        $publicCss = 'public/saas_public.css';
-        if (Helper::fluentbooking_is_rtl()) {
-            $publicCss = 'public/saas_public-rtl.css';
-        }
+        $publicCss = 'saas_public_css';
 
         $data = [
             'title'       => __('Confirmation: ', 'fluent-booking') . $calendarEvent->title . ' ' . __('with', 'fluent-booking') . ' ' . $authorProfile['name'],
             'body'        => $responseHtml,
             'description' => substr(strip_shortcodes(wp_strip_all_tags(str_replace(PHP_EOL, ' ', $calendarEvent->description))), 0, 300) . '...',
             'css_files'   => [
-                App::getInstance('url.assets') . $publicCss
+                Vite::styleUrl($publicCss)
             ],
             'js_files'    => [],
             'js_vars'     => [],
@@ -343,7 +338,7 @@ class LandingPageHandler
         ];
 
         if ($actionType == 'cancel') {
-            $data['js_files']['fluent-booking-public-manage-meeting-js'] = App::getInstance('url.assets') . 'public/js/public-manage-meeting.js';
+            $data['js_files']['fluent-booking-public-manage-meeting-js'] = Vite::scriptUrl('manage_meeting');
         }
 
         $data = apply_filters('fluent_booking/booking_confirmation_page_vars', $data, $booking, $calendarEvent);
@@ -464,7 +459,7 @@ class LandingPageHandler
         $assetUrl = App::getInstance('url.assets');
 
         if (BookingFieldService::hasPhoneNumberField($formFields)) {
-            $files['fluent-booking-phone-field-js'] = $assetUrl . 'public/js/phone-field.js';
+            $files['fluent-booking-phone-field-js'] = Vite::scriptUrl('phone_field');
         }
 
         if ($calendarEvent->type == 'paid') {

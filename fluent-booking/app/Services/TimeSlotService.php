@@ -270,14 +270,18 @@ class TimeSlotService
         $hostIds = $this->calendarSlot->getHostIds($this->hostId);
         $status = ['pending', 'reserved', 'approved', 'scheduled', 'completed'];
 
+        // Single indexed start_time range: widen the lower bound by max booking duration to catch overlaps.
+        $maxDurationMinutes = (int) apply_filters('fluent_booking/max_booking_duration_minutes', DAY_IN_SECONDS / MINUTE_IN_SECONDS, $this->calendarSlot);
+
+        $rangeLowerBound = gmdate('Y-m-d H:i:s', strtotime($dateRange[0]) - $maxDurationMinutes * MINUTE_IN_SECONDS); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+
         $bookings = Booking::with(['calendar_event'])
             ->whereHas('hosts', function ($query) use ($hostIds) {
                 $query->whereIn('user_id', $hostIds);
             })
-            ->where(function ($query) use ($dateRange) {
-                $query->whereBetween('start_time', $dateRange)
-                      ->orWhereBetween('end_time', $dateRange);
-            })
+            ->where('start_time', '>=', $rangeLowerBound)
+            ->where('start_time', '<=', $dateRange[1])
+            ->where('end_time', '>=', $dateRange[0])
             ->orderBy('start_time', 'ASC')
             ->whereIn('status', $status)
             ->get()

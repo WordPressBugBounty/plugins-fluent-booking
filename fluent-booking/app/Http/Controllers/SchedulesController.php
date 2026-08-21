@@ -16,6 +16,7 @@ use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\CalendarService;
 use FluentBooking\App\Services\ExportHelper;
 use FluentBooking\App\Services\Integrations\FluentCRM\CrmContactService;
+use FluentBooking\App\Services\Integrations\FluentCart\CustomerProfileService;
 use FluentCrm\App\Services\PermissionManager as CrmPermissionManager;
 
 class SchedulesController extends Controller
@@ -141,7 +142,7 @@ class SchedulesController extends Controller
         $query = Booking::with(['calendar_event']);
 
         $hasPermission = PermissionManager::userCanSeeAllBookings();
-        
+
         if (!$hasPermission || $author == 'me') {
             $query->where('host_user_id', get_current_user_id());
         }
@@ -178,7 +179,7 @@ class SchedulesController extends Controller
     private function addCountsForFirstPage($author, &$data)
     {
         $bookingQuery = Booking::query()
-            ->when($author == 'me', function($query) {
+            ->when(!PermissionManager::userCanSeeAllBookings() || $author == 'me', function($query) {
                 return $query->where('host_user_id', get_current_user_id());
             })
             ->when($author && is_numeric($author), function($query) use ($author) {
@@ -460,13 +461,26 @@ class SchedulesController extends Controller
         $sidebarContents = [];
         $mainBodyContents = [];
 
-        $crmProfile = CrmContactService::getProfileData($booking->email);
+        $canReadCrm = CrmContactService::isActive() && CrmPermissionManager::currentUserCan('fcrm_read_contacts');
+        $crmProfile = $canReadCrm ? CrmContactService::getProfileData($booking->email) : null;
         if ($crmProfile) {
             $sidebarContents[] = [
                 'id'      => 'fluent_crm_profule',
                 'title'   => __('CRM Profile', 'fluent-booking'),
                 'type'    => 'crm_profile',
                 'profile' => $crmProfile,
+            ];
+        }
+
+        $cartProfile = CustomerProfileService::canView()
+            ? CustomerProfileService::getProfileData($booking->email)
+            : null;
+        if ($cartProfile) {
+            $sidebarContents[] = [
+                'id'      => 'fluent_cart_profile',
+                'title'   => __('Cart Profile', 'fluent-booking'),
+                'type'    => 'cart_profile',
+                'profile' => $cartProfile,
             ];
         }
 
@@ -504,6 +518,12 @@ class SchedulesController extends Controller
             return $this->sendError([
                 'message' => __('FluentCRM is not active.', 'fluent-booking')
             ]);
+        }
+
+        if (!CrmPermissionManager::currentUserCan('fcrm_read_contacts')) {
+            return $this->sendError([
+                'message' => __('You do not have permission to read CRM contacts.', 'fluent-booking')
+            ], 403);
         }
 
         $state = CrmContactService::getContactState($booking->email);
@@ -594,6 +614,12 @@ class SchedulesController extends Controller
             ]);
         }
 
+        if (!CrmPermissionManager::currentUserCan('fcrm_read_contacts')) {
+            return $this->sendError([
+                'message' => __('You do not have permission to read CRM contacts.', 'fluent-booking')
+            ], 403);
+        }
+
         $type   = $request->get('type') === 'lists' ? 'lists' : 'tags';
         $search = sanitize_text_field($request->get('search', ''));
 
@@ -620,6 +646,12 @@ class SchedulesController extends Controller
             return $this->sendError([
                 'message' => __('FluentCRM is not active.', 'fluent-booking')
             ]);
+        }
+
+        if (!CrmPermissionManager::currentUserCan('fcrm_manage_contacts')) {
+            return $this->sendError([
+                'message' => __('You do not have permission to manage CRM contacts.', 'fluent-booking')
+            ], 403);
         }
 
         $requestKey = $type === 'tags' ? 'tag_ids' : 'list_ids';

@@ -191,6 +191,44 @@ class CrmContactService
         ];
     }
 
+    /**
+     * Create (or reuse) a tag/list definition in FluentCRM. Idempotent on
+     * slug, so typing an existing name returns that existing tag/list.
+     *
+     * @param string $type 'tags' | 'lists'
+     * @return array|null  {id, title} or null when inactive / empty title.
+     */
+    public static function createTaxonomy($type, $title)
+    {
+        if (!self::isActive()) {
+            return null;
+        }
+
+        $title = trim((string) $title);
+        if ($title === '') {
+            return null;
+        }
+
+        $model = self::taxonomyModel($type);
+        $slug  = sanitize_title($title);
+
+        if ($slug === '') {
+            return null;
+        }
+
+        $item = $model::firstOrCreate(['slug' => $slug], ['title' => $title]);
+
+        if ($item->wasRecentlyCreated) {
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- FluentCRM's own hook names, fired so CRM listeners see parity with native tag/list creation
+            do_action($type === 'tags' ? 'fluent_crm/tag_created' : 'fluent_crm/list_created', $item);
+        }
+
+        return [
+            'id'    => (int) $item->id,
+            'title' => $item->title,
+        ];
+    }
+
     private static function getContact($email)
     {
         if (!self::isActive() || !$email) {

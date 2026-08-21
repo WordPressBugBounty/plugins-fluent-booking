@@ -14,6 +14,7 @@ use FluentBooking\App\Hooks\Handlers\FrontEndHandler;
 use FluentForm\App\Models\Submission;
 use FluentForm\App\Modules\Form\FormFieldsParser;
 use FluentForm\App\Services\FormBuilder\ShortCodeParser;
+use FluentBooking\App\Vite;
 
 
 class FluentFormInit
@@ -384,16 +385,10 @@ class FluentFormInit
 
             [$localizeData, $elementId] = $this->getLocalizedData($calendarEvent, $field, $form);
 
-            wp_enqueue_script(
-                'fluent_booking',
-                FLUENT_BOOKING_URL . 'assets/public/js/fluentform-conversational.js',
-                [],
-                FLUENT_BOOKING_ASSETS_VERSION,
-                true
-            );
+            Vite::enqueueScript('fluent_booking', 'ff_conversational', [], FLUENT_BOOKING_ASSETS_VERSION);
 
             if (BookingFieldService::hasPhoneNumberField($localizeData['form_fields'])) {
-                wp_enqueue_script('fluent-booking-phone-field', FLUENT_BOOKING_URL . 'assets/public/js/phone-field.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
+                Vite::enqueueScript('fluent-booking-phone-field', 'phone_field', [], FLUENT_BOOKING_ASSETS_VERSION);
                 $inlineStyle = '.fcal_phone_wrapper .flag { background: url(' . esc_url(FLUENT_BOOKING_URL . 'assets/images/flags_responsive.png') . ') no-repeat;background-size: 100%;}';
                 wp_add_inline_style('fluent-booking-phone-field', $inlineStyle);
             }

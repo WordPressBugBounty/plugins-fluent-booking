@@ -75,7 +75,7 @@ use FluentBooking\App\Models\Booking;
     </script>
 
     <?php foreach ($js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
-        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>"
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>"<?php echo \FluentBooking\App\Vite::isDev() ? ' type="module"' : ''; ?>
                 src="<?php echo esc_url($fluentBookingFile); ?>?version=<?php echo esc_attr(FLUENT_BOOKING_ASSETS_VERSION); ?>"
                 defer="defer">
         </script>

@@ -25,7 +25,7 @@ class MeetingPolicy extends Policy
         // values cannot override the resource being acted on.
         $bookingId = $this->getRouteBookingId($request);
 
-        if ($request->method() == 'GET') {
+        if ($request->getMethod() == 'GET') {
             if (PermissionManager::userCan(['manage_own_calendar','read_all_bookings'])) {
                 return true;
             }

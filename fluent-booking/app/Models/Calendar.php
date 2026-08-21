@@ -13,6 +13,8 @@ class Calendar extends Model
 
     protected $guarded = ['id'];
 
+    protected $metaCache = [];
+
     protected $fillable = [
         'hash',
         'user_id',
@@ -171,10 +173,21 @@ class Calendar extends Model
 
     public function getMeta($key, $default = null)
     {
-        $meta = Meta::where('object_type', 'Calendar')
-            ->where('object_id', $this->id)
-            ->where('key', $key)
-            ->first();
+        if ($this->relationLoaded('metas')) {
+            $meta = $this->metas->firstWhere('key', $key);
+            return $meta ? $meta->value : $default;
+        }
+
+        if (array_key_exists($key, $this->metaCache)) {
+            $meta = $this->metaCache[$key];
+        } else {
+            $meta = Meta::where('object_type', 'Calendar')
+                ->where('object_id', $this->id)
+                ->where('key', $key)
+                ->first();
+
+            $this->metaCache[$key] = $meta;
+        }
 
         if (!$meta) {
             return $default;
@@ -201,6 +214,8 @@ class Calendar extends Model
                 'value'       => $value
             ]);
         }
+
+        $this->metaCache[$key] = $exist;
 
         return $exist;
     }
@@ -245,7 +260,7 @@ class Calendar extends Model
 
     public static function getAllHosts()
     {
-        $calendars = self::with(['user'])
+        $calendars = self::with(['user', 'metas'])
             ->where('type', 'simple')
             ->get();
 

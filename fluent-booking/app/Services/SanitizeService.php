@@ -143,7 +143,7 @@ class SanitizeService
         }
 
         return [
-            'value' => (int)Arr::get($conditions, 'value', 4),
+            'value' => max(0, (int)Arr::get($conditions, 'value', 4)),
             'unit'  => sanitize_text_field(Arr::get($conditions, 'unit', 'hours'))
         ];
     }

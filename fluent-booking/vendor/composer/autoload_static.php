@@ -34,7 +34,6 @@ class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'FluentBooking\\App\\App' => __DIR__ . '/../..' . '/app/App.php',
-        'FluentBooking\\App\\ComposerScript' => __DIR__ . '/../..' . '/app/ComposerScript.php',
         'FluentBooking\\App\\Hooks\\Handlers\\ActivationHandler' => __DIR__ . '/../..' . '/app/Hooks/Handlers/ActivationHandler.php',
         'FluentBooking\\App\\Hooks\\Handlers\\AdminMenuHandler' => __DIR__ . '/../..' . '/app/Hooks/Handlers/AdminMenuHandler.php',
         'FluentBooking\\App\\Hooks\\Handlers\\BlockEditorHandler' => __DIR__ . '/../..' . '/app/Hooks/Handlers/BlockEditorHandler.php',
@@ -121,6 +120,7 @@ class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
         'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\NewBookingTrigger' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCRM/NewBookingTrigger.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCart\\Bootstrap' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCart/Bootstrap.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCart\\CartHelper' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCart/CartHelper.php',
+        'FluentBooking\\App\\Services\\Integrations\\FluentCart\\CustomerProfileService' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCart/CustomerProfileService.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentCart\\Http\\Controller\\FluentCartController' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentCart/Http/Controller/FluentCartController.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentForms\\BookingElement' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentForms/BookingElement.php',
         'FluentBooking\\App\\Services\\Integrations\\FluentForms\\FluentFormInit' => __DIR__ . '/../..' . '/app/Services/Integrations/FluentForms/FluentFormInit.php',
@@ -146,6 +146,7 @@ class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
         'FluentBooking\\App\\Services\\SummaryReportService' => __DIR__ . '/../..' . '/app/Services/SummaryReportService.php',
         'FluentBooking\\App\\Services\\TimeSlotService' => __DIR__ . '/../..' . '/app/Services/TimeSlotService.php',
         'FluentBooking\\App\\Services\\TransStrings' => __DIR__ . '/../..' . '/app/Services/TransStrings.php',
+        'FluentBooking\\App\\Vite' => __DIR__ . '/../..' . '/app/Vite.php',
         'FluentBooking\\Database\\DBMigrator' => __DIR__ . '/../..' . '/database/DBMigrator.php',
         'FluentBooking\\Database\\DBSeeder' => __DIR__ . '/../..' . '/database/DBSeeder.php',
         'FluentBooking\\Database\\Migrations\\BookingActivityMigrator' => __DIR__ . '/../..' . '/database/Migrations/BookingActivityMigrator.php',

@@ -76,7 +76,7 @@ class FluentCrmInit
         $total = (clone $base)->count();
 
         $meetings = (clone $base)
-            ->with(['slot', 'calendar'])
+            ->with(['slot', 'calendar', 'calendar.metas'])
             ->orderBy('start_time', 'DESC')
             ->limit($limit)
             ->get();
@@ -176,7 +176,7 @@ class FluentCrmInit
 
     private function getFormattedTime($meeting)
     {
-        return DateTimeHelper::convertToTimeZone($meeting->start_time, 'utc', $meeting->calendar->author_timezone, 'j M Y, g:i A');
+        return DateTimeHelper::convertToTimeZone($meeting->start_time, 'UTC', $meeting->calendar->author_timezone, 'j M Y, g:i A');
     }
 
     private function getBookingTitle($meeting, $host = null)

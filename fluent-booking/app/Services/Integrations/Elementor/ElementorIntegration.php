@@ -100,6 +100,11 @@ class ElementorIntegration
             exit;
         }
 
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(['message' => __('You do not have permission to perform this action', 'fluent-booking')]);
+            exit;
+        }
+
         if (!isset($_POST['cal_id'])) {
             wp_send_json_error(['message' => __('No calendar ID provided', 'fluent-booking')]);
         }
@@ -116,6 +121,11 @@ class ElementorIntegration
     public function ajaxGetEventHash() {
         if (!isset($_POST['security']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['security'])), 'calendar_events_nonce')) {
             wp_send_json_error(['message' => __('Nonce verification failed', 'fluent-booking')]);
+            exit;
+        }
+
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(['message' => __('You do not have permission to perform this action', 'fluent-booking')]);
             exit;
         }
 

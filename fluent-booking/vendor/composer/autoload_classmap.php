@@ -8,7 +8,6 @@ $baseDir = dirname($vendorDir);
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'FluentBooking\\App\\App' => $baseDir . '/app/App.php',
-    'FluentBooking\\App\\ComposerScript' => $baseDir . '/app/ComposerScript.php',
     'FluentBooking\\App\\Hooks\\Handlers\\ActivationHandler' => $baseDir . '/app/Hooks/Handlers/ActivationHandler.php',
     'FluentBooking\\App\\Hooks\\Handlers\\AdminMenuHandler' => $baseDir . '/app/Hooks/Handlers/AdminMenuHandler.php',
     'FluentBooking\\App\\Hooks\\Handlers\\BlockEditorHandler' => $baseDir . '/app/Hooks/Handlers/BlockEditorHandler.php',
@@ -95,6 +94,7 @@ return array(
     'FluentBooking\\App\\Services\\Integrations\\FluentCRM\\NewBookingTrigger' => $baseDir . '/app/Services/Integrations/FluentCRM/NewBookingTrigger.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCart\\Bootstrap' => $baseDir . '/app/Services/Integrations/FluentCart/Bootstrap.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCart\\CartHelper' => $baseDir . '/app/Services/Integrations/FluentCart/CartHelper.php',
+    'FluentBooking\\App\\Services\\Integrations\\FluentCart\\CustomerProfileService' => $baseDir . '/app/Services/Integrations/FluentCart/CustomerProfileService.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentCart\\Http\\Controller\\FluentCartController' => $baseDir . '/app/Services/Integrations/FluentCart/Http/Controller/FluentCartController.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentForms\\BookingElement' => $baseDir . '/app/Services/Integrations/FluentForms/BookingElement.php',
     'FluentBooking\\App\\Services\\Integrations\\FluentForms\\FluentFormInit' => $baseDir . '/app/Services/Integrations/FluentForms/FluentFormInit.php',
@@ -120,6 +120,7 @@ return array(
     'FluentBooking\\App\\Services\\SummaryReportService' => $baseDir . '/app/Services/SummaryReportService.php',
     'FluentBooking\\App\\Services\\TimeSlotService' => $baseDir . '/app/Services/TimeSlotService.php',
     'FluentBooking\\App\\Services\\TransStrings' => $baseDir . '/app/Services/TransStrings.php',
+    'FluentBooking\\App\\Vite' => $baseDir . '/app/Vite.php',
     'FluentBooking\\Database\\DBMigrator' => $baseDir . '/database/DBMigrator.php',
     'FluentBooking\\Database\\DBSeeder' => $baseDir . '/database/DBSeeder.php',
     'FluentBooking\\Database\\Migrations\\BookingActivityMigrator' => $baseDir . '/database/Migrations/BookingActivityMigrator.php',

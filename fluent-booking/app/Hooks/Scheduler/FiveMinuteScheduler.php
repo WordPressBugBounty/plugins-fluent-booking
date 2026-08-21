@@ -110,7 +110,20 @@ class FiveMinuteScheduler
 
     private function maybeAutoExpireCalendars()
     {
-        Calendar::query()
+        $calendarIds = Calendar::query()
+            ->where('type', 'event')
+            ->where('status', 'active')
+            ->whereDoesntHave('events', function ($query) {
+                $query->whereIn('status', ['active', 'draft']);
+            })
+            ->limit(500)
+            ->pluck('id');
+
+        if ($calendarIds->isEmpty()) {
+            return true;
+        }
+
+        Calendar::whereIn('id', $calendarIds)
             ->where('type', 'event')
             ->where('status', 'active')
             ->whereDoesntHave('events', function ($query) {
@@ -144,7 +157,18 @@ class FiveMinuteScheduler
 
     private function maybeAutoDeleteReservations()
     {
-        Booking::query()
+        $reservationIds = Booking::query()
+            ->whereIn('event_type', ['single_event', 'group_event'])
+            ->where('status', 'reserved')
+            ->where('start_time', '<=', gmdate('Y-m-d H:i:s', time())) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+            ->limit(500)
+            ->pluck('id');
+
+        if ($reservationIds->isEmpty()) {
+            return true;
+        }
+
+        Booking::whereIn('id', $reservationIds)
             ->whereIn('event_type', ['single_event', 'group_event'])
             ->where('status', 'reserved')
             ->where('start_time', '<=', gmdate('Y-m-d H:i:s', time())) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date

@@ -47,7 +47,7 @@
     </script>
 
     <?php foreach ($js_files as $fluentBookingFileKey => $fluentBookingFile): ?>
-        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>" src="<?php echo esc_url($fluentBookingFile); ?>" defer="defer"></script>
+        <script id="<?php echo esc_attr($fluentBookingFileKey); ?>"<?php echo \FluentBooking\App\Vite::isDev() ? ' type="module"' : ''; ?> src="<?php echo esc_url($fluentBookingFile); ?>" defer="defer"></script>
     <?php endforeach; ?>
 
     <script>
