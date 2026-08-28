@@ -1,4 +1,17 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+use FluentBooking\App\Models\Calendar;
+
+/**
+ * @var array    $author
+ * @var Calendar $calendar
+ * @var iterable $events
+ * @var bool     $embedded
+ * @var bool     $hideInfo
+ * @var bool     $block
+ */
+?>
 
 <div class="fcal_calendar_wrap<?php echo esc_attr(isset($block) ? '_block' : ''); ?> <?php echo esc_attr(isset($embedded) && $embedded ? 'fcal_booking_iframe' : ''); ?>">
     <div class="fluent_booking_wrap">

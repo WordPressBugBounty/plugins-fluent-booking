@@ -29,9 +29,13 @@ class CalendarIntegrationService
 
         $mergeFields = false;
         if ($integrationId) {
-            $feed = Meta::where(['object_id' => $slotId, 'id' => $integrationId])->first();
+            $feed = Meta::where('id', $integrationId)
+                ->where('object_id', $slotId)
+                ->where('object_type', 'integration')
+                ->where('key', $integrationName . '_feeds')
+                ->first();
 
-            if ($feed->value) {
+            if ($feed && $feed->value) {
                 $settings = $feed->value;
                 $settings = apply_filters('fluent_booking/get_integration_values_' . $integrationName, $settings, $feed, $slotId);
                 if (!empty($settings['list_id'])) {

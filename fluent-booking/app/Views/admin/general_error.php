@@ -1,4 +1,13 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var string $title
+ * @var string $body
+ * @var string $btn_url
+ * @var string $btn_text
+ */
+?>
 
 <!DOCTYPE html>
 <html lang='en'>

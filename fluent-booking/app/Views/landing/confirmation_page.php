@@ -1,4 +1,20 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var string $title
+ * @var string $body
+ * @var string $description
+ * @var array  $author
+ * @var string $url
+ * @var bool   $embedded
+ * @var string $theme
+ * @var array  $back_button
+ * @var array  $css_files
+ * @var array  $js_files
+ * @var array  $js_vars
+ */
+?>
 
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>

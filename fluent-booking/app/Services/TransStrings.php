@@ -1241,6 +1241,25 @@ class TransStrings
             'Avg. Order' => __('Avg. Order', 'fluent-booking'),
             'Last Purchase' => __('Last Purchase', 'fluent-booking'),
             'New name' => __('New name', 'fluent-booking'),
+            'Attendee\'s Email' => __('Attendee\'s Email', 'fluent-booking'),
+            'Attendee\'s Name' => __('Attendee\'s Name', 'fluent-booking'),
+            'Attendee\'s Timezone' => __('Attendee\'s Timezone', 'fluent-booking'),
+            'Don\'t Reject' => __('Don\'t Reject', 'fluent-booking'),
+            'Evening vibes!' => __('Evening vibes!', 'fluent-booking'),
+            'Good afternoon' => __('Good afternoon', 'fluent-booking'),
+            'Good evening' => __('Good evening', 'fluent-booking'),
+            'Good morning' => __('Good morning', 'fluent-booking'),
+            'No coupons found' => __('No coupons found', 'fluent-booking'),
+            'No meetings today' => __('No meetings today', 'fluent-booking'),
+            'No, Don\'t cancel' => __('No, Don\'t cancel', 'fluent-booking'),
+            'No, Don\'t delete' => __('No, Don\'t delete', 'fluent-booking'),
+            'Select remote calendar in where to add new events to when you\'re booked.' => __('Select remote calendar in where to add new events to when you\'re booked.', 'fluent-booking'),
+            'Step into the moonlight!' => __('Step into the moonlight!', 'fluent-booking'),
+            'The night\'s still young!' => __('The night\'s still young!', 'fluent-booking'),
+            'Welcome back' => __('Welcome back', 'fluent-booking'),
+            /* translators: %s: site name */
+            'Welcome to %s' => __('Welcome to %s', 'fluent-booking'),
+            'You don\'t have any feeds configured. Let\'s go' => __('You don\'t have any feeds configured. Let\'s go', 'fluent-booking'),
         );
     }
 }

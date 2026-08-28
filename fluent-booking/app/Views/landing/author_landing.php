@@ -1,4 +1,22 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+use FluentBooking\App\Models\Calendar;
+
+/**
+ * @var Calendar $calendar
+ * @var iterable $events
+ * @var array    $author
+ * @var string   $title
+ * @var string   $description
+ * @var string   $url
+ * @var bool     $embedded
+ * @var array    $css_files
+ * @var array    $js_files
+ * @var array    $js_vars
+ * @var array    $header_js_files
+ */
+?>
 
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>

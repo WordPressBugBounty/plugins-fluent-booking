@@ -27,15 +27,24 @@ class AvailabilityService
         return Availability::create($defaultSchedule);
     }
 
-    public static function availabilitySchedules()
+    /**
+     * Schedules the current user may read and attach, as a query so callers that only
+     * need ids can avoid formatting every schedule.
+     */
+    public static function usableAvailabilityQuery()
     {
         $permissions = ['manage_all_data', 'read_and_use_other_availabilities', 'manage_other_availabilities', 'read_other_calendars', 'manage_other_calendars'];
 
-        $availabilities = Availability::when(
+        return Availability::when(
             !PermissionManager::userCan($permissions),
             function ($query) {
                 return $query->where('object_id', get_current_user_id());
-            })->get()->toArray();
+            });
+    }
+
+    public static function availabilitySchedules()
+    {
+        $availabilities = self::usableAvailabilityQuery()->get()->toArray();
 
         $formattedSchedules = [];
         foreach ($availabilities as $availability) {

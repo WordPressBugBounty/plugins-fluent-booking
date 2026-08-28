@@ -1,4 +1,10 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var array $items
+ */
+?>
 
 <?php if ($items) : ?>
     <h4><?php esc_html_e('Customer Details', 'fluent-booking'); ?></h4>

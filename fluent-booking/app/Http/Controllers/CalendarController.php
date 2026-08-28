@@ -2,6 +2,7 @@
 
 namespace FluentBooking\App\Http\Controllers;
 
+use FluentBooking\App\Models\Availability;
 use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\Helper;
@@ -81,7 +82,7 @@ class CalendarController extends Controller
             }
 
             if(empty($calendar->author_profile['ID'])) {
-                $calendar->generic_error = '<p style="color: red; margin:0;">Connected Host user is missing</p>';
+                $calendar->generic_error = '<p style="color: var(--fcal-danger-fg); margin:0;">Connected Host user is missing</p>';
             }
 
             do_action_ref_array('fluent_booking/calendar', [&$calendar, 'lists']);
@@ -173,7 +174,11 @@ class CalendarController extends Controller
             OnboardingService::installAddons($installableAddons);
         }
 
-        $type = sanitize_text_field(Arr::get($data, 'type', 'simple'));
+        $type = SanitizeService::checkCollection(
+            sanitize_text_field(Arr::get($data, 'type', 'simple')),
+            ['simple', 'team', 'event'],
+            'simple'
+        );
 
         $isHostCalendar = $type == 'simple' ? true : false;
 
@@ -197,8 +202,28 @@ class CalendarController extends Controller
         if (!$isHostCalendar) {
             $title = sanitize_text_field(Arr::get($data, 'title', ''));
             $data['slug'] = sanitize_title($title, '', 'display');
-            $teamMembers = array_map('intval', Arr::get($slot, 'settings.team_members', []));
-            if (!in_array($user->ID, $teamMembers)) {
+            $teamMembers = array_values(array_filter(
+                array_map('intval', (array) Arr::get($slot, 'settings.team_members', []))
+            ));
+
+            cache_users($teamMembers);
+
+            foreach ($teamMembers as $memberId) {
+                if (!get_user_by('ID', $memberId)) {
+                    return $this->sendError([
+                        'message' => __('Invalid Team Member', 'fluent-booking')
+                    ], 422);
+                }
+            }
+
+            if (!in_array($user->ID, $teamMembers, true)) {
+                // Same privileged act as passing an explicit user_id above; gate it identically.
+                if (!PermissionManager::userCan(['manage_all_data', 'invite_team_members'])) {
+                    return $this->sendError([
+                        'message' => __('You are not allowed to create a calendar for another user', 'fluent-booking')
+                    ], 403);
+                }
+
                 $user = get_user_by('ID', reset($teamMembers));
                 if (!$user) {
                     return $this->sendError([
@@ -649,17 +674,67 @@ class CalendarController extends Controller
             'common_schedule'    => Arr::isTrue($data, 'common_schedule', false)
         ];
 
+        $hostsSchedules = [];
+
         if ($event->isTeamEvent()) {
-            $eventSettings['hosts_schedules'] = array_map('intval', array_combine(
+            $hostsSchedules = array_map('intval', array_combine(
                 array_map('intval', array_keys(Arr::get($data, 'hosts_schedules', []))),
                 array_map('intval', Arr::get($data, 'hosts_schedules', []))
             ));
         }
 
+        $availabilityId = (int)Arr::get($data, 'availability_id');
+        $availabilityType = SanitizeService::checkCollection(Arr::get($data, 'availability_type'), ['existing_schedule', 'custom']);
+
+        $submittedIds = array_values(array_filter(array_unique(array_merge(
+            [$availabilityType === 'existing_schedule' ? $availabilityId : 0],
+            array_values($hostsSchedules)
+        ))));
+
+        $usableIds = [];
+        $scheduleOwners = [];
+
+        if ($submittedIds) {
+            $usableIds = array_map('intval', AvailabilityService::usableAvailabilityQuery()
+                ->whereIn('id', $submittedIds)->pluck('id')->toArray());
+
+            $scheduleOwners = array_map('intval', Availability::whereIn('id', $submittedIds)
+                ->pluck('object_id', 'id')->toArray());
+        }
+
+        foreach ($hostsSchedules as $hostId => $scheduleId) {
+            if (($scheduleOwners[$scheduleId] ?? 0) === (int)$hostId) {
+                continue;
+            }
+
+            if (!in_array($scheduleId, $usableIds, true)) {
+                return $this->sendError([
+                    'message' => __('You are not allowed to use the selected schedule', 'fluent-booking')
+                ], 403);
+            }
+        }
+
+        if ($hostsSchedules) {
+            $eventSettings['hosts_schedules'] = $hostsSchedules;
+        }
+
+        $eventHostIds = array_map('intval', array_merge(
+            $event->getHostIds(),
+            [$event->user_id, $event->calendar->user_id]
+        ));
+
+        if ($availabilityType === 'existing_schedule' && $availabilityId
+            && !in_array($availabilityId, $usableIds, true)
+            && !in_array($scheduleOwners[$availabilityId] ?? 0, $eventHostIds, true)) {
+            return $this->sendError([
+                'message' => __('You are not allowed to use the selected schedule', 'fluent-booking')
+            ], 403);
+        }
+
         $event->settings = $eventSettings;
 
-        $event->availability_id = (int)Arr::get($data, 'availability_id');
-        $event->availability_type = SanitizeService::checkCollection(Arr::get($data, 'availability_type'), ['existing_schedule', 'custom']);
+        $event->availability_id = $availabilityId;
+        $event->availability_type = $availabilityType;
 
         $event->save();
 

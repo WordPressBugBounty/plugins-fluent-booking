@@ -1,4 +1,11 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var object $order
+ * @var array  $currency_settings
+ */
+?>
 
 <div class="fluent_booking_payment_info">
     <table width="100%">

@@ -1,4 +1,11 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var string $calendar_app
+ * @var string $element_id
+ */
+?>
 
 <div class="ff-el-group has-conditions">
     <div class="fcal_cal_wrap">

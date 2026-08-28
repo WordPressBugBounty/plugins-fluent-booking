@@ -23,6 +23,41 @@ class AdminMenuHandler
             }
             $this->enqueueAssets();
         }, 100);
+
+        add_action('admin_head', function () {
+            if (!isset($_REQUEST['page']) || $_REQUEST['page'] != 'fluent-booking') { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                return;
+            }
+            $this->printThemeClass();
+        }, 1);
+    }
+
+    /**
+     * Put the dark class on the document before the page paints.
+     *
+     * The theme is chosen in the browser, so the server cannot know it - which means
+     * without this the first frame is always light, and somebody on dark gets a white flash
+     * on every page load. This runs in <head>, before wp-admin's own markup, and is the
+     * only reason it is inline rather than in global_admin.js: a file in the footer is too
+     * late to matter, and one in the header is still a request the paint would wait on.
+     *
+     * `fluent_theme_mode` is the key every Fluent plugin shares (see global_admin.js), and it
+     * holds a bare `light`, `dark` or `system`, so `system` is resolved here against the
+     * machine's own preference. <body> does not exist yet, so only <html> is marked;
+     * global_admin.js puts the same classes on <body> and #wpbody-content once it runs.
+     *
+     * @return void
+     */
+    public function printThemeClass()
+    {
+        $script = <<<'JS'
+(function(){try{var s=localStorage.getItem('fluent_theme_mode')||'';
+if(!s){s=localStorage.getItem('fcal_color_mode')==='dark'?'dark':'light';}
+if(s==='system'){s='system:'+(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}
+if(s==='dark'||s==='system:dark'){var e=document.documentElement;e.classList.add('fluent_theme_dark');e.classList.add('dark');}}catch(e){}})();
+JS;
+
+        echo '<script id="fluent-booking-theme-class">' . $script . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     }
 
     public function add()
@@ -372,6 +407,7 @@ class AdminMenuHandler
                 'id'          => $currentUser->ID,
                 'calendar_id' => $calendarId,
                 'full_name'   => $currentUsername,
+                'avatar'      => get_avatar_url($currentUser->ID, ['size' => 96]),
                 'email'       => $currentUser->user_email,
                 'is_admin'    => $hasAllAccess,
                 'permissions' => PermissionManager::getUserPermissions($currentUser, false),
@@ -380,6 +416,7 @@ class AdminMenuHandler
             'is_new'                 => $isNew,
             'require_slug'           => $requireSlug,
             'site_url'               => site_url('/'),
+            'site_title'             => get_bloginfo('name'),
             'upgrade_url'            => Helper::getUpgradeUrl(),
             'timezones'              => DateTimeHelper::getTimeZones(true),
             'features'               => Helper::getFeatures(),

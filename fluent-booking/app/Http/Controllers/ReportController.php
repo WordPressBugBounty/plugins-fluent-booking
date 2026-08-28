@@ -161,10 +161,12 @@ class ReportController extends Controller
 
         $bookingStats = $this->getBookingStats($startTime, $endTime, $lastMonthStartTime, $startTime);
 
-        $bookingStats['bookedComparison'] = $this->getComparisonMessage($bookingStats['bookedStat']);
-        $bookingStats['completedComparison'] = $this->getComparisonMessage($bookingStats['completedStat']);
-        $bookingStats['cancelledComparison'] = $this->getComparisonMessage($bookingStats['cancelledStat']);
-        $bookingStats['guestComparison'] = $this->getComparisonMessage($bookingStats['guestStat']);
+        $comparison = $this->getComparisonLabel($differenceInDays);
+
+        $bookingStats['bookedComparison'] = $comparison;
+        $bookingStats['completedComparison'] = $comparison;
+        $bookingStats['cancelledComparison'] = $comparison;
+        $bookingStats['guestComparison'] = $comparison;
 
         return $bookingStats;
     }
@@ -215,10 +217,15 @@ class ReportController extends Controller
     {
         if ($lastMonthTotal > 0) {
             return round((($currentMonthTotal - $lastMonthTotal) / $lastMonthTotal) * 100, 2);
-        } else if (!$lastMonthTotal) {
-            return 100;
         }
-        return 0;
+
+        // Nothing before and nothing now is no change, not a rise from nothing - which is what
+        // every tile on a fresh install used to claim.
+        if (!$currentMonthTotal) {
+            return 0;
+        }
+
+        return 100;
     }
 
     private function getBookingWidgetNumbers($startTime, $endTime)
@@ -296,17 +303,29 @@ class ReportController extends Controller
         ];
     }
 
-    private function getComparisonMessage($change)
+    /**
+     * The window the percentage beside each number is measured against.
+     *
+     * This used to describe the direction of the change - "More than last month" - which is
+     * what the percentage next to it already says, so the tile stated one fact twice and left
+     * the window it was comparing against unstated. It was also wrong whenever a custom range
+     * was picked, since the comparison is always against a preceding window of the same
+     * length, not against a calendar month.
+     *
+     * @param float $days Length of the reporting window, in days.
+     *
+     * @return string
+     */
+    private function getComparisonLabel($days)
     {
-        if ($change > 0) {
-            return __('More than last month', 'fluent-booking');
-        }
-        if ($change < 0) {
-            return __('Less than last month', 'fluent-booking');
+        $days = max(1, (int) round($days));
+
+        if ($days === 1) {
+            return __('vs. previous day', 'fluent-booking');
         }
 
-        return __('Same as last month', 'fluent-booking');
-
+        /* translators: %d - the number of days being compared against */
+        return sprintf(__('vs. previous %d days', 'fluent-booking'), $days);
     }
 
     private function getPaymentWidgets($startTime, $endTime)
@@ -363,7 +382,7 @@ class ReportController extends Controller
 
         $paymentPercentage = $this->getPercentage($currentMonthTotal, $lastMonthTotal);
 
-        $paymentComparison = $this->getComparisonMessage($paymentPercentage);
+        $paymentComparison = $this->getComparisonLabel($differenceInDays);
 
         $paymentStats['totalPayment'] = intval($currentMonthTotal);
         $paymentStats['paymentComparison'] = $paymentComparison;

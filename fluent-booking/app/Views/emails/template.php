@@ -1,4 +1,11 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var string $email_body
+ * @var string $email_footer
+ */
+?>
 
 <!doctype html>
 <html lang="en">

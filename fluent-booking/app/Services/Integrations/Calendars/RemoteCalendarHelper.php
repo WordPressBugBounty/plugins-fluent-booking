@@ -10,6 +10,48 @@ use FluentBooking\Framework\Support\Arr;
 
 class RemoteCalendarHelper
 {
+    /**
+     * Remote calendar and webhook URLs are set by roles below `manage_options`, so by
+     * default they are held to WordPress' safe URL rules (no loopback/private/link-local
+     * address, and only ports 80, 443, 8080). Filter to allow an internal host or port.
+     *
+     * Callbacks get the URL under check, so compare the host, not the whole string.
+     */
+    public static function shouldRejectUnsafeUrl($url, $context = 'remote_calendar')
+    {
+        return (bool) apply_filters('fluent_booking/reject_unsafe_remote_urls', true, $url, $context);
+    }
+
+    /**
+     * Sanitize an operator supplied remote URL, returning false when it is not a plain
+     * http/https address this site is allowed to call. Callers own the error message.
+     *
+     * @param string $url
+     * @param string $context
+     * @return string|false
+     */
+    public static function sanitizeRemoteUrl($url, $context = 'remote_calendar')
+    {
+        $url = esc_url_raw(trim((string) $url), ['http', 'https']);
+
+        if (!$url) {
+            return false;
+        }
+
+        // esc_url_raw() and wp_http_validate_url() both accept a scheme relative `//host`.
+        $scheme = strtolower((string) wp_parse_url($url, PHP_URL_SCHEME));
+
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return false;
+        }
+
+        if (self::shouldRejectUnsafeUrl($url, $context) && !wp_http_validate_url($url)) {
+            return false;
+        }
+
+        return $url;
+    }
+
     public static function getUserRemoteCreatableCalendarSettings($userId)
     {
         $exist = Meta::where('object_type', '_calendar_user_meta')

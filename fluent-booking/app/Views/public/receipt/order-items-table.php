@@ -1,6 +1,11 @@
 <?php
-
 defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var object $order
+ * @var array  $currency_settings
+ * @var bool   $hasSubscription
+ */
 
 if (!$order->items) {
     return '';

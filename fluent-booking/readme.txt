@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.5
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,18 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.3.0 (Date: 28 Aug 2026)
+- Introduced: Fully Redesigned Admin Interface
+- Added: Next Meetings Grouped by Today, Tomorrow and Later
+- Improved: Stacked Layout for Integration and Payment Settings
+- Security: Hardened Ownership Checks and Merge Tag Evaluation
+- Fixed: Availability Save Blocked for Team Members
+- Fixed: Phone Field Sometimes Rendering Blank on Booking Form
+- Fixed: Prefilled Phone Number Cleared on Booking Form
+- Fixed: Stripe Card Field Failing to Load on Onsite Payment
+- Fixed: Fatal Error When Calendar Event Missing in Payment Update
+- Fixed: Light-Only Colors Leaking Into Dark Mode
 
 = 2.2.5 (Date: 21 Aug 2026)
 - Added: Days Unit for Booking Cutoff Limits

@@ -1,8 +1,20 @@
 <?php
-    /*
-    * @var $booking \FluentBooking\App\Models\Booking
-    */
-    defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH' ) || exit;
+
+use FluentBooking\App\Models\Booking;
+
+/**
+ * @var Booking $booking
+ * @var string  $title
+ * @var string  $sub_heading
+ * @var array   $sections
+ * @var string  $confirm_icon
+ * @var string  $extra_html
+ * @var string  $action_type
+ * @var string  $action_url
+ * @var array   $cancel_field
+ * @var array   $bookmarks
+ */
 ?>
 
 <div class="fcal_confirmation">

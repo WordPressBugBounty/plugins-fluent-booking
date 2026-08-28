@@ -10,6 +10,7 @@ use FluentBoards\App\Models\Board;
 use FluentBoards\App\Models\User;
 use FluentBoards\App\Services\Constant;
 use FluentBoards\App\Services\NotificationService;
+use FluentBoards\App\Services\PermissionManager as FluentBoardsPermission;
 use FluentBoards\App\Services\TaskService;
 use FluentBooking\Framework\Support\Arr;
 use FluentBooking\App\Http\Controllers\IntegrationManagerController;
@@ -242,6 +243,10 @@ class Bootstrap extends IntegrationManagerController
     {
         $boardId = Arr::get($settings, 'board_config.board_id');
 
+        if ($boardId && !FluentBoardsPermission::userHasBoardPermission($boardId, 'GET')) {
+            $boardId = null;
+        }
+
         $data = [
             'board_id'   => $this->getBoards(),
             'stage_id'   => $boardId ? $this->getStages($boardId) : [],
@@ -258,6 +263,7 @@ class Bootstrap extends IntegrationManagerController
     private function getBoards()
     {
         $boards = Board::whereNull('archived_at')
+            ->whereIn('id', FluentBoardsPermission::getBoardIdsForUser())
             ->select('id', 'title')
             ->get();
 

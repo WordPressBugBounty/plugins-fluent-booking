@@ -1,4 +1,16 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var string $slug
+ * @var string $baseUrl
+ * @var string $logo
+ * @var string $dark_logo
+ * @var array  $menuItems
+ * @var array  $settings
+ * @var array  $rightItems
+ */
+?>
 
 <div id="<?php echo esc_attr($slug); ?>-app" class="warp fconnector_app">
     <div class="fframe_app">

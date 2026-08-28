@@ -1,17 +1,19 @@
 <?php
-    /**
-     * @var $theme
-     * @var $calenderEvent
-     */
-    
-    defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH' ) || exit;
 
-    $mode = '';
-    if ($theme == 'dark') {
-        $mode = 'fcal-dark-mode';
-    } else if ($theme == 'light') {
-        $mode = 'fcal-light-mode';
-    }
+use FluentBooking\App\Models\CalendarSlot;
+
+/**
+ * @var string       $theme
+ * @var CalendarSlot $calenderEvent
+ */
+
+$mode = '';
+if ($theme == 'dark') {
+    $mode = 'fcal-dark-mode';
+} else if ($theme == 'light') {
+    $mode = 'fcal-light-mode';
+}
 ?>
 <div class="fcal_cal_wrap <?php echo esc_attr($mode); ?>">
     <div class="fluent_booking_app" data-calendar_id="<?php echo (int)$calenderEvent->calendar_id; ?>"

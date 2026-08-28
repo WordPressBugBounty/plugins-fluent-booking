@@ -1,4 +1,17 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var object $bookings
+ * @var array  $attributes
+ * @var int    $per_page
+ * @var int    $start_page
+ * @var int    $end_page
+ * @var string $booking_period
+ * @var array  $page_options
+ * @var array  $period_options
+ */
+?>
 
 <div class="fcal_container">
     <div class="fcal_booking_header">

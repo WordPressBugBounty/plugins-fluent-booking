@@ -986,14 +986,24 @@ class FrontEndHandler
 
         $eventId = (int)Arr::get($request, 'event_id');
 
-        $rescheduling = Arr::get($request, 'rescheduling', 'no');
+        $reschedulingHash = sanitize_text_field(Arr::get($request, 'rescheduling_hash', '')); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
         $calendarEvent = $eventId ? CalendarSlot::find($eventId) : null;
 
-        if (!$calendarEvent || ($calendarEvent->status != 'active' && $rescheduling == 'no')) {
+        if (!$calendarEvent) {
             wp_send_json([
                 'message' => __('Sorry, the host is not accepting any new bookings at the moment.', 'fluent-booking')
             ], 422);
+        }
+
+        if ($calendarEvent->status != 'active') {
+            $existingBooking = $reschedulingHash ? Booking::where('hash', $reschedulingHash)->first() : null;
+
+            if (!$existingBooking || (int)$existingBooking->event_id !== (int)$calendarEvent->id) {
+                wp_send_json([
+                    'message' => __('Sorry, the host is not accepting any new bookings at the moment.', 'fluent-booking')
+                ], 422);
+            }
         }
 
         $calendar = $calendarEvent->calendar;

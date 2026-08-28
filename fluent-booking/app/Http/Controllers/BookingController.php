@@ -197,7 +197,15 @@ class BookingController extends Controller
         }
 
         if ($hostUserId = Arr::get($postedData, 'host_user_id', null)) {
-            $bookingData['host_user_id'] = (int) $hostUserId;
+            $hostUserId = (int) $hostUserId;
+
+            if (!in_array($hostUserId, array_map('intval', $calendarEvent->getHostIds()), true)) {
+                return $this->sendError([
+                    'message' => __('The selected host is not a host of this event', 'fluent-booking')
+                ], 422);
+            }
+
+            $bookingData['host_user_id'] = $hostUserId;
         }
 
         $hostIds = null;

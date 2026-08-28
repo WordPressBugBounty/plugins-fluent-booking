@@ -1,4 +1,14 @@
-<?php defined( 'ABSPATH' ) || exit; ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * @var string $wrapper_id
+ * @var string $wrapper_class
+ * @var string $logo
+ * @var string $title
+ * @var string $description
+ */
+?>
 
 <div id="<?php echo esc_attr($wrapper_id); ?>" class="fcal_calendar_wrapper fcal_calendars <?php echo esc_attr($wrapper_class); ?>">
     <div class="fcal_calendar_block_inner">

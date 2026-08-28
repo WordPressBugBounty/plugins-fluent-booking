@@ -230,7 +230,20 @@ class EditorShortCodeParser
             }
 
             if (Arr::get($customField, 'type') == 'hidden') {
-                return self::parseShortCodes(Arr::get(self::$store['custom_booking_data'], $key));
+                static $resolving = [];
+
+                // Guest-supplied hidden values are parsed again, so a self-reference would recurse until the stack runs out.
+                if (isset($resolving[$key])) {
+                    return Arr::get(self::$store['custom_booking_data'], $key);
+                }
+
+                $resolving[$key] = true;
+
+                try {
+                    return self::parseShortCodes(Arr::get(self::$store['custom_booking_data'], $key));
+                } finally {
+                    unset($resolving[$key]);
+                }
             }
 
             return Arr::get(self::$store['custom_booking_data'], $key);
