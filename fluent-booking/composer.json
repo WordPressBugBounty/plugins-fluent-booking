@@ -25,7 +25,7 @@
         }
     ],
     "require": {
-        "wpfluent/framework": "2.11.19",
+        "wpfluent/framework": "2.12.8",
         "woocommerce/action-scheduler": "3.7.0",
         "wpfluent/caldav": "*"
     },

@@ -8,7 +8,7 @@ class User extends Model
 {
     protected $table = 'users';
 
-    protected $guarded = ['ID', 'user_pass'];
+    protected $guarded = ['ID', 'user_pass', 'user_activation_key'];
 
     protected $hidden = ['user_pass', 'user_activation_key'];
 

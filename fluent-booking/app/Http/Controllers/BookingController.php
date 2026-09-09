@@ -314,7 +314,17 @@ class BookingController extends Controller
         $duration = $calendarEvent->getDuration($request->get('duration'));
 
         $hostId = $request->get('host_id', null);
-        
+
+        if ($hostId) {
+            $hostId = (int) $hostId;
+
+            if (!in_array($hostId, array_map('intval', $calendarEvent->getHostIds()), true)) {
+                wp_send_json([
+                    'message' => __('The selected host is not a host of this event', 'fluent-booking')
+                ], 422);
+            }
+        }
+
         $timeSlotService = TimeSlotServiceHandler::initService($calendar, $calendarEvent);
 
         if (is_wp_error($timeSlotService)) {

@@ -23,6 +23,12 @@ use FluentBooking\Framework\Database\Orm\Relations\Concerns\AsPivot;
 use FluentBooking\Framework\Database\Orm\Collection as OrmCollection;
 use FluentBooking\Framework\Database\ConnectionResolverInterface as Resolver;
 
+/**
+ * Model forwards unknown instance/static calls to a new Orm Builder
+ * (see __call/__callStatic), which itself proxies to the Query Builder.
+ *
+ * @mixin \FluentBooking\Framework\Database\Orm\Builder
+ */
 abstract class Model implements ArrayableInterface, ArrayAccess, CanBeEscapedWhenCastToString, JsonableInterface, JsonSerializable, UrlRoutable
 {
     use HelperFunctionsTrait;

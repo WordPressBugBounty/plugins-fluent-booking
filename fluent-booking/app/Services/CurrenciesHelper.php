@@ -378,6 +378,7 @@ class CurrenciesHelper
             'SRD' => '&#36;',
             'SSP' => '&pound;',
             'STD' => 'Db',
+            'SVC' => '₡',
             'SYP' => '&#x644;.&#x633;',
             'SZL' => 'L',
             'THB' => '&#3647;',

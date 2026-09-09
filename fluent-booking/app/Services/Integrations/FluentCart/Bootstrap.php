@@ -53,6 +53,10 @@ class Bootstrap
         // after order confirmation
         add_action('fluent_booking/cart/booking_order_completed', [$this, 'maybeScheduleBooking'], 10, 1);
 
+        // Offline and async payments settle after their cart is closed, so the
+        // action above never reaches us. This one fires on the payment itself.
+        add_action('fluent_cart/order_paid_done', [$this, 'reconcileBookingFromOrder'], 10, 1);
+
         add_filter('fluent_cart/checkout_page_name_fields_schema', [$this, 'maybeFillSplitNameFields'], 10, 2);
     }
 
@@ -218,8 +222,8 @@ class Bootstrap
     public function maybeScheduleBooking($eventData)
     {
         $order = Arr::get($eventData, 'order');
-        $bookingId = Arr::get($order->config, 'fcal_booking_id', '');
-        if (empty($order) || empty($bookingId)) {
+
+        if (empty($order)) {
             return;
         }
 
@@ -240,6 +244,40 @@ class Bootstrap
         });
 
         if (!$checkoutItem) {
+            return;
+        }
+
+        $this->scheduleBookingForOrder($order);
+    }
+
+    /**
+     * The same work, reached without a cart.
+     *
+     * __on_success_actions__ only run while the cart is open, and offline and
+     * async orders close theirs before the payment settles - leaving the
+     * booking pending for good. The order keeps the booking id either way.
+     *
+     * @param array $eventData
+     */
+    public function reconcileBookingFromOrder($eventData)
+    {
+        $order = Arr::get($eventData, 'order');
+
+        if (empty($order)) {
+            return;
+        }
+
+        $this->scheduleBookingForOrder($order);
+    }
+
+    /**
+     * @param \FluentCart\App\Models\Order $order
+     */
+    protected function scheduleBookingForOrder($order)
+    {
+        $bookingId = Arr::get($order->config, 'fcal_booking_id', '');
+
+        if (empty($bookingId)) {
             return;
         }
 

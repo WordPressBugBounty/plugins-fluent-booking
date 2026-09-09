@@ -146,9 +146,9 @@ class FluentCrmInit
 
         return [
             'id'         => '#' . $groupRef,
-            'title'      => $this->getBookingTitle($meeting, $host),
-            'status'     => $meeting->status,
-            'meeting_at' => $this->getFormattedTime($meeting),
+            'title'      => esc_html($this->getBookingTitle($meeting, $host)),
+            'status'     => esc_html($meeting->status),
+            'meeting_at' => esc_html($this->getFormattedTime($meeting)),
             'action'     => $this->getActionUrl($meeting),
         ];
     }

@@ -93,7 +93,7 @@ class CalendarService
         foreach ($createdEvents as $index => $event) {
             $eventMetasData = Arr::get($createEventMetasData, $index, []);
 
-            $eventMetasData = self::prepareEventMetas($eventMetasData);
+            $eventMetasData = self::prepareEventMetas($eventMetasData, $event);
 
             $event->event_metas()->createMany($eventMetasData);
         }
@@ -169,7 +169,9 @@ class CalendarService
             $preparedCalendarMetas[] = [
                 'key'         => sanitize_text_field($calendarMeta['key']),
                 'value'       => is_array($value) ? self::sanitize_mapped_data($value) : sanitize_text_field($value),
-                'object_type' => sanitize_text_field($calendarMeta['object_type'])
+                // Bound to the imported calendar; never let the payload pick the type
+                // (e.g. a user_meta / _access_permissions row).
+                'object_type' => 'Calendar'
             ];
         }
 
@@ -280,7 +282,7 @@ class CalendarService
         return $preparedEventData;
     }
 
-    protected static function prepareEventMetas($eventMetasData)
+    protected static function prepareEventMetas($eventMetasData, $event = null)
     {
         $preparedEventMetas = [];
 
@@ -291,14 +293,26 @@ class CalendarService
 
             $value = $eventMeta['value'];
 
+            // Only the two types an event actually stores; anything else in the
+            // payload (e.g. user_meta / _access_permissions) is dropped.
+            $objectType = sanitize_text_field(Arr::get($eventMeta, 'object_type'));
+            if (!in_array($objectType, ['calendar_event', 'integration'], true)) {
+                continue;
+            }
+
             if ($eventMeta['key'] == 'email_notification') {
                 $value = self::updateNotificationImageUrl($value);
+            }
+
+            // Rendered on the public form via {@html}; sanitize as the admin path does.
+            if ($eventMeta['key'] == 'booking_fields' && is_array($value)) {
+                $value = BookingFieldService::sanitizeBookingFields($value, $event);
             }
 
             $preparedEventMetas[] = [
                 'key'         => sanitize_text_field($eventMeta['key']),
                 'value'       => is_array($value) ? self::sanitize_mapped_data($value) : sanitize_text_field($value),
-                'object_type' => sanitize_text_field($eventMeta['object_type'])
+                'object_type' => $objectType
             ];
         }
 

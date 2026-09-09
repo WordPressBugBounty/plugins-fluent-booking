@@ -35,7 +35,11 @@ class CalendarIntegrationService
                 ->where('key', $integrationName . '_feeds')
                 ->first();
 
-            if ($feed && $feed->value) {
+            if (!$feed) {
+                throw new ValidationException(__('Integration feed not found', 'fluent-booking'), 404); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+            }
+
+            if ($feed->value) {
                 $settings = $feed->value;
                 $settings = apply_filters('fluent_booking/get_integration_values_' . $integrationName, $settings, $feed, $slotId);
                 if (!empty($settings['list_id'])) {

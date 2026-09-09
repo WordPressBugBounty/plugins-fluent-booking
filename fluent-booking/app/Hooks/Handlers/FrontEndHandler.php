@@ -15,7 +15,7 @@ use FluentBooking\App\Services\LandingPage\LandingPageHelper;
 use FluentBooking\App\Hooks\Handlers\TimeSlotServiceHandler;
 use FluentBooking\App\Services\CalendarEventService;
 use FluentBooking\App\Services\LocationService;
-use FluentBooking\App\Services\PermissionManager;
+use FluentBooking\App\Services\RescheduleService;
 use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\Framework\Support\Arr;
 use FluentBooking\App\Vite;
@@ -448,84 +448,25 @@ class FrontEndHandler
                 ], 422);
             }
 
-            // The booking must be rescheduled against its own event. Reject mixed-object
-            // requests where the posted event_id differs from the booking's event so the
-            // availability validation cannot be performed under a different event than the
-            // one actually being modified.
-            if ((int) $existingBooking->event_id !== (int) $calendarEvent->id) {
+            $result = RescheduleService::reschedule(
+                $existingBooking,
+                $calendarEvent,
+                $bookingData['start_time'],
+                $bookingData['person_time_zone'],
+                [
+                    'reason'       => Arr::get($postedData, 'rescheduling_reason', ''),
+                    'host_user_id' => Arr::get($bookingData, 'host_user_id'),
+                    'source'       => __('Web UI', 'fluent-booking')
+                ]
+            );
+
+            if (is_wp_error($result)) {
                 wp_send_json([
-                    'message' => __('Invalid rescheduling request', 'fluent-booking')
+                    'message' => $result->get_error_message()
                 ], 422);
             }
 
-            $rescheduleBy = 'guest';
-            $hostIds = $existingBooking->getHostIds();
-            if (in_array(get_current_user_id(), $hostIds) || PermissionManager::userCan(['manage_all_data', 'manage_all_bookings'])) {
-                $rescheduleBy = 'host';
-            }
-
-            $existingBooking->updateMeta('rescheduled_by_type', $rescheduleBy);
-
-            if ($rescheduleBy == 'guest' && !$existingBooking->canReschedule()) {
-                wp_send_json([
-                    'message' => $existingBooking->getRescheduleMessage()
-                ], 422);
-            }
-
-            if ($bookingData['start_time'] == $existingBooking->start_time) {
-                wp_send_json([
-                    'message' => __('Sorry! you can not reschedule to the same time.', 'fluent-booking')
-                ], 422);
-            }
-
-            $endDateTime = gmdate('Y-m-d H:i:s', strtotime($bookingData['start_time']) + ($existingBooking->slot_minutes * 60)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-
-            $previousBooking = clone $existingBooking;
-
-            if ($existingBooking->isMultiGuestBooking()) {
-                // Need to handle group booking type here
-                // check for existing group
-                $parent = Booking::where('status', 'scheduled')
-                    ->where('event_id', $existingBooking->event_id)
-                    ->where('start_time', $bookingData['start_time'])
-                    ->orderBy('id', 'ASC')
-                    ->first();
-
-                if ($parent) {
-                    $existingBooking->group_id = $parent->group_id;
-                } else {
-                    $existingBooking->group_id = Helper::getNextBookingGroup();
-                }
-            }
-
-            if ($existingBooking->isRoundRobinBooking()) {
-                $hostId = $bookingData['host_user_id'];
-                $existingBooking->host_user_id = $hostId;
-                $existingBooking->hosts()->sync([$hostId]);
-            }
-
-            $existingBooking->start_time = $bookingData['start_time'];
-            $existingBooking->person_time_zone = $bookingData['person_time_zone'];
-            $existingBooking->end_time = $endDateTime;
-            $existingBooking->save();
-
-            $existingBooking->updateMeta('previous_meeting_time', $previousBooking->start_time);
-
-            $reschedulingMessage = sanitize_textarea_field(Arr::get($postedData, 'rescheduling_reason'));
-            if ($reschedulingMessage) {
-                $existingBooking->updateMeta('reschedule_reason', $reschedulingMessage);
-            }
-
-            do_action('fluent_booking/log_booking_activity', [
-                'booking_id'  => $existingBooking->id,
-                'type'        => 'info',
-                'status'      => 'closed',
-                'title'       => __('Meeting Rescheduled', 'fluent-booking'),
-                /* translators: %1$s is the user who rescheduled the meeting, %2$s is the previous date and time in UTC. */
-                'description' => sprintf(__('Meeting has been rescheduled by %1$s from Web UI. Previous date time: %2$s (UTC)', 'fluent-booking'), $rescheduleBy, $previousBooking->start_time)
-            ]);
-
-            do_action('fluent_booking/after_booking_rescheduled', $existingBooking, $previousBooking, $calendarEvent);
+            $existingBooking = $result;
 
             add_filter('fluent_booking/schedule_receipt_data', function ($data) {
                 $data['title'] = __('Your meeting has been rescheduled', 'fluent-booking');

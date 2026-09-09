@@ -16,7 +16,7 @@ class DataImporter
             ]);
         }
 
-        if (!PermissionManager::userCan(['invite_team_members', 'manage_all_data', 'manage_other_calendars'])) {
+        if (!PermissionManager::userCan(['manage_all_data', 'manage_other_calendars'])) {
             wp_send_json_error([
                 'message' => __('You are not authorized to import calendar', 'fluent-booking'),
             ]);
@@ -50,7 +50,9 @@ class DataImporter
             ]);
         }
 
-        $calendar = CalendarService::createCalendar($calendarData, false, true);
+        $useCurrentUser = !PermissionManager::userCan('manage_all_data');
+
+        $calendar = CalendarService::createCalendar($calendarData, $useCurrentUser, true);
 
         if (is_wp_error($calendar)) {
             wp_send_json_error([

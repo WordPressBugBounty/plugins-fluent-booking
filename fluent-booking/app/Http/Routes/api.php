@@ -3,14 +3,12 @@
 defined('ABSPATH') || exit;
 
 /**
- * @var $router FluentBooking\Framework\Http\Router
+ * @var FluentBooking\Framework\Http\Router $router
  */
 
 $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($router) {
 
     $router->get('/', 'CalendarController@getAllCalendars')->meta('calendar_type', 'booking');
-
-    $router->get('event-lists', 'CalendarController@getCalendarEventLists');
 
     $router->post('/', 'CalendarController@createCalendar');
     $router->post('check-slug', 'CalendarController@checkSlug');
@@ -34,7 +32,7 @@ $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($rou
     $router->put('/{id}/events/{event_id}', 'CalendarController@patchCalendarEvent')->int('id')->int('event_id');
     $router->delete('/{id}/events/{event_id}', 'CalendarController@deleteCalendarEvent')->int('id')->int('event_id');
 
-    $router->get('/{id}/events/{event_id}/availability', 'CalendarController@getAvailabilitySettings')->int('event_id');
+    $router->get('/{id}/events/{event_id}/availability', 'CalendarController@getAvailabilitySettings')->int('id')->int('event_id');
     $router->post('/{id}/events/{event_id}/details', 'CalendarController@updateEventDetails')->int('id')->int('event_id');
     $router->post('/{id}/events/{event_id}/availability', 'CalendarController@updateEventAvailability')->int('id')->int('event_id');
     $router->post('/{id}/events/{event_id}/limits', 'CalendarController@updateEventLimits')->int('id')->int('event_id');
@@ -104,6 +102,11 @@ $router->prefix('settings')->withPolicy('SettingsPolicy')->group(function ($rout
     $router->get('/pages', 'SettingsController@getPages');
     $router->post('/addons-settings', 'SettingsController@saveAddonsSettings');
     $router->post('/install-plugin', 'SettingsController@installPlugin');
+
+    // MCP server settings — see docs/mcp-server-spec.md.
+    $router->get('/mcp', 'McpController@getSettings');
+    $router->post('/mcp', 'McpController@updateSettings');
+    $router->post('/mcp/install-adapter', 'McpController@installAdapter');
 });
 
 $router->prefix('availability')->withPolicy('AvailabilityPolicy')->group(function ($router) {
@@ -135,9 +138,9 @@ $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($rou
             $router->get('/', 'CalendarIntegrationController@find')->int('id')->int('event_id')->int('integration_id');
             $router->post('/', 'CalendarIntegrationController@update')->int('id')->int('event_id')->int('integration_id');
             $router->delete('/', 'CalendarIntegrationController@delete')->int('id')->int('event_id')->int('integration_id');
-            $router->get('/merge-fields', 'CalendarIntegrationController@integrationListComponent');
-            $router->get('/config-field-options', 'CalendarIntegrationController@getConfigFieldOptions');
-            $router->post('/crm-taxonomy', 'CalendarIntegrationController@createCrmTaxonomy')->int('id')->int('event_id');
+            $router->get('/merge-fields', 'CalendarIntegrationController@integrationListComponent')->int('id')->int('event_id')->int('integration_id');
+            $router->get('/config-field-options', 'CalendarIntegrationController@getConfigFieldOptions')->int('id')->int('event_id')->int('integration_id');
+            $router->post('/crm-taxonomy', 'CalendarIntegrationController@createCrmTaxonomy')->int('id')->int('event_id')->int('integration_id');
         });
     });
 });

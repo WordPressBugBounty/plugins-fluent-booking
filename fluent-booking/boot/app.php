@@ -11,8 +11,10 @@ return function ($file) {
 
     $app = new Application($file);
 
-    register_activation_hook($file, function () use ($app) {
-        ($app->make(ActivationHandler::class))->handle();
+    register_activation_hook($file, function ($network_wide = false) use ($app) {
+        // WordPress passes $network_wide; dropping it left every blog but the
+        // activating one unmigrated and unscheduled on a network activation.
+        ($app->make(ActivationHandler::class))->handle($network_wide);
     });
 
     register_deactivation_hook($file, function () use ($app) {
@@ -25,9 +27,20 @@ return function ($file) {
         do_action('fluent_booking/loaded', $app);
 
         $currentDBVersion = get_option('fluent_booking_db_version');
+
         if (!$currentDBVersion || version_compare($currentDBVersion, FLUENT_BOOKING_DB_VERSION, '<')) {
-            update_option('fluent_booking_db_version', FLUENT_BOOKING_DB_VERSION, 'no');
-            DBMigrator::run();
+            // plugins_loaded, so every request during an upgrade reaches this.
+            if (!get_transient('fluent_booking_db_migration_lock')) {
+                set_transient('fluent_booking_db_migration_lock', 1, 5 * MINUTE_IN_SECONDS);
+
+                DBMigrator::run();
+
+                // Stamped after the run: a failure mid-migration used to leave
+                // the version current against a schema that never changed.
+                update_option('fluent_booking_db_version', FLUENT_BOOKING_DB_VERSION, 'no');
+
+                delete_transient('fluent_booking_db_migration_lock');
+            }
         }
 
         if (defined('FLUENT_BOOKING_PRO_VERSION') && version_compare(FLUENT_BOOKING_MIN_PRO_VERSION, FLUENT_BOOKING_PRO_VERSION, '>')) {

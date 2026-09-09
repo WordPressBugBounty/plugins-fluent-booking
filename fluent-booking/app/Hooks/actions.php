@@ -28,6 +28,13 @@ defined('ABSPATH') || exit;
 (new \FluentBooking\App\Hooks\Scheduler\DailyScheduler())->register();
 (new \FluentBooking\App\Services\LandingPage\LandingPageHandler())->boot();
 
+/*
+ * MCP (Model Context Protocol) server for AI agents.
+ * Ships off — boot() only registers the Toolkit discovery filters until an
+ * operator enables it in Settings. See docs/mcp-server-spec.md.
+ */
+\FluentBooking\App\Modules\MCP\MCPInit::boot();
+
 
 /*
  * Register all the single action handlers

@@ -306,7 +306,7 @@ class EditorShortCodeParser
             return __('will be available soon', 'fluent-booking');
         }
 
-        return Arr::get($guest, $key, '');
+        return self::resolveScalarAttribute($guest, $key);
     }
 
     protected static function getBookingEventData($key)
@@ -319,11 +319,11 @@ class EditorShortCodeParser
 
         $fillables = (new CalendarSlot())->getFillable();
 
-        if (in_array($key, $fillables) || isset($bookingEvent->{$key})) {
+        if (in_array($key, $fillables)) {
             return $bookingEvent->{$key};
         }
 
-        return '';
+        return self::resolveScalarAttribute($bookingEvent, $key);
     }
 
     protected static function getCalendarData($key)
@@ -336,11 +336,26 @@ class EditorShortCodeParser
 
         $fillables = (new Calendar())->getFillable();
 
-        if (in_array($key, $fillables) || isset($calendar->{$key})) {
+        if (in_array($key, $fillables)) {
             return $calendar->{$key};
         }
 
-        return '';
+        return self::resolveScalarAttribute($calendar, $key);
+    }
+
+    /**
+     * Resolve a scalar attribute only; never a relation (dumps as JSON) or a
+     * dotted hop into a relation's columns.
+     */
+    protected static function resolveScalarAttribute($model, $key)
+    {
+        if (strpos($key, '.') !== false) {
+            return '';
+        }
+
+        $value = isset($model[$key]) ? $model[$key] : '';
+
+        return is_scalar($value) ? $value : '';
     }
 
     protected static function getPaymentData($key)

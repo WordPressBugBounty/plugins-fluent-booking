@@ -2449,4 +2449,39 @@ class Helper
 
         return true;
     }
+
+    /**
+     * Run a callback inside a database transaction, re-throwing on failure so
+     * the caller decides how to report it.
+     *
+     * \Throwable, not \Exception: a TypeError is an Error, and an
+     * Exception-only catch would leave the transaction open.
+     *
+     * Database writes only — a hook fired in here would hold the callback's
+     * rows locked for the length of a listener's outbound request.
+     *
+     * @param callable $callback
+     *
+     * @return mixed
+     *
+     * @throws \Throwable after the rollback
+     */
+    public static function dbTransaction($callback)
+    {
+        $db = App::getInstance('db');
+
+        $db->beginTransaction();
+
+        try {
+            $result = $callback();
+
+            $db->commit();
+
+            return $result;
+        } catch (\Throwable $e) {
+            $db->rollBack();
+
+            throw $e;
+        }
+    }
 }

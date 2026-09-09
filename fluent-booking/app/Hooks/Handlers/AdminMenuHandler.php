@@ -131,6 +131,13 @@ JS;
             as_schedule_recurring_action(time(), (60 * 5), 'fluent_booking_five_minutes_tasks', [], 'fluent-booking', true);
         }
 
+        // The daily task carries the summary report and the MCP record purge.
+        // A site that never got it — a secondary blog on a network activation,
+        // or one that lost it — would grow fcal_mcp_g_* rows forever.
+        if (!as_has_scheduled_action('fluent_booking/daily_tasks')) {
+            as_schedule_recurring_action(time(), (60 * 60 * 24), 'fluent_booking/daily_tasks', [], 'fluent-booking', true);
+        }
+
         $this->changeFooter();
 
         $app = App::getInstance();

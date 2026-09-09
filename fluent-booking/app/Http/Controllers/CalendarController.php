@@ -536,7 +536,7 @@ class CalendarController extends Controller
         $availability = AvailabilityService::getDefaultSchedule($calendar->user_id);
 
         $slotData = [
-            'title'             => $slot['title'],
+            'title'             => sanitize_text_field($slot['title']),
             'slug'              => Helper::generateSlotSlug($slot['duration'] . 'min', $calendar),
             'calendar_id'       => $calendar->id,
             'user_id'           => $calendar->user_id,
@@ -951,52 +951,7 @@ class CalendarController extends Controller
 
         $bookingFields = $request->get('booking_fields');
 
-        $optionRequiredFields = ['dropdown', 'radio', 'checkbox-group', 'multi-select'];
-
-        $formattedFields = [];
-
-        $textFields = ['type', 'name', 'label', 'placeholder', 'limit', 'help_text', 'date_format', 'min_date', 'max_date'];
-        $booleanFields = ['enabled', 'required', 'system_defined', 'disable_alter', 'is_sms_number'];
-
-        foreach ($bookingFields as $value) {
-            if (empty($value['name'])) {
-                $value['name'] = BookingFieldService::generateFieldName($calendarEvent, $value['label']);
-            } else {
-                $value['name'] = BookingFieldService::maybeGenerateFieldName($calendarEvent, $value);
-            }
-
-            $textValues = array_map('sanitize_text_field', Arr::only($value, $textFields));
-
-            $booleanValues = array_map(function ($valueItem) {
-                return $valueItem === true || $valueItem === 'true' || $valueItem == 1;
-            }, Arr::only($value, $booleanFields));
-
-            $formattedField = array_merge($textValues, $booleanValues);
-
-            $fieldType = Arr::get($value, 'type');
-
-            $formattedField['index'] = (int)Arr::get($value, 'index');
-            if (in_array($fieldType, $optionRequiredFields)) {
-                $sanitizedOptions = array_map('sanitize_text_field', Arr::get($value, 'options'));
-                $formattedField['options'] = $sanitizedOptions;
-            }
-            if ($fieldType == 'file') {
-                $formattedField['max_file_allow'] = intval(Arr::get($value, 'max_file_allow'));
-                $formattedField['allow_file_types'] = array_map('sanitize_text_field', Arr::get($value, 'allow_file_types'));
-                $formattedField['file_size_value'] = intval(Arr::get($value, 'file_size_value'));
-                $formattedField['file_size_unit'] = SanitizeService::checkCollection(Arr::get($value, 'file_size_unit'), ['kb','mb']);
-            }
-            if ($fieldType == 'hidden') {
-                $formattedField['default_value'] = sanitize_text_field(Arr::get($value, 'default_value'));
-            }
-            if ($fieldType == 'terms-and-conditions') {
-                $formattedField['terms_and_conditions'] = wp_kses_post(Arr::get($value, 'terms_and_conditions'));
-            }
-
-            $formattedField = apply_filters('fluent_booking/save_event_booking_field_' . $fieldType, $formattedField, $value, $calendarEvent);
-
-            $formattedFields[] = $formattedField;
-        }
+        $formattedFields = BookingFieldService::sanitizeBookingFields($bookingFields, $calendarEvent);
 
         $calendarEvent->setBookingFields($formattedFields);
 

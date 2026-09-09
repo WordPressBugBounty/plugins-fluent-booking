@@ -14,8 +14,12 @@ class ImportService
      */
     public function importHostJson($data, $useCurrentUser = true)
     {
-        if (!PermissionManager::userCan(['manage_all_data', 'invite_team_members', 'manage_other_calendars'])) {
+        if (!PermissionManager::userCan(['manage_all_data', 'manage_other_calendars'])) {
             return new \WP_Error('invalid_data', __('You are not authorized to import calendar', 'fluent-booking'));
+        }
+
+        if (!$useCurrentUser && !PermissionManager::userCan('manage_all_data')) {
+            $useCurrentUser = true;
         }
  
         if (is_string($data)) {

@@ -65,6 +65,7 @@ class BookingService
         $booking->load('calendar');
 
         $bookingStatus = $booking->status;
+        $paymentStatus = $booking->payment_status;
 
         $bookingData = apply_filters('fluent_booking/after_booking_data', $bookingData, $booking, $calendarSlot, $customFieldsData);
 
@@ -74,13 +75,30 @@ class BookingService
         // We are just renewing this as this may have been changed by the pre hook
         $booking = Booking::find($booking->id);
 
-        if ($bookingStatus != $booking->status) {
+        if (self::preHookHasDispatched($bookingStatus, $paymentStatus, $booking)) {
             return $booking;
         }
 
         do_action('fluent_booking/after_booking_' . $booking->status, $booking, $calendarSlot, $bookingData);
 
         return $booking;
+    }
+
+    /**
+     * Whether the pre hook already dispatched the lifecycle action, so
+     * dispatching again would notify twice. Status is not the only sign: a
+     * full-price coupon settles payment on a booking that stays pending for
+     * manual confirmation.
+     *
+     * Loose on purpose - payment_status is nullable with no default, and
+     * multi-time child rows are written as ''.
+     *
+     * @return bool
+     */
+    private static function preHookHasDispatched($bookingStatus, $paymentStatus, $booking)
+    {
+        return $bookingStatus != $booking->status
+            || $paymentStatus != $booking->payment_status;
     }
 
     public static function createMultiTimeBooking($data, $calendarSlot, $customFieldsData, $guests)

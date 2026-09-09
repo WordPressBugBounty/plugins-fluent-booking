@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -301,10 +301,33 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 
 == Changelog ==
 
+= 2.4.0 (Date: 09 Sep 2026)
+- Introduced: MCP Server for AI Agents to Manage Bookings
+- Added: Dependency Rule for Payment Settings Fields
+- Added: Currency Sign for the Salvadoran Colon
+- Improved: Overall Admin Responsiveness on Mobile and Tablet
+- Improved: Consistent Section Headers Across Admin Settings
+- Improved: Live PayPal IPN Skip Removed From UI, Still Available via Filter
+- Security: Hardened Input Sanitization, Access Control and Merge Tag Handling
+- Fixed: Admin Layout Breaking at Narrow and Mobile Widths
+- Fixed: Cart Bookings Stuck Pending After Payment
+- Fixed: Duplicate Booking Request Notifications
+- Fixed: Report Metrics, Filters and Date Range Validation
+- Fixed: Reschedule Writing Partial Data When a Step Failed
+- Fixed: Database Version Recorded Before the Migration Completed
+- Fixed: Fatal Error When an Integration Feed Is Missing
+- Fixed: Recurring Series Shifting an Hour at DST
+- Fixed: Refund Totals and PayPal Payment Amount Checks
+- Fixed: Twilio SMS Ignoring the Notification Toggle
+- Fixed: Standalone Portal Layout, Login Styles and Asset Loading
+- Fixed: Order Payment List Matching the Wrong Transaction Type
+- Fixed: Undefined Version Notice on Plugin Details
+
 = 2.3.0 (Date: 28 Aug 2026)
 - Introduced: Fully Redesigned Admin Interface
 - Added: Next Meetings Grouped by Today, Tomorrow and Later
 - Improved: Stacked Layout for Integration and Payment Settings
+- Improved: Dashboard Booking Widgets and Graph Now Count the Same Bookings
 - Security: Hardened Ownership Checks and Merge Tag Evaluation
 - Fixed: Availability Save Blocked for Team Members
 - Fixed: Phone Field Sometimes Rendering Blank on Booking Form

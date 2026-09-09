@@ -4,6 +4,7 @@ namespace FluentBooking\App\Hooks\Handlers;
 
 use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Services\EmailNotificationService;
+use FluentBooking\App\Services\NotificationGate;
 use FluentBooking\Framework\Support\Arr;
 
 class NotificationHandler
@@ -85,6 +86,10 @@ class NotificationHandler
             return;
         }
 
+        if (NotificationGate::isSuppressed('booking_scheduled', $booking)) {
+            return;
+        }
+
         if (Arr::isTrue($notifications, 'booking_conf_attendee.enabled') || (Arr::isTrue($notifications, 'booking_conf_host.enabled'))) {
             as_enqueue_async_action('fluent_booking/after_booking_scheduled_async', [
                 $booking->id,
@@ -95,6 +100,10 @@ class NotificationHandler
 
     public function pushBookingPendingToQueue($booking, $bookingEvent)
     {
+        if (NotificationGate::isSuppressed('booking_pending', $booking)) {
+            return;
+        }
+
         if (!$bookingEvent->isConfirmationEnabled() || $bookingEvent->isMultiGuestEvent()) {
             return;
         }
@@ -119,6 +128,10 @@ class NotificationHandler
 
     public function emailToUpdatedEmail($booking, $calendarEvent)
     {
+        if (NotificationGate::isSuppressed('booking_email_changed', $booking)) {
+            return;
+        }
+
         $notifications = $calendarEvent->getNotifications();
 
         if (Arr::isTrue($notifications, 'booking_conf_attendee.enabled') || (Arr::isTrue($notifications, 'booking_conf_host.enabled'))) {
@@ -229,7 +242,7 @@ class NotificationHandler
 
     public function emailOnBookingCancelled(Booking $booking, $calendarEvent)
     {
-        if (!$calendarEvent) {
+        if (!$calendarEvent || NotificationGate::isSuppressed('booking_cancelled', $booking)) {
             return;
         }
 
@@ -284,6 +297,10 @@ class NotificationHandler
             $this->pushRemindersToQueue($booking, $reminderTimes, 'host');
         }
 
+        if (NotificationGate::isSuppressed('booking_rescheduled', $booking)) {
+            return;
+        }
+
         $rescheduledBy = $booking->getMeta('rescheduled_by_type', 'host');
 
         if ($rescheduledBy == 'host') {
@@ -307,7 +324,7 @@ class NotificationHandler
 
     public function emailOnBookingRejected(Booking $booking, $calendarEvent)
     {
-        if (!$calendarEvent) {
+        if (!$calendarEvent || NotificationGate::isSuppressed('booking_rejected', $booking)) {
             return;
         }
 

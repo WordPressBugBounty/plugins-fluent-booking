@@ -5,16 +5,15 @@ namespace FluentBooking\Framework\Foundation;
 use FluentBooking\Framework\Container\Contracts\BindingResolutionException;
 
 /**
- * @method static db();
- * @method static view();
- * @method static events();
- * @method static config();
- * @method static request();
- * @method static response();
- * @method static encrypter();
- * @method static validator();
+ * @method static \FluentBooking\Framework\Database\DatabaseManager db()
+ * @method static \FluentBooking\Framework\View\View view()
+ * @method static \FluentBooking\Framework\Events\Dispatcher events()
+ * @method static \FluentBooking\Framework\Foundation\Config config()
+ * @method static \FluentBooking\Framework\Http\Request\Request request()
+ * @method static \FluentBooking\Framework\Http\Response\Response response()
+ * @method static \FluentBooking\Framework\Encryption\Encrypter encrypter()
+ * @method static \FluentBooking\Framework\Validator\Validator validator()
  */
-
 class App
 {
     /**
