@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
 {
     public static $files = array (
-        '5acfa953fb947d9c094f156813b35f4f' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/mbstring-loader.php',
+        '6c475849da538134242f5be99200fc96' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Polyfills/loader.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -167,6 +167,7 @@ class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
         'FluentBooking\\App\\Services\\NotificationGate' => __DIR__ . '/../..' . '/app/Services/NotificationGate.php',
         'FluentBooking\\App\\Services\\OnboardingService' => __DIR__ . '/../..' . '/app/Services/OnboardingService.php',
         'FluentBooking\\App\\Services\\PermissionManager' => __DIR__ . '/../..' . '/app/Services/PermissionManager.php',
+        'FluentBooking\\App\\Services\\PublicTransStrings' => __DIR__ . '/../..' . '/app/Services/PublicTransStrings.php',
         'FluentBooking\\App\\Services\\ReportingHelperTrait' => __DIR__ . '/../..' . '/app/Services/ReportingHelperTrait.php',
         'FluentBooking\\App\\Services\\RescheduleService' => __DIR__ . '/../..' . '/app/Services/RescheduleService.php',
         'FluentBooking\\App\\Services\\SanitizeService' => __DIR__ . '/../..' . '/app/Services/SanitizeService.php',
@@ -396,7 +397,6 @@ class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
         'FluentBooking\\Framework\\Support\\JsonableInterface' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/JsonableInterface.php',
         'FluentBooking\\Framework\\Support\\LazyCollection' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/LazyCollection.php',
         'FluentBooking\\Framework\\Support\\Locale' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Locale.php',
-        'FluentBooking\\Framework\\Support\\MBString\\Mbstring' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/MBString/Mbstring.php',
         'FluentBooking\\Framework\\Support\\MacroableTrait' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/MacroableTrait.php',
         'FluentBooking\\Framework\\Support\\Mail' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Mail.php',
         'FluentBooking\\Framework\\Support\\MathException' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/MathException.php',
@@ -406,8 +406,10 @@ class ComposerStaticInit78e842760d4b2c304f7701ee34fd8f8e
         'FluentBooking\\Framework\\Support\\Number' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Number.php',
         'FluentBooking\\Framework\\Support\\Once' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Once.php',
         'FluentBooking\\Framework\\Support\\Path' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Path.php',
+        'FluentBooking\\Framework\\Support\\Pipe' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Pipe.php',
         'FluentBooking\\Framework\\Support\\Pipeline' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Pipeline.php',
         'FluentBooking\\Framework\\Support\\Pluralizer' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Pluralizer.php',
+        'FluentBooking\\Framework\\Support\\Polyfills\\MBString\\Mbstring' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Polyfills/MBString/Mbstring.php',
         'FluentBooking\\Framework\\Support\\Reflector' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Reflector.php',
         'FluentBooking\\Framework\\Support\\ReflectsClosures' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/ReflectsClosures.php',
         'FluentBooking\\Framework\\Support\\Sanitizer' => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent/Support/Sanitizer.php',

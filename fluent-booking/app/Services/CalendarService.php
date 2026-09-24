@@ -390,7 +390,7 @@ class CalendarService
             ->get();
 
         $formattedCalendars = [];
-        foreach ($calendars as $index => $calendar) {
+        foreach ($calendars as $calendar) {
             $slots = Arr::get($calendar, 'slots');
             if (!empty($slots)) {
                 $options = [];
@@ -401,7 +401,7 @@ class CalendarService
                     ];
                 }
                 if (!empty($options)) {
-                    $formattedCalendars[$index] = [
+                    $formattedCalendars[] = [
                         'label'   => Arr::get($calendar, 'title'),
                         'options' => $options
                     ];
@@ -439,7 +439,7 @@ class CalendarService
         $calendars = $calendarsQuery->latest()->get();
 
         $formattedCalendars = [];
-        foreach ($calendars as $index => $calendar) {
+        foreach ($calendars as $calendar) {
             $slots = Arr::get($calendar, 'slots');
             if (!empty($slots)) {
                 $options = [];
@@ -450,7 +450,7 @@ class CalendarService
                     ];
                 }
                 if (!empty($options)) {
-                    $formattedCalendars[$index] = [
+                    $formattedCalendars[] = [
                         'id'      => Arr::get($calendar, 'id'),
                         'title'   => Arr::get($calendar, 'title'),
                         'options' => $options

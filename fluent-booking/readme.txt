@@ -5,7 +5,7 @@ Tags: booking, appointment booking, appointments, booking system
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.4.0
+Stable tag: 2.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -300,6 +300,34 @@ Yes, FluentBooking has a [public roadmap](https://fluentbooking.com/roadmap/) wh
 5. General Settings
 
 == Changelog ==
+
+= 2.5.0 (Date: 24 Sep 2026)
+- Introduced: Host-Only Notes on Bookings
+- Added: Reschedule Bookings Without Leaving the Admin
+- Added: Map Fluent Forms Fields to Booking Questions
+- Added: Opt In to Product Updates and Usage Sharing
+- Added: Reschedule Restriction for One-Off Events
+- Added: Retry When Location Options Fail to Load
+- Improved: Enable the Landing Page From the Share Modal
+- Improved: Faster Host Lookup on Large Sites
+- Improved: Batched Conferencing Connection Checks
+- Security: Hardened Host Data Exposure, Access Gates and File Uploads
+- Fixed: Recurring Occurrences Missing From Emails, ICS and Google Calendar
+- Fixed: Dark Mode Contrast Across Modals, Forms and Notices
+- Fixed: DST Double Booking and Wrong Repeated-Hour Handling
+- Fixed: Coupon Usage Limits Exceeded Under Concurrent Bookings
+- Fixed: Refunds Lost or Reversed by Concurrent Payment Events
+- Fixed: FluentCart Checkout Order Bumps, Titles and Images
+- Fixed: Fluent Forms Bookings Confirmed Before Payment
+- Fixed: Calendar Delete Wiping Team Bookings
+- Fixed: Lost and Duplicated Booking Reminders
+- Fixed: Date Overrides Lost on the Default Schedule
+- Fixed: Conferencing Status and Zoom Payload Errors on New Events
+- Fixed: Apple and Nextcloud Fatal Error on Bad Credentials
+- Fixed: Google Calendar Cache Expiring Within Seconds
+- Fixed: Upload Size Limit Ignored on Public Uploads
+- Fixed: General Settings Save Resetting the Theme
+- Fixed: Clone Event List Empty With an Eventless Host
 
 = 2.4.0 (Date: 09 Sep 2026)
 - Introduced: MCP Server for AI Agents to Manage Bookings

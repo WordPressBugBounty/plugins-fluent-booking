@@ -13,27 +13,18 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * Reading bookings — the surface an agent spends most of its calls on.
+ * Read-only booking tools. Attendees, hosts etc. are `include` values on
+ * get-booking rather than separate tools, to save schema tokens.
  *
- * Two tools rather than five. Cal.com ships separate tools for a booking's
- * attendees; here that is an `include` value on `get-booking`, because the
- * parameter shape is identical and a separate tool would cost another ~500
- * tokens of permanently-resident schema to save one round-trip nobody makes.
- *
- * Scoping is done in the query, never in the response. A host without
- * read-all-bookings permission gets a query that cannot see other hosts' rows
- * at all, so counts, pagination totals and results are all consistent with what
- * they are allowed to know. Filtering after the fact leaks the totals.
+ * Scoping happens in the query, not the response, so totals and pagination
+ * never leak rows the caller can't see.
  */
 class BookingTools
 {
     const DEFAULT_PER_PAGE = 20;
 
-    /**
-     * `include` values get-booking accepts. Each one costs a query or an
-     * unserialize, which is exactly why none of them are on by default.
-     */
-    const INCLUDABLE = ['custom_fields', 'attendees', 'hosts', 'activities'];
+    // `include` values for get-booking. Each costs a query, so none are default.
+    const INCLUDABLE = ['custom_fields', 'attendees', 'hosts', 'activities', 'notes'];
 
     public static function definitions()
     {
@@ -114,7 +105,7 @@ class BookingTools
 
             'fluent-booking/get-booking' => [
                 'label'               => __('Get booking', 'fluent-booking'),
-                'description'         => __('Full detail for one booking by id or hash, including attendee contact details, location, status history and cancellation reason. Use include to add form answers, guests, hosts or the activity timeline.', 'fluent-booking'),
+                'description'         => __('Full detail for one booking by id or hash, including attendee contact details, location, status history and cancellation reason. Use include to add form answers, guests, hosts or the activity timeline. include notes is a Pro section: host notes, oldest first.', 'fluent-booking'),
                 'input_schema'        => [
                     'type'       => 'object',
                     'properties' => [
@@ -163,15 +154,11 @@ class BookingTools
             return $query;
         }
 
-        // The admin list collapses group bookings on group_id so a ten-attendee
-        // group event reads as one booking rather than ten. Default to the same
-        // thing: an agent that reports a different number than the operator's
-        // screen is worse than useless.
+        // Collapse group bookings by default, like the admin list, so counts match.
         $grouped = (bool) Arr::get($params, 'group_bookings', true);
 
-        // ...except when searching. GROUP BY keeps one arbitrary row per group,
-        // so a term matching two attendees of the same group could drop the
-        // exact match in favour of the weaker one beside it.
+        // Not when searching: GROUP BY keeps an arbitrary row per group and
+        // could hide the attendee that actually matched.
         $searchCollapsed = $grouped && trim((string) Arr::get($params, 'search', '')) !== '';
 
         if ($searchCollapsed) {
@@ -181,11 +168,8 @@ class BookingTools
         $perPage = MCPHelper::perPage(Arr::get($params, 'per_page'), self::DEFAULT_PER_PAGE);
         $page    = max(1, absint(Arr::get($params, 'page', 1)));
 
-        // Count BEFORE the groupBy is applied. COUNT() over a grouped query
-        // returns the size of the first group, not the number of groups — which
-        // reads as a plausible small number rather than an error, so an agent
-        // would report "1 booking" over a page of seventeen and never know.
-        // Mirrors SchedulesController::addCountsForFirstPage().
+        // Count before groupBy: COUNT() on a grouped query returns the first
+        // group's size. Mirrors SchedulesController::addCountsForFirstPage().
         $total = $grouped
             ? (clone $query)->withoutEagerLoads()->distinct('group_id')->count('group_id')
             : (clone $query)->withoutEagerLoads()->count();
@@ -199,9 +183,8 @@ class BookingTools
             ->take($perPage)
             ->get();
 
-        // Unmasked emails are a read-all-bookings privilege. Asking for them
-        // without that permission is not an error — the rows are still useful —
-        // so the request is downgraded and the response says it was.
+        // Unmasked emails need read-all-bookings. Without it, downgrade and
+        // flag pii_masked rather than erroring.
         $wantsPii    = (bool) Arr::get($params, 'include_pii', false);
         $includePii  = $wantsPii && $seesAll;
 
@@ -278,8 +261,16 @@ class BookingTools
         $include = Arr::get($params, 'include', []);
         $include = is_array($include) ? array_intersect($include, self::INCLUDABLE) : [];
 
-        return MCPHelper::success(
+        $bookingData = apply_filters(
+            'fluent_booking/mcp_booking_full',
             BookingProjector::full($booking, $timezone, $include),
+            $booking,
+            $timezone,
+            $include
+        );
+
+        return MCPHelper::success(
+            $bookingData,
             [
                 'timezone' => $timezone,
                 'scope'    => PermissionGate::currentScope(),
@@ -288,20 +279,9 @@ class BookingTools
     }
 
     /**
-     * True when the caller may read this specific booking.
-     *
-     * Deliberately the SAME test `list-bookings` scopes its query with —
-     * `Booking::whereHostAccess()`, i.e. own the calendar or be a host on this
-     * booking. It used to fall back to `PermissionManager::canReadCalendar()`,
-     * which is a broader question than it sounds: `canReadCalendar()` treats a
-     * calendar as readable if the caller is a team member on *any one* of its
-     * event types, so on a shared team calendar it returned true for every
-     * booking on every other event type too.
-     *
-     * The effect was a single-record read that was wider than the list beside
-     * it, on sequential integer ids, while still stamping the response
-     * `scope: own_calendars`. An agent that cannot see a booking in
-     * `list-bookings` must not be able to open it by guessing its id.
+     * Whether the caller may read this booking. Must match the scope
+     * list-bookings uses (Booking::whereHostAccess()), so a booking hidden from
+     * the list can't be opened by guessing its id.
      *
      * @param Booking $booking
      * @return bool
@@ -322,19 +302,16 @@ class BookingTools
             return true;
         }
 
-        // Calendar ownership, matching whereHostAccess()'s first branch. Not
-        // canReadCalendar(): that also admits shared calendars.
+        // Calendar ownership, as in whereHostAccess(). Not canReadCalendar():
+        // it admits any team member on a shared calendar.
         return (bool) Calendar::where('id', $booking->calendar_id)
             ->where('user_id', $userId)
             ->exists();
     }
 
     /**
-     * Compose the list query from the filters, scoped to what the caller may see.
-     *
-     * Every filter here delegates to an existing Booking scope, so MCP results
-     * and the admin schedules list are produced by the same code — the two
-     * cannot drift into disagreeing about what "upcoming" or "cancelled" means.
+     * Build the list query, scoped to what the caller may see. Filters reuse
+     * the Booking scopes the admin list uses, so the two agree.
      *
      * @param array  $params
      * @param bool   $seesAll
@@ -389,21 +366,15 @@ class BookingTools
             $query->applyDateRangeFilter($range);
         }
 
-        // Applied before the status/period branch below, because that branch
-        // returns early: a search silently dropped whenever `status` was also
-        // passed produced a full unfiltered result set that reads exactly like
-        // a successful search, which is the one failure mode this module is
-        // least able to recover from.
+        // Before the status branch below, which returns early.
         $search = sanitize_text_field((string) Arr::get($params, 'search', ''));
 
         if ($search) {
             $query->searchBy($search);
         }
 
-        // A raw status filter and a period bucket answer different questions
-        // ("rows whose column says cancelled" vs "rows the admin shows under
-        // Cancelled"), so an explicit status list wins rather than being ANDed
-        // into a contradiction that silently returns nothing.
+        // An explicit status list replaces the period bucket. ANDing the two
+        // can contradict and silently return nothing.
         $statuses = Arr::get($params, 'status', []);
         $statuses = is_array($statuses) ? array_filter(array_map('sanitize_text_field', $statuses)) : [];
 
@@ -427,15 +398,8 @@ class BookingTools
     }
 
     /**
-     * Translate the caller's from/to dates into the UTC window they mean.
-     *
-     * `start_time` is stored in UTC, but "bookings on 2026-08-24" is a question
-     * about a local calendar day. Matching the UTC column against a bare
-     * '2026-08-24 00:00:00'–'23:59:59' answers a question up to fourteen hours
-     * out of alignment with the one asked: in America/Los_Angeles it silently
-     * drops everything from 5pm Monday onward and folds in Sunday evening
-     * instead. The dates are therefore read in the same timezone the response
-     * renders its *_local times in.
+     * Convert from/to dates into a UTC window. The dates are local calendar
+     * days in $timezone, while `start_time` is stored in UTC.
      *
      * @param array  $params
      * @param string $timezone resolved IANA identifier
@@ -460,8 +424,7 @@ class BookingTools
             }
         }
 
-        // An open-ended bound is a usable question; fill the other end rather
-        // than rejecting it.
+        // Open-ended ranges are allowed.
         $start = $from ? MCPHelper::dayBoundaryToUtc($from, $timezone, false) : '1970-01-01 00:00:00';
         $end   = $to ? MCPHelper::dayBoundaryToUtc($to, $timezone, true) : '2999-12-31 23:59:59';
 

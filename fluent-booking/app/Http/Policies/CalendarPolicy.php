@@ -36,12 +36,13 @@ class CalendarPolicy extends Policy
 
         $method = $request->getMethod();
 
-        if ($method == 'GET') {
-            return PermissionManager::canReadCalendar($calendarId);
-        }
-
+        // Event-scoped for reads too: hosting one event must not expose its sibling events' settings.
         if ($eventId) {
             return PermissionManager::canUpdateCalendarEvent($eventId);
+        }
+
+        if ($method == 'GET') {
+            return PermissionManager::canReadCalendar($calendarId);
         }
 
         return PermissionManager::canWriteCalendar($calendarId);
@@ -54,20 +55,17 @@ class CalendarPolicy extends Policy
 
     public function createCalendar(Request $request)
     {
-        if (PermissionManager::userCan(['manage_all_data', 'invite_team_members'])) {
-            return true;
-        }
-
-        if (PermissionManager::userCan('manage_own_calendar')) {
-            return true;
-        }
-
-        return false;
+        return $this->canCreateCalendar();
     }
 
     public function checkSlug(Request $request)
     {
-        return PermissionManager::userCan(['manage_all_data', 'invite_team_members', 'manage_own_calendar']);
+        return $this->canCreateCalendar();
+    }
+
+    public function getNewEventLocationFields(Request $request)
+    {
+        return $this->canCreateCalendar();
     }
 
     public function getEvent(Request $request, $calendarId, $eventId)
@@ -115,10 +113,14 @@ class CalendarPolicy extends Policy
         return PermissionManager::canWriteCalendar($destinationCalendarId);
     }
 
+    private function canCreateCalendar()
+    {
+        return PermissionManager::userCan(['manage_all_data', 'invite_team_members', 'manage_own_calendar']);
+    }
+
     /**
-     * Read a URL-only route parameter safely. Some routes under this prefix
-     * (event-lists, root listing, create) have no path placeholder, so a
-     * direct array access would emit an undefined-array-key warning.
+     * Read a URL route parameter. Some routes here (event-lists, root listing,
+     * create) have no placeholder, so direct access would warn.
      */
     private function getRouteParam(Request $request, $key)
     {

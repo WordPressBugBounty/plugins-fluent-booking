@@ -10,22 +10,17 @@ use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\Framework\Support\Arr;
 
 /**
- * Settings surface for the MCP server (FluentBooking → Settings → MCP for AI
- * Agents).
+ * Settings → MCP for AI Agents.
  *
- * Bound to SettingsPolicy, whose verifyRequest() requires `manage_all_data`.
- * Writes additionally require `manage_options`: enabling MCP exposes booking
- * and attendee data to any client holding an application password, which is a
- * site-administration decision rather than a scheduling one. The read endpoint
- * reports `can_manage` so the UI can disable the controls instead of letting an
- * operator submit a change that would be refused.
+ * SettingsPolicy requires `manage_all_data`. Writes also need `manage_options`,
+ * since enabling MCP exposes booking data to any application-password client.
+ * The read endpoint reports `can_manage` so the UI can disable the controls.
  */
 class McpController extends Controller
 {
     /**
-     * "FluentHub" in the UI is the fluent-toolkit plugin, which can bundle the
-     * MCP adapter runtime. The standalone WordPress MCP Adapter plugin is the
-     * other accepted provider.
+     * "FluentHub" in the UI. It can bundle the MCP adapter; the standalone
+     * MCP Adapter plugin is the other accepted provider.
      */
     const TOOLKIT_PLUGIN_FILE = 'fluent-toolkit/fluent-toolkit.php';
 
@@ -60,13 +55,9 @@ class McpController extends Controller
             $data = [];
         }
 
-        // Absent keys keep their stored value rather than defaulting to off. A
-        // partial POST — a caller sending only `toolsets`, say — would otherwise
-        // read as "enabled: false" and silently switch the server off.
-        //
-        // Arr::isTrue(), never a (bool) cast: jQuery form-encodes the body, so
-        // an off toggle arrives as the STRING "false" and `(bool) "false"` is
-        // true — which makes the master switch one-way.
+        // Absent keys keep their stored value, so a partial POST can't switch
+        // the server off. Arr::isTrue(), not a (bool) cast: the body is
+        // form-encoded and `(bool) "false"` is true.
         $enabled = array_key_exists('enabled', $data)
             ? (bool) Arr::isTrue($data, 'enabled')
             : PermissionGate::isEnabled();
@@ -75,14 +66,11 @@ class McpController extends Controller
             ? $data['toolsets']
             : PermissionGate::enabledToolsets();
 
-        // Toolsets first: enabling the server and its tool selection in one
-        // request should never leave a window where the server is live with a
-        // stale toolset list.
+        // Toolsets first, so the server is never live with a stale toolset list.
         PermissionGate::setToolsets($toolsets);
         PermissionGate::setEnabled($enabled);
 
-        // get-booking-context reports the toolset list and names tools only the
-        // enabled toolsets expose, so its cache has to go with a toolset change.
+        // get-booking-context's cached output depends on the enabled toolsets.
         ContextTools::invalidateCache();
 
         return [
@@ -96,15 +84,11 @@ class McpController extends Controller
     }
 
     /**
-     * Install FluentHub (the fluent-toolkit plugin, which carries the MCP
-     * adapter) so the abilities become reachable without a manual upload.
+     * Install FluentHub, which carries the MCP adapter.
      *
-     * FluentBooking bundles no installer of its own. The actual download lives
-     * behind `fluent_toolkit/do_auto_install`, which a paid tier registers; the
-     * `fluent_toolkit/can_auto_install` filter reports whether that handler is
-     * present. With nothing registered (free-only), the endpoint returns the
-     * GitHub link so the operator can install it by hand. `install_plugins` is
-     * required either way — installing a plugin is a site-administration action.
+     * FluentBooking has no installer of its own: the download runs on
+     * `fluent_toolkit/do_auto_install`, which a paid tier registers. Without a
+     * handler the endpoint returns the GitHub link for a manual install.
      */
     public function installAdapter(Request $request)
     {
@@ -143,8 +127,7 @@ class McpController extends Controller
     }
 
     /**
-     * Adapter / FluentHub detection shared by the read endpoint and the install
-     * action so both report the same state after a change.
+     * Adapter and FluentHub state, shared by the read and install endpoints.
      *
      * @return array
      */
@@ -191,8 +174,7 @@ class McpController extends Controller
     }
 
     /**
-     * FluentHub loaded in this request (its constant is defined) or present on
-     * disk as an installed plugin.
+     * FluentHub loaded in this request or installed on disk.
      *
      * @return bool
      */
@@ -274,9 +256,8 @@ class McpController extends Controller
     }
 
     /**
-     * Heuristic for a local development host, used to offer the self-signed-TLS
-     * override in the Claude Desktop connection snippet. Filterable so a real
-     * deployment on an unusual TLD can correct it.
+     * Guess whether this is a local dev host, to offer the self-signed TLS
+     * override in the Claude Desktop snippet. Filterable for unusual TLDs.
      *
      * @return bool
      */
@@ -285,8 +266,7 @@ class McpController extends Controller
         $host = strtolower((string) wp_parse_url(home_url(), PHP_URL_HOST));
         $isDev = false;
 
-        // .dev is intentionally excluded — it is a real public TLD (HSTS-preloaded),
-        // not a local-only suffix, so it must never trip the TLS-bypass hint.
+        // Not .dev: it is a real public TLD and must never get the TLS-bypass hint.
         $devTlds = ['.test', '.lab', '.local', '.localhost', '.docker'];
 
         foreach ($devTlds as $tld) {
@@ -314,17 +294,9 @@ class McpController extends Controller
     }
 
     /**
-     * Attach each toolset's tool count and rough context cost.
-     *
-     * Every tool definition sits in the AI client's context for the whole
-     * session whether it gets called or not, so the operator deciding whether
-     * to switch a toolset on is really deciding how much of their agent's
-     * working memory to spend. That number belongs on the toggle, not in a
-     * design document.
-     *
-     * The measurement itself lives on AbilitiesRegistrar so this and
-     * scripts/check-mcp-budget.php cannot report different figures for the
-     * same toolset.
+     * Attach each toolset's tool count and rough context cost, since every
+     * enabled tool definition sits in the agent's context all session.
+     * AbilitiesRegistrar does the measuring so this and check-mcp-budget.php agree.
      *
      * @param array $toolsets
      *
@@ -335,8 +307,7 @@ class McpController extends Controller
         foreach ($toolsets as $key => $meta) {
             $definitions = AbilitiesRegistrar::getDefinitions([$key]);
 
-            // Prompts are excluded: they are not in tools/list, and their
-            // bodies are fetched only when someone runs them.
+            // Prompts aren't in tools/list and load only when run.
             $definitions = array_filter($definitions, function ($definition) {
                 return empty($definition['is_prompt']);
             });

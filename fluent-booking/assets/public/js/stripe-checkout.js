@@ -33,7 +33,7 @@ class StripeCheckout {
 
         const loadingMessage = document.createElement('p');
         loadingMessage.classList.add('fluent_booking_loading_payment_processor') ;
-        loadingMessage.textContent = 'Loading Payment Processor...';
+        loadingMessage.textContent = window.fcal_translate('Loading Payment Processor...');
 
         paymentProcessor.appendChild(loadingMessage);
 
@@ -55,7 +55,7 @@ class StripeCheckout {
                 e.preventDefault();
 
                 elements.submit().then(result => {
-                    stripePayButton.textContent = 'Processing...';
+                    stripePayButton.textContent = window.fcal_translate('Processing...');
                     stripePayButton.disabled = true;
 
                     const confirmParams = {

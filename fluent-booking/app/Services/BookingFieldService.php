@@ -4,12 +4,16 @@ namespace FluentBooking\App\Services;
 
 use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\CalendarSlot;
+use FluentBooking\App\Services\Libs\FileSystem;
 use FluentBooking\App\Services\SanitizeService;
 use FluentBooking\Framework\Support\Arr;
 
 class BookingFieldService
 {
-    public static function getCustomFieldsData($postedData, CalendarSlot $slot)
+    /**
+     * @param array|null $mappedKeys Fluent Forms mapped fields: read and sanitized only, the form owns validation.
+     */
+    public static function getCustomFieldsData($postedData, CalendarSlot $slot, $mappedKeys = null)
     {
         $customFields = self::getCustomFields($slot, true);
 
@@ -18,8 +22,23 @@ class BookingFieldService
         $formattedValues = [];
 
         foreach ($customFields as $fieldKey => $customField) {
+            $isMapped = $mappedKeys !== null;
+
+            if ($isMapped && !in_array($fieldKey, $mappedKeys, true)) {
+                continue;
+            }
+
             $value = wp_unslash(Arr::get($postedData, $fieldKey));
-            if (Arr::isTrue($customField, 'required')) {
+
+            if ($customField['type'] === 'file' && $value) {
+                // A posted external URL would render as a trusted download link, and
+                // pro deletes stored basenames from the upload folder with the booking.
+                // Slice first so a crafted array can't force a check per entry.
+                $value = array_slice((array) $value, 0, (int) Arr::get($customField, 'max_file_allow', 1));
+                $value = array_values(array_filter($value, [FileSystem::class, 'isUploadedFileUrl']));
+            }
+
+            if (!$isMapped && Arr::isTrue($customField, 'required')) {
                 $isTerms = $customField['type'] === 'terms-and-conditions';
                 $isCheckbox = $customField['type'] === 'checkbox';
                 if (!$value || ($isCheckbox && $value !== 'Yes') || ($isTerms && $value !== 'Accepted')) {
@@ -35,10 +54,6 @@ class BookingFieldService
                         $val = is_array($item) ? Arr::get($item, 'value') : $item;
                         return sanitize_text_field($val);
                     },$value);
-                } else if ($customField['type'] === 'file') {
-                    $maxField = Arr::get($customField, 'max_file_allow', 1);
-                    $value = array_slice($value, 0, $maxField);
-                    $value = array_map('sanitize_text_field', $value);
                 } else {
                     $value = array_map('sanitize_text_field', $value);
                 }
@@ -48,7 +63,7 @@ class BookingFieldService
                 $value = sanitize_text_field($value);
             }
 
-            if ($customField['type'] === 'phone' && $value && !Helper::isValidPhoneNumber($value)) {
+            if (!$isMapped && $customField['type'] === 'phone' && $value && !Helper::isValidPhoneNumber($value)) {
                 /* translators: %s: Field label */
                 $errors[$fieldKey . '.valid_phone_number'] = sprintf(__('%s is not a valid phone number', 'fluent-booking'), $customField['label']);
                 continue;
@@ -66,10 +81,10 @@ class BookingFieldService
 
     public static function getBookingFields(CalendarSlot $calendarSlot, $cached = false)
     {
-        static $bookingFields = null;
+        static $bookingFields = [];
 
-        if ($cached && $bookingFields) {
-            return $bookingFields;
+        if ($cached && isset($bookingFields[$calendarSlot->id])) {
+            return $bookingFields[$calendarSlot->id];
         }
 
         $requiredIndexes = ['name', 'email', 'message', 'cancellation_reason', 'rescheduling_reason'];
@@ -243,9 +258,7 @@ class BookingFieldService
 
         $existingFields['email']['disabled'] = false;
 
-        $bookingFields = apply_filters('fluent_booking/booking_fields', array_values($existingFields), $calendarSlot);
-
-        return $bookingFields;
+        return $bookingFields[$calendarSlot->id] = apply_filters('fluent_booking/booking_fields', array_values($existingFields), $calendarSlot);
     }
 
     public static function getBookingFieldLabels(CalendarSlot $calendarSlot, $enabledOnly = false)
@@ -323,6 +336,11 @@ class BookingFieldService
             if ($fieldType == 'hidden') {
                 if ($isPublic) continue;
                 $formattedValue = EditorShortcodeParser::parse($formattedValue, $booking);
+
+                // Some shortcodes return HTML, and the admin renders hidden values as HTML.
+                if ($htmlSupport) {
+                    $formattedValue = wp_kses_post($formattedValue);
+                }
             }
 
             $formattedData[$dataKey] = [

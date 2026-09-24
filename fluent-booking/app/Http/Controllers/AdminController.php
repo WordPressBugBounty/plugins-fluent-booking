@@ -25,39 +25,45 @@ class AdminController extends Controller
 
         $search_term = sanitize_text_field($request->get('search'));
 
-        $queryArgs = [
+        // The total is never used, and counting it forces a full scan of every matching user
+        $baseArgs = [
             'role__not_in' => ['subscriber'],
             'number'       => 50,
             'fields'       => ['ID', 'user_email', 'display_name'],
-            'search'       => '*' . $search_term . '*'
+            'count_total'  => false
         ];
 
-        $metaQueryArgs = [
-            'role__not_in' => ['subscriber'],
-            'number'       => 50,
-            'fields'       => ['ID', 'user_email', 'display_name'],
-            /* phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query */
-            'meta_query' => [
-                'relation' => 'OR',
-                [
-                    'key'     => 'first_name',
-                    'value'   => $search_term,
-                    'compare' => 'LIKE'
+        if ($search_term === '') {
+            $users = get_users(apply_filters('fluent_booking/user_search_meta_query_arguments', $baseArgs, $search_term));
+        } else {
+            $queryArgs = array_merge($baseArgs, [
+                'search' => '*' . $search_term . '*'
+            ]);
+
+            $metaQueryArgs = array_merge($baseArgs, [
+                /* phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query */
+                'meta_query' => [
+                    'relation' => 'OR',
+                    [
+                        'key'     => 'first_name',
+                        'value'   => $search_term,
+                        'compare' => 'LIKE'
+                    ],
+                    [
+                        'key'     => 'last_name',
+                        'value'   => $search_term,
+                        'compare' => 'LIKE'
+                    ]
                 ],
-                [
-                    'key'     => 'last_name',
-                    'value'   => $search_term,
-                    'compare' => 'LIKE'
-                ]
-            ],
-        ];
+            ]);
 
-        $metaQueryArgs = apply_filters('fluent_booking/user_search_meta_query_arguments', $metaQueryArgs, $search_term);
+            $metaQueryArgs = apply_filters('fluent_booking/user_search_meta_query_arguments', $metaQueryArgs, $search_term);
 
-        $queryResult = get_users($queryArgs);
-        $metaQueryResult = get_users($metaQueryArgs);
+            $queryResult = get_users($queryArgs);
+            $metaQueryResult = get_users($metaQueryArgs);
 
-        $users = array_unique(array_merge($queryResult, $metaQueryResult), SORT_REGULAR);
+            $users = array_unique(array_merge($queryResult, $metaQueryResult), SORT_REGULAR);
+        }
         
         $hosts = [];
         $pushedIds = [];

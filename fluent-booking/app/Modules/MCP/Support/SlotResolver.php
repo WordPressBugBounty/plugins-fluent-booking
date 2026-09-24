@@ -10,37 +10,21 @@ defined('ABSPATH') || exit;
 /**
  * Thin wrapper over the slot engine for the MCP tools.
  *
- * Deliberately thin. Availability is the one answer an agent must never get
- * differently from what a visitor sees on the booking page, so this class
- * computes nothing: it resolves the same service the public page resolves
- * (TimeSlotServiceHandler::initService, which returns the round-robin /
- * collective / one-off / multi variants for Pro event types), calls the same
- * method, and then only reshapes and trims the result.
- *
- * The reshaping is the point. getAvailableSpots() returns one array per slot,
- * keyed by full timestamp — a 30-day window on a 30-minute event is ~480 of
- * those, which is roughly 12k tokens of an agent's context for a single call.
- * Keyed by date with bare "HH:MM" strings, the same information is about a
- * tenth of that. See docs/mcp-server-spec.md §10.
+ * An agent must see the same availability as the booking page, so this
+ * computes nothing. It calls the same service the public page uses
+ * (TimeSlotServiceHandler::initService) and only reshapes and trims the
+ * result: slots keyed by date as "HH:MM" strings cost about a tenth of the
+ * engine's per-slot arrays in tokens. See docs/mcp-server-spec.md §10.
  */
 class SlotResolver
 {
-    /**
-     * Hard ceiling on a slot query, in days. A caller asking for a year of
-     * availability does not want a year of availability in one response; it
-     * wants a smaller question it has not thought of yet.
-     */
+    // Hard ceiling on a slot query, in days.
     const MAX_RANGE_DAYS = 62;
 
     /**
-     * Hard ceiling on slots in one response, enforced at a whole-date boundary.
-     *
-     * A 62-day window on a busy event is ~1,400 slots ≈ 3,500 tokens, which
-     * overruns the budget in docs/mcp-server-spec.md §10 by more than double.
-     * Measured at ~8.6 bytes per slot, 600 keeps a full response near 1,500
-     * tokens. The cap is never silent: the response says it truncated and names
-     * the first date it left out, so the agent asks for the next window instead
-     * of concluding the calendar ends there.
+     * Hard ceiling on slots in one response, applied at a whole-date boundary.
+     * At ~8.6 bytes per slot, 600 keeps a response near 1,500 tokens (the
+     * budget in docs/mcp-server-spec.md §10). Truncation is always reported.
      */
     const MAX_SLOTS = 600;
 
@@ -58,10 +42,8 @@ class SlotResolver
     public static function getSlots(CalendarSlot $event, $from, $to, $timezone, $duration = null, $hostId = null)
     {
         if ($event->status !== 'active') {
-            // The slot engine does not check event status — BookingController
-            // does, before it ever calls the engine. Without mirroring that here
-            // a draft event reports a full calendar of bookable times that the
-            // public page would refuse, and an agent would try to book into it.
+            // The slot engine doesn't check status (BookingController does), so
+            // a draft event would otherwise show slots the public page refuses.
             return [
                 'slots'  => [],
                 'reason' => sprintf(
@@ -82,12 +64,8 @@ class SlotResolver
         $spotsRemaining = [];
         $lastError      = null;
 
-        // The engine is month-bounded: getAvailableSpots() derives its end date
-        // via getMaxBookableDateTime(), which clamps to the last day of the
-        // START date's month, because the booking page renders one month at a
-        // time. A single call for 23 Aug – 5 Sep therefore returns August only
-        // and reports nothing for September — which an agent reads as "fully
-        // booked" rather than "not asked". So walk the range a month at a time
+        // getAvailableSpots() only returns the start date's month (the booking
+        // page renders one month at a time), so walk the range month by month
         // and merge. MAX_RANGE_DAYS keeps this to at most three calls.
         $cursor = $from;
 
@@ -95,9 +73,8 @@ class SlotResolver
             $spots = $service->getAvailableSpots($cursor . ' 00:00:00', $timezone, $duration, $hostId);
 
             if (is_wp_error($spots)) {
-                // One month being unusable (its window is past the event's
-                // bookable range) says nothing about the others — keep going and
-                // only surface the error if no month yields anything.
+                // A month past the bookable range says nothing about the others.
+                // Only surface the error if no month yields anything.
                 $lastError = $spots;
             } else {
                 self::mergeMonth((array) $spots, $from, $to, $slots, $spotsRemaining);
@@ -105,8 +82,7 @@ class SlotResolver
 
             $next = gmdate('Y-m-01', strtotime(gmdate('Y-m-01', strtotime($cursor)) . ' +1 month')); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 
-            // Guard against a non-advancing cursor: an infinite loop inside a
-            // request is worse than a wrong answer.
+            // Guard against a non-advancing cursor.
             if ($next <= $cursor) {
                 break;
             }
@@ -127,10 +103,8 @@ class SlotResolver
     }
 
     /**
-     * Apply MAX_SLOTS at a whole-date boundary and say so when it bites.
-     *
-     * Whole dates rather than a flat slot count: half a Tuesday reads as a
-     * Tuesday that is half booked, which is a different and wrong answer.
+     * Apply MAX_SLOTS at a whole-date boundary, since half a day would read
+     * as a half-booked day.
      *
      * @param array $slots
      * @param array $spotsRemaining
@@ -173,11 +147,8 @@ class SlotResolver
     }
 
     /**
-     * Fold one month's raw engine output into the accumulating result, trimmed
-     * to the requested window.
-     *
-     * getAvailableSpots() can also snap its start back to the first of the month,
-     * so the lower bound needs trimming as well as the upper.
+     * Fold one month's engine output into the result, trimmed to the window.
+     * The engine can snap its start back to the 1st, so both bounds are trimmed.
      *
      * @param array  $spots           raw engine output
      * @param string $from
@@ -207,10 +178,8 @@ class SlotResolver
                     $times[] = $time;
                 }
 
-                // `remaining` is false on every event that does not track spots,
-                // which is most of them. Only build the parallel map when there
-                // is something in it — an always-present map of nulls is pure
-                // context cost.
+                // `remaining` is false on events that don't track spots (most),
+                // so only build the map when there is something to put in it.
                 if (isset($slot['remaining']) && $slot['remaining'] !== false && $slot['remaining'] !== null) {
                     $spotsRemaining[$date][$time] = (int) $slot['remaining'];
                 }
@@ -226,9 +195,8 @@ class SlotResolver
     /**
      * Is one specific slot bookable right now?
      *
-     * Runs the same engine as getSlots() rather than scanning its output, so the
-     * answer reflects the state at the moment of asking — this is the check a
-     * write path relies on, and a cached list is exactly what it must not trust.
+     * Asks the engine directly rather than scanning getSlots() output, because
+     * write paths rely on this and need the current state.
      *
      * @param CalendarSlot $event
      * @param string       $startUtc 'Y-m-d H:i:s' in UTC, already validated by
@@ -297,10 +265,8 @@ class SlotResolver
      */
     public static function resolveRange($from, $to)
     {
-        // Absent and unparseable are different questions. Both used to
-        // normalise to '', so `from: "next tuesday"` fell through to the
-        // default window and came back as a confident answer about the wrong
-        // fortnight. Matches BookingTools::dateRange().
+        // An unparseable date is an error, not a request for the default
+        // window. Matches BookingTools::dateRange().
         foreach (['from' => $from, 'to' => $to] as $key => $value) {
             if (self::suppliedDate($value) && !self::normalizeDate($value)) {
                 return MCPHelper::error(
@@ -367,9 +333,7 @@ class SlotResolver
             return '';
         }
 
-        // Y-m-d only. strtotime() would also accept "next tuesday", "+1 year"
-        // and "5", resolving them against the current instant and answering a
-        // question nobody asked.
+        // Y-m-d only. strtotime() would accept "next tuesday" or "5".
         return MCPHelper::isRealDate($date) ? $date : '';
     }
 }

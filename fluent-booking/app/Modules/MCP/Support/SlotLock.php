@@ -5,63 +5,37 @@ namespace FluentBooking\App\Modules\MCP\Support;
 defined('ABSPATH') || exit;
 
 /**
- * A short-lived exclusive hold on one event/slot/host combination.
+ * A short-lived exclusive hold on one slot for one host.
  *
- * Availability is answered by a query and a booking is written by a separate
- * INSERT, with the whole slot engine in between. Nothing in the schema stops two
- * rows landing on the same host at the same minute — there is no unique index
- * over (event, host, start_time), and there cannot be a simple one, because
- * group events legitimately seat several bookings in one slot. So "check, then
- * write" is a race, and re-checking immediately before the write narrows it
- * without closing it.
+ * Checking availability and inserting the booking is a race, and the schema
+ * can't close it: group events seat several bookings in one slot, so there is
+ * no unique index on (event, host, start_time). MCP makes the race likelier
+ * because agents retry and the confirm round-trip adds a human-length pause.
  *
- * That race has always existed on the public booking page, where the two
- * requests have to arrive within milliseconds of each other. It matters more
- * here: an agent retries on its own initiative, several agents can hold
- * credentials for the same site, and the confirm round-trip deliberately puts a
- * human-length pause between the preview and the write.
+ * The lock is an INSERT IGNORE on the unique `option_name` index, so exactly
+ * one concurrent caller wins. GET_LOCK is avoided: some managed hosts disable
+ * it, and it is per-connection, which connection pooling breaks.
  *
- * `add_option()` is the primitive, for the same reason WriteGuard uses it: it
- * bottoms out in one INSERT against the unique index on `option_name`, so
- * exactly one of N concurrent callers gets `true` back. That is a real mutual
- * exclusion, unlike a get-then-set on a transient, and it needs no new table and
- * no MySQL-specific advisory lock (`GET_LOCK` is unavailable on some managed
- * hosts and is per-connection, which connection pooling makes unreliable).
+ * Not a general-purpose lock: the TTL is seconds, a failed acquire returns
+ * instead of waiting, and an expired lock is stolen.
  *
- * Deliberately NOT a general-purpose lock: the TTL is seconds, a failure to
- * acquire is reported to the caller rather than waited on, and an expired lock
- * is stolen rather than honoured. A booking that cannot be written in fifteen
- * seconds has a bigger problem than contention.
- *
- * WHAT THIS DOES NOT DO, stated plainly so the next reader does not assume more
- * than it delivers: acquireInterval() claims every bucket a booking touches, so
- * partial overlaps on one host collide across event types. But only MCP writes
- * take these locks. The public booking page and the admin UI take none, so a
- * booking made there races exactly as it always has, and availability
- * re-checking remains the only defence against it.
+ * Only MCP writes take these locks. Bookings from the public page and admin UI
+ * don't, so against those, availability re-checking is still the only guard.
  *
  * @since 2.3.0
  */
 class SlotLock
 {
-    /**
-     * Long enough for a slot query plus an insert and its hooks, short enough
-     * that a fatal mid-write frees the slot before anyone notices.
-     */
+    // Covers a slot query plus the insert and its hooks; short enough that a
+    // fatal mid-write frees the slot quickly.
     const TTL = 15;
 
     const PREFIX = 'fcal_mcp_slot_';
 
-    /**
-     * Lock granularity, in seconds. The finest slot interval the plugin offers,
-     * so a booking aligned to any configurable duration claims whole buckets.
-     */
+    // Lock granularity in seconds: the finest slot interval the plugin offers.
     const BUCKET = 900;
 
-    /**
-     * A day of buckets. A booking cannot legitimately need more, and a bad end
-     * time must not turn into an unbounded row-insert loop.
-     */
+    // A day of buckets, so a bad end time can't become an unbounded insert loop.
     const MAX_BUCKETS = 96;
 
     /**
@@ -91,10 +65,9 @@ class SlotLock
 
         $record = ($existing === null) ? null : maybe_unserialize($existing);
 
-        // Steal an expired lock: a request that died mid-write must not hold a
-        // slot closed until the daily cleanup runs. Conditional on the value
-        // just read, so of two requests racing the same expired lock the slower
-        // one cannot delete the winner's fresh row and then insert its own.
+        // Steal an expired lock left by a request that died mid-write. Deleting
+        // by the value just read stops a slower racer from deleting the
+        // winner's fresh row.
         if (is_array($record) && !empty($record['expires']) && $record['expires'] < time()) {
             $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                 $wpdb->prepare(
@@ -107,10 +80,8 @@ class SlotLock
             wp_cache_delete($key, 'options');
         }
 
-        // INSERT IGNORE, the primitive core uses for its own locks
-        // (WP_Upgrader::create_lock). Deliberately not add_option(): that issues
-        // ON DUPLICATE KEY UPDATE and reports success to a caller whose row
-        // already existed, which is no mutual exclusion at all.
+        // Same primitive as WP_Upgrader::create_lock. Not add_option(): its ON
+        // DUPLICATE KEY UPDATE reports success even when the row already existed.
         $inserted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->prepare(
                 "INSERT IGNORE INTO `{$wpdb->options}` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, 'no')",
@@ -133,18 +104,16 @@ class SlotLock
             return false;
         }
 
-        // The handle carries the owner, so release() can prove it holds this
-        // lock rather than a successor's.
+        // The owner in the handle lets release() prove it holds this lock and
+        // not a successor's.
         return $key . '|' . $owner;
     }
 
     /**
      * Claim one instant for every host a booking would occupy, all or nothing.
      *
-     * A collective event books each of its hosts, and two single-host event
-     * types can share an owner, so the constrained resource is a SET of people
-     * rather than one. Partial claims are released before returning, so a
-     * caller never holds half a slot.
+     * A collective event books each of its hosts. Partial claims are released
+     * before returning false.
      *
      * @param int    $eventId
      * @param string $startTimeUtc
@@ -175,12 +144,8 @@ class SlotLock
      * Claim every bucket a booking would occupy, for every host it would
      * occupy, all or nothing.
      *
-     * Keying on the start instant alone let two bookings that overlap without
-     * sharing a start — 10:00 for thirty minutes and 10:15 for fifteen, through
-     * different event types — take independent keys and interleave. Overlapping
-     * intervals always share an instant, so claiming every bucket an interval
-     * touches makes them collide; intervals that merely abut do not, so a
-     * booking ending at 10:30 still leaves 10:30 free.
+     * Overlapping bookings with different starts (10:00 for 30 min, 10:15 for
+     * 15) always share a bucket, so they collide. Abutting ones don't.
      *
      * @param int    $eventId
      * @param string $startTimeUtc 'Y-m-d H:i:s'
@@ -217,8 +182,8 @@ class SlotLock
     }
 
     /**
-     * The bucket starts an interval touches, half open so a booking ending on a
-     * boundary does not claim the bucket beginning there.
+     * Bucket starts an interval touches. Half open, so a booking ending on a
+     * boundary doesn't claim the next bucket.
      *
      * @return array of 'Y-m-d H:i:s'
      */
@@ -277,15 +242,12 @@ class SlotLock
     /**
      * Re-assert a lease this caller still owns, pushing its expiry out.
      *
-     * The lease is taken before isSpotAvailable(), which fans out through
-     * `fluent_booking/remote_booked_events` to a live FreeBusy call per
-     * connected calendar per host. On a team event with a cold cache that can
-     * outrun TTL before a single row is written — and acquire() steals an
-     * expired lease unconditionally, so the race this class exists to close
-     * reopens exactly when the check is slow.
+     * isSpotAvailable() can make a live FreeBusy call per calendar per host,
+     * which on a team event can outlast TTL, and acquire() steals expired
+     * leases. Renewing before the write keeps the lock held.
      *
-     * Conditional on the exact stored bytes, so a caller whose lease was
-     * already stolen gets false rather than stamping over the new owner.
+     * Matches the exact stored bytes, so a caller whose lease was stolen gets
+     * false instead of overwriting the new owner.
      *
      * @param string|false $handle the value returned by acquire()
      *
@@ -331,23 +293,18 @@ class SlotLock
 
         wp_cache_delete($key, 'options');
 
-        // MySQL reports CHANGED rows, not matched ones, so renewing inside the
-        // same second as the last write is a no-op update and reports zero.
-        // The row is still ours and still current, which is what was asked.
+        // MySQL counts changed rows, not matched ones, so a renew within the
+        // same second reports zero even though the row is still ours.
         return $updated ? true : ($renewed === $existing);
     }
 
     /**
      * Release a lock this caller actually holds.
      *
-     * The owner check is the point. A lease can expire while a slow booking hook
-     * is still running; another request then legitimately takes the slot, and an
-     * ownerless `delete_option()` from the first request would free the second
-     * one's lock while it was still working.
-     *
-     * The check and the delete are two statements, so the delete carries the
-     * proof with it and matches the exact value checked. A successor's row holds
-     * a different owner token, so a lapsed owner's delete matches nothing.
+     * A lease can expire during a slow booking hook and be taken by another
+     * request; a plain delete_option() would then free the successor's lock.
+     * The delete matches the exact value checked, so a lapsed owner's delete
+     * matches nothing.
      *
      * @param string|false $handle the value returned by acquire()
      */
@@ -390,21 +347,16 @@ class SlotLock
     }
 
     /**
-     * Host is part of the key: on a team event two hosts genuinely can be booked
-     * for the same minute, and locking the slot across all of them would turn a
-     * correctness guard into a throughput problem.
+     * Keyed on the host, since the person is the constrained resource: it blocks
+     * one host double-booked via two event types, while two team hosts can
+     * still take the same minute. Round robin has no host until
+     * isSpotAvailable() picks one, so it keys on the event and the caller takes
+     * a host-keyed lock afterwards.
      *
      * @return string
      */
     private static function key($eventId, $startTimeUtc, $hostId)
     {
-        // Keyed on the HOST once one is known, not the event: the constrained
-        // resource is the person, and keying on the event let two requests book
-        // the same host at one instant through different event types.
-        //
-        // Round robin has no host until isSpotAvailable() settles one, so it
-        // falls back to the event and the caller takes a second, host-keyed
-        // lock afterwards.
         $scope = $hostId ? 'h' . (int) $hostId : 'e' . (int) $eventId;
 
         return self::PREFIX . md5($scope . '|' . $startTimeUtc);

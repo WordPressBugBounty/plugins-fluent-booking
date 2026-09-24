@@ -70,6 +70,11 @@ class MeetingPolicy extends Policy
         return $this->authorizeBookingAccess($request);
     }
 
+    public function getNotes(Request $request)
+    {
+        return $this->authorizeBookingAccess($request);
+    }
+
     public function getBookingMetaInfo(Request $request)
     {
         return $this->authorizeBookingAccess($request);
@@ -115,11 +120,9 @@ class MeetingPolicy extends Policy
     }
 
     /**
-     * Resolve the booking ID from the URL route parameter only.
-     *
-     * Why: merged request inputs let JSON body values shadow URL params,
-     * which previously allowed authorizing against an attacker-owned ID
-     * while the controller acted on the URL-targeted victim ID.
+     * Resolve the booking ID from the URL route parameter only. Merged inputs
+     * let a body value shadow the URL, so a check could pass on one ID while
+     * the controller acts on another.
      */
     private function getRouteBookingId(Request $request)
     {
@@ -127,9 +130,8 @@ class MeetingPolicy extends Policy
     }
 
     /**
-     * Read a URL-only route parameter safely. Routes such as /schedules/
-     * and /schedules/export have no path placeholders, so a direct
-     * access would emit an undefined-array-key warning under PHP 8.
+     * Read a URL route parameter. Some routes (/schedules/, /schedules/export)
+     * have no placeholder, so direct access would warn under PHP 8.
      */
     private function getRouteParam(Request $request, $key)
     {

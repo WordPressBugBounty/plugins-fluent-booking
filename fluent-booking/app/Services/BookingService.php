@@ -56,7 +56,9 @@ class BookingService
 
         do_action('fluent_booking/before_booking', $bookingData, $calendarSlot);
 
-        $booking = Booking::create($bookingData);
+        $booking = Helper::dbTransaction(function () use ($bookingData) {
+            return Booking::create($bookingData);
+        });
 
         self::attachHosts($booking, $calendarSlot);
         self::updateParentInfo($booking, $bookingIds);
@@ -453,8 +455,6 @@ class BookingService
 
     public static function generateBookingICS(Booking $booking)
     {
-        $author = $booking->getHostDetails(false);
-
         // Initialize the ICS content
         $icsContent = "BEGIN:VCALENDAR\r\n";
         $icsContent .= "VERSION:2.0\r\n";
@@ -464,7 +464,55 @@ class BookingService
         // invitation bound to the ATTENDEE, which Google Calendar then rejects/mishandles.
         $icsContent .= "METHOD:PUBLISH\r\n";
 
-        $icsContent .= "BEGIN:VEVENT\r\n";
+        foreach (self::getIcsBookings($booking) as $icsBooking) {
+            $icsContent .= self::generateIcsEvent($icsBooking);
+        }
+
+        // Close the VCALENDAR component
+        $icsContent .= "END:VCALENDAR\r\n";
+
+        return $icsContent;
+    }
+
+    /**
+     * A recurring or multiple-time booking is stored as one row per time, with
+     * the last row as the parent the guest lands on. Its export carries every
+     * confirmed time in the set, one VEVENT each, so an occurrence that was
+     * cancelled or is still awaiting confirmation stays out of the calendar.
+     */
+    private static function getIcsBookings(Booking $booking)
+    {
+        if ($booking->parent_id) {
+            return [$booking];
+        }
+
+        // Additional guests on a group booking are linked the same way, each
+        // with their own email; their bookings are not this guest's to export.
+        $childBookings = Booking::with(['calendar', 'calendar_event', 'booking_meta'])
+            ->where('parent_id', $booking->id)
+            ->where('email', $booking->email)
+            ->whereIn('status', ['scheduled', 'completed'])
+            ->get()
+            ->all();
+
+        if (!$childBookings) {
+            return [$booking];
+        }
+
+        $bookings = array_merge($childBookings, [$booking]);
+
+        usort($bookings, function ($first, $second) {
+            return strtotime($first->start_time) - strtotime($second->start_time);
+        });
+
+        return $bookings;
+    }
+
+    private static function generateIcsEvent(Booking $booking)
+    {
+        $author = $booking->getHostDetails(false);
+
+        $icsContent = "BEGIN:VEVENT\r\n";
         $icsContent .= "STATUS:CONFIRMED\r\n";
         $icsContent .= "UID:" . md5($booking->hash) . "\r\n"; // Unique ID for the event
         $icsContent .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n"; // Required by RFC5545; Google rejects ICS without it
@@ -485,9 +533,6 @@ class BookingService
         $icsContent .= "ORGANIZER;CN=\"" . self::escapeIcsText($author['name']) . "\":mailto:" . $organizerEmail . "\r\n";
 
         $icsContent .= "END:VEVENT\r\n";
-
-        // Close the VCALENDAR component
-        $icsContent .= "END:VCALENDAR\r\n";
 
         return $icsContent;
     }

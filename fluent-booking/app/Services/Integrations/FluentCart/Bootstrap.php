@@ -45,10 +45,14 @@ class Bootstrap
             $bookingId = Arr::get($cart->checkout_data, 'fluent_booking_data.booking_id');
             if ($bookingId) {
                 $config['fcal_booking_id'] = $bookingId;
+                $config['fcal_target_variant_id'] = Arr::get($cart->checkout_data, 'fluent_booking_data.target_variant_id');
                 $order->config = $config;
                 $order->save();
             }
         });
+
+        // The booking cart is locked to pin its booking item, which also hides order bumps
+        add_filter('fluent_cart/cart/accepts_additional_items', [$this, 'maybeAcceptOrderBumps'], 10, 2);
 
         // after order confirmation
         add_action('fluent_booking/cart/booking_order_completed', [$this, 'maybeScheduleBooking'], 10, 1);
@@ -58,6 +62,22 @@ class Bootstrap
         add_action('fluent_cart/order_paid_done', [$this, 'reconcileBookingFromOrder'], 10, 1);
 
         add_filter('fluent_cart/checkout_page_name_fields_schema', [$this, 'maybeFillSplitNameFields'], 10, 2);
+    }
+
+    public function maybeAcceptOrderBumps($accepts, $context)
+    {
+        $cart = Arr::get($context, 'cart');
+
+        if ($accepts || !$cart || empty($cart->checkout_data['fluent_booking_data'])) {
+            return $accepts;
+        }
+
+        // A draft order binds the cart, and upgrade carts keep their own restriction
+        if ($cart->order_id || !empty($cart->checkout_data['upgrade_data'])) {
+            return $accepts;
+        }
+
+        return true;
     }
 
     public function maybeFillSplitNameFields($nameFields, $context)
@@ -132,9 +152,7 @@ class Bootstrap
             }
 
             $quantity = $booking->getMeta('quantity', 1);
-            $newItem = $product->toArray();
-
-            $instantCart = \FluentCart\App\Helpers\CartHelper::generateCartFromCustomVariation($newItem, $quantity);
+            $instantCart = \FluentCart\App\Helpers\CartHelper::generateCartFromVariation($product, $quantity);
 
             $cartData = $instantCart->cart_data;
             $cartData[0]['fcal_booking_id'] = $booking->id;
@@ -181,7 +199,7 @@ class Bootstrap
                 'status'      => 'closed',
                 'type'        => 'info',
                 'title'       => __('Redirect to FluentCart checkout page', 'fluent-booking'),
-                'description' => __('User redirected to FluentCart checkout page to comeplete the order.', 'fluent-booking')
+                'description' => __('User redirected to FluentCart checkout page to complete the order.', 'fluent-booking')
             ]);
 
             return $response;
@@ -288,6 +306,24 @@ class Bootstrap
 
         $calendarEvent = $booking->calendar_event;
         if (!CartHelper::isEnabled($calendarEvent)) {
+            return;
+        }
+
+        // The cart takes order bumps, so a paid order is not proof the booking item was bought.
+        // Orders drafted before the variant was recorded carry no id and skip the check.
+        $targetVariantId = (int) Arr::get($order->config, 'fcal_target_variant_id', 0);
+        if ($targetVariantId && !$order->order_items()->where('object_id', $targetVariantId)->exists()) {
+            do_action('fluent_booking/log_booking_activity', [
+                'booking_id'  => $booking->id,
+                'status'      => 'closed',
+                'type'        => 'error',
+                'title'       => __('Cart: Booking status could not be changed', 'fluent-booking'),
+                'description' => sprintf(
+                /* translators: %1$s and %2$s are the HTML link tags for "View Order" */
+                    __('The paid order does not contain the booking item. %1$sView Order%2$s', 'fluent-booking'),
+                    '<a target="_blank" href="' . $order->getViewUrl('admin') . '">',
+                    '</a>')
+            ]);
             return;
         }
 

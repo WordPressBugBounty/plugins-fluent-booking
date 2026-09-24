@@ -36,10 +36,10 @@ class BookingElement extends BaseFieldManager
         );
 
         add_filter('fluentform/response_render_fcal_booking', array($this, 'renderResponse'), 10, 3);
-        add_filter('fluentform/select_group_component_ajax_options', array($this, 'getCalendarOptions'));
+        add_filter('fluentform/select_group_component_ajax_options', array($this, 'getCalendarOptions'), 10, 2);
 
         add_action('fluentform/loading_editor_assets', function () {
-            wp_enqueue_script('fluentcal_ff_editor_extended', FLUENT_BOOKING_URL . 'assets/admin/fluentform.js', [], '1.0.0', true);
+            wp_enqueue_script('fluentcal_ff_editor_extended', FLUENT_BOOKING_URL . 'assets/admin/fluentform.js', [], FLUENT_BOOKING_ASSETS_VERSION, true);
         });
     }
 
@@ -248,9 +248,48 @@ class BookingElement extends BaseFieldManager
         return __('Text Response', 'fluent-booking');
     }
 
-    public function getCalendarOptions()
+    public function getCalendarOptions($options = [], $requestData = [])
     {
-        return apply_filters('fluent_booking/ff_editor_calendar_options', CalendarService::getCalendarOptionsByHost());
+        $eventId = (int) Arr::get($requestData, 'fcal_event_id');
+
+        if (!$eventId) {
+            return apply_filters('fluent_booking/ff_editor_calendar_options', CalendarService::getCalendarOptionsByHost());
+        }
+
+        return $this->getMappableFields($eventId);
+    }
+
+    /**
+     * Custom booking fields of an event that a Fluent Forms field can fill.
+     * File, checkbox and terms fields are left out: their stored value contract
+     * (a FluentBooking upload URL, 'Yes', 'Accepted') differs from what Fluent Forms submits.
+     *
+     * @param int $eventId
+     * @return array field name => label
+     */
+    private function getMappableFields($eventId)
+    {
+        $event = CalendarSlot::find($eventId);
+
+        if (!$event || !$event->calendar) {
+            return [];
+        }
+
+        // Same scope as getCalendarOptionsByHost(): Fluent Forms only checks dashboard access.
+        if (!PermissionManager::hasAllCalendarAccess(true) && $event->calendar->user_id != get_current_user_id()) {
+            return [];
+        }
+
+        $fields = [];
+
+        foreach (BookingFieldService::getCustomFields($event, true) as $fieldKey => $field) {
+            if (in_array(Arr::get($field, 'type'), ['file', 'checkbox', 'terms-and-conditions'], true)) {
+                continue;
+            }
+            $fields[$fieldKey] = Arr::get($field, 'label', $fieldKey);
+        }
+
+        return $fields;
     }
 
     /**

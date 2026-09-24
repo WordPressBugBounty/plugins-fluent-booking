@@ -65,7 +65,8 @@ class BookingMigrator
                 KEY `fcal_b_fcrm_id` (`fcrm_id`),
                 KEY `fcal_b_event_id` (`event_id`),
                 KEY `fcal_b_booking_type` (`booking_type`),
-                KEY `fcal_b_start_time` (`start_time`)
+                KEY `fcal_b_start_time` (`start_time`),
+                KEY `fcal_b_group_id` (`group_id`)
             ) $charsetCollate;";
 
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -78,6 +79,15 @@ class BookingMigrator
                 $safe_table = esc_sql($table);
                 $wpdb->query("ALTER TABLE `{$safe_table}` ADD COLUMN `utm_content` VARCHAR(192) NULL DEFAULT '' AFTER `utm_term`"); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             }
+
+            $hasGroupIdIndex = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s AND INDEX_NAME='fcal_b_group_id'", $table)); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+            if (!$hasGroupIdIndex) {
+                $safe_table = esc_sql($table);
+                $wpdb->query("ALTER TABLE `{$safe_table}` ADD KEY `fcal_b_group_id` (`group_id`)"); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            }
         }
+
+        // Row locked by Booking::assignNextGroupId().
+        $wpdb->query("INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('fcal_booking_group_lock', '', 'no')"); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
     }
 }

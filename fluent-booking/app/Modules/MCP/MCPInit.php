@@ -8,36 +8,22 @@ use FluentBooking\App\Modules\MCP\Tools\ContextTools;
 defined('ABSPATH') || exit;
 
 /**
- * Bootstrap for FluentBooking's Model Context Protocol integration.
+ * Bootstrap for the MCP integration.
  *
- * Wires the WordPress Abilities API (core 6.9+) to the WP MCP Adapter, which is
- * provided by FluentToolkit (which bundles it) or the standalone mcp-adapter
- * plugin — whichever is present. FluentBooking bundles nothing; it consumes
- * whatever is loaded, and surfaces an admin notice rather than failing silently
- * when neither is.
+ * Wires the Abilities API (WP 6.9+) to the MCP Adapter, supplied by
+ * FluentToolkit or the standalone mcp-adapter plugin. Shows an admin notice
+ * when neither is loaded.
  *
- * The whole surface is gated behind PermissionGate::isEnabled() (default off).
- * An operator turns it on in Settings and connects with an application password.
- * Even when on, the endpoint sits behind WP authentication, a FluentBooking
- * permission (transport gate), and per-ability permission checks.
- *
- * Called once from app/Hooks/actions.php.
+ * Off by default (PermissionGate::isEnabled()). When on, the endpoint needs WP
+ * auth, the transport permission gate and per-ability permission checks.
  */
 class MCPInit
 {
     const SERVER_ID = 'fluent-booking';
 
     /**
-     * Bootstrap entry point.
-     *
-     * Toolkit discovery and the settings card register UNCONDITIONALLY: the
-     * Toolkit needs to list FluentBooking on its MCP page while the feature is
-     * still off, or the operator has no way to find the switch. Both are
-     * add_filter calls that no-op unless something applies them, so the cost
-     * when nothing does is nil.
-     *
-     * The server itself is instantiated only when enabled, so a site that never
-     * turns MCP on pays nothing beyond one autoloaded option read.
+     * Toolkit discovery and the settings entry always register, since they are
+     * where the operator finds the switch. The server starts only when enabled.
      */
     public static function boot()
     {
@@ -51,20 +37,17 @@ class MCPInit
 
     public function init()
     {
-        // Abilities API hooks — fire only on WP 6.9+ (or with the Abilities API
-        // feature plugin active).
+        // Fire only on WP 6.9+ or with the Abilities API plugin.
         add_action('wp_abilities_api_categories_init', [$this, 'registerCategory']);
         add_action('wp_abilities_api_init', [$this, 'registerAbilities']);
 
         add_action('admin_init', [$this, 'registerPrivacyPolicyContent']);
 
-        // Server registration — fires only when an adapter is loaded.
+        // Fires only when an adapter is loaded.
         add_action('mcp_adapter_init', [$this, 'registerCustomServer']);
 
-        // Keep get-booking-context honest: drop its cache whenever something it
-        // reports changes, so an operator's edit is visible to the agent on the
-        // next call instead of up to CACHE_TTL later. Static callback so a site
-        // can remove_action it.
+        // Drop get-booking-context's cache when anything it reports changes.
+        // Static callback so a site can remove_action it.
         $invalidate = [ContextTools::class, 'invalidateCache'];
 
         foreach ([
@@ -79,7 +62,6 @@ class MCPInit
             add_action($hook, $invalidate);
         }
 
-        // Warn the operator if they enabled MCP but no adapter is installed.
         add_action('admin_notices', [$this, 'maybeShowAdapterNotice']);
     }
 
@@ -96,9 +78,8 @@ class MCPInit
         AbilitiesRegistrar::register();
 
         /**
-         * Fires after FluentBooking registers its core MCP abilities.
-         * FluentBooking Pro hooks this to register its own abilities (payments)
-         * under the same `fluent-booking/` namespace and on the same server.
+         * Fires after FluentBooking registers its core MCP abilities. Pro
+         * registers its own here, under the same namespace and server.
          *
          * @since 2.3.0
          */
@@ -106,10 +87,8 @@ class MCPInit
     }
 
     /**
-     * Register the dedicated FluentBooking MCP server. The endpoint defaults to
-     * /wp-json/fluent-booking/mcp — a sibling of the admin REST namespace
-     * (fluent-booking/v2) but deliberately outside it, so it is not caught by
-     * that policy stack.
+     * Register the FluentBooking MCP server at /wp-json/fluent-booking/mcp,
+     * outside fluent-booking/v2 so the admin policy stack doesn't apply.
      *
      * @param object $adapter the \WP\MCP\Core\McpAdapter instance
      */
@@ -123,8 +102,7 @@ class MCPInit
 
         /**
          * Filters the ability names exposed by the FluentBooking MCP server.
-         * Pro and extensions push their ability names here so they land on the
-         * same server as the free ones.
+         * Pro and extensions add theirs here to share the server.
          *
          * @since 2.3.0
          *
@@ -133,9 +111,7 @@ class MCPInit
         $abilityNames = apply_filters('fluent_booking/mcp_ability_names', $abilityNames);
         $abilityNames = array_values(array_unique(array_filter((array) $abilityNames)));
 
-        // Prompts are a separate argument to create_server(). Listed as tools
-        // they would show up in tools/list carrying a body of instructions —
-        // both wrong and, at a few hundred tokens each, expensive.
+        // Prompts go in their own argument, not in tools/list.
         $promptNames = AbilitiesRegistrar::getPromptNames();
 
         /**
@@ -169,19 +145,12 @@ class MCPInit
     }
 
     /**
-     * Announce FluentBooking to FluentToolkit's MCP page.
-     *
-     * The Toolkit discovers products through `fluent_kit/mcp_products` and
-     * toggles them through `fluent_kit/mcp_toggle_handlers`. Without these,
-     * FluentBooking's server would be fully functional yet never appear in the
-     * Toolkit's list, which reads to an operator as "not supported".
-     *
-     * Runs even while MCP is off so the card is reachable to switch on.
+     * List FluentBooking on FluentToolkit's MCP page, even while MCP is off,
+     * so the operator can switch it on there.
      */
     public static function registerWithToolkit()
     {
-        // Static callbacks rather than closures so a site can remove_filter
-        // them — a closure registered here would be unreachable forever.
+        // Static callbacks, not closures, so a site can remove_filter them.
         add_filter('fluent_kit/mcp_products', [self::class, 'addToolkitProduct']);
         add_filter('fluent_kit/mcp_toggle_handlers', [self::class, 'addToolkitToggleHandler']);
     }
@@ -227,12 +196,8 @@ class MCPInit
     }
 
     /**
-     * Add the MCP entry to FluentBooking → Settings.
-     *
-     * Registered even while the feature is off — it is the only place an
-     * operator can turn it on, so hiding it when disabled would make the switch
-     * unreachable. Priority 30 keeps it after the existing settings entries
-     * rather than in the middle of them.
+     * Add the MCP entry to Settings. Registered while off too, since it holds
+     * the switch. Priority 30 puts it after the existing entries.
      */
     public static function registerSettingsMenu()
     {
@@ -264,16 +229,13 @@ class MCPInit
     }
 
     /**
-     * How many abilities the server currently exposes, Pro's included. Reflects
-     * the operator's toolset selection, because that is the number that governs
-     * how much of every request's context window this server occupies.
+     * How many tools the server exposes for the enabled toolsets, Pro's
+     * included. Prompts don't count; they aren't in the tool list.
      *
      * @return int
      */
     public static function toolsCount()
     {
-        // Tools only: prompts do not occupy the tool list, which is the number
-        // this count exists to report.
         $names = AbilitiesRegistrar::getToolNames();
 
         $names = apply_filters('fluent_booking/mcp_ability_names', $names);
@@ -318,13 +280,8 @@ class MCPInit
     }
 
     /**
-     * Suggest privacy-policy wording while MCP is on.
-     *
-     * Enabling this makes whichever model provider the connected client uses a
-     * recipient of attendee data the moment a read tool is called — the site
-     * owner is the controller and has to disclose that. WordPress has a place
-     * for exactly this text; not using it left the transfer undisclosed
-     * everywhere except the settings screen.
+     * Suggest privacy-policy wording while MCP is on. The connected client's
+     * model provider receives attendee data, which the site owner must disclose.
      */
     public function registerPrivacyPolicyContent()
     {

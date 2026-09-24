@@ -83,6 +83,7 @@ class CrmSmartCode
             '{{fcal.booking.phone}}'                         => __('Guest Main Phone Number (if provided)', 'fluent-booking'),
             '{{fcal.guest.note}}'                            => __('Guest Note', 'fluent-booking'),
             '{{fcal.guest.timezone}}'                        => __('Guest Timezone', 'fluent-booking'),
+            '{{fcal.guest.form_data_html}}'                  => __('Guest Form Submitted Data (HTML)', 'fluent-booking'),
             '{{fcal.booking.event_name}}'                    => __('Event Name', 'fluent-booking'),
             '{{fcal.booking.description}}'                   => __('Event Description', 'fluent-booking'),
             '{{fcal.booking.full_start_end_guest_timezone}}' => __('Full Start & End Time (with guest timezone)', 'fluent-booking'),

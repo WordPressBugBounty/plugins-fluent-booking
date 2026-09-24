@@ -88,6 +88,7 @@ class SettingsController extends Controller
         ];
 
         $settings['all_countries'] = Countries::get();
+        $settings['share_stats'] = Arr::get((array) Helper::getMeta('option', 0, 'optin'), 'share_stats', '');
 
         return apply_filters('fluent_booking/general_settings', $settings);
     }
@@ -108,9 +109,10 @@ class SettingsController extends Controller
             }
             $formattedSettings[$settingKey] = $santizedSettings;
         }
-        $formattedSettings['time_format'] = $request->get('timeFormat');
+        $formattedSettings['time_format'] = sanitize_text_field($request->get('timeFormat'));
 
-        update_option('_fluent_booking_settings', $formattedSettings, 'no');
+        // The option also holds keys saved elsewhere, e.g. theme from updateThemeSettings().
+        update_option('_fluent_booking_settings', array_merge((array) get_option('_fluent_booking_settings', []), $formattedSettings), 'no');
 
         return [
             'message'  => __('Settings updated successfully', 'fluent-booking'),
@@ -259,6 +261,90 @@ class SettingsController extends Controller
             'message'        => __('Settings are saved', 'fluent-booking'),
             'featureModules' => $settings
         ]);
+    }
+
+    public function updateOptin(Request $request)
+    {
+        // Validated before sanitizing: sanitize_email() turns a typo into '', which would pass
+        // `nullable` and drop the address without telling anyone.
+        $this->validate([
+            'share_stats' => sanitize_text_field($request->get('share_stats', '')),
+            'optin_email' => trim((string) $request->get('optin_email', ''))
+        ], [
+            'share_stats' => 'nullable|in:yes,no',
+            'optin_email' => 'nullable|email'
+        ], [
+            'optin_email.email' => __('Please enter a valid email address', 'fluent-booking')
+        ]);
+
+        $data = [
+            'share_stats' => sanitize_text_field($request->get('share_stats', '')),
+            'optin_email' => sanitize_email($request->get('optin_email', '')),
+            'optin_name'  => sanitize_text_field($request->get('optin_name', ''))
+        ];
+
+        // One record: the stats decision, the opt-in email, when the prompt was dismissed and
+        // when stats were last sent.
+        $optin = (array) Helper::getMeta('option', 0, 'optin');
+
+        if ($data['share_stats']) {
+            $optin['share_stats'] = $data['share_stats'];
+
+            // Opting back in sends straight away rather than waiting out the old interval.
+            if ($data['share_stats'] === 'no') {
+                unset($optin['last_sent_at']);
+            }
+        }
+
+        // Closing the prompt only snoozes it; it says nothing about stats.
+        // See AdminMenuHandler::showOptinPrompt().
+        if ($request->get('dismiss') === 'yes') {
+            $optin['dismissed_at'] = time();
+        }
+
+        $optinStatus = '';
+        if ($data['optin_email']) {
+            // Reported with the usage data instead of the site's admin email.
+            $optin['email'] = $data['optin_email'];
+            $optinStatus = $this->subscribeToNewsletter($data['optin_email'], $data['optin_name']);
+        }
+
+        Helper::updateMeta('option', 0, 'optin', $optin);
+
+        return [
+            'message'      => __('Settings updated successfully', 'fluent-booking'),
+            'share_stats'  => Arr::get($optin, 'share_stats', ''),
+            'optin_status' => $optinStatus
+        ];
+    }
+
+    /**
+     * Hands the admin's name and email to the licensing Worker, which forwards them to
+     * fluentbooking.com's FluentCRM. Pro is matched later by site url, so it must be home_url().
+     *
+     * @return string 'confirm_email', 'subscribed' or 'queued'
+     */
+    private function subscribeToNewsletter($email, $name)
+    {
+        $response = wp_remote_post('https://fluentapi.wpmanageninja.com/subscribe', [
+            'timeout' => 15,
+            'headers' => ['Content-Type' => 'application/json'],
+            'cookies' => [],
+            'body'    => wp_json_encode([
+                'product'         => 'fluent-booking',
+                'product_version' => FLUENT_BOOKING_VERSION,
+                'site_url'        => home_url(),
+                'email'           => $email,
+                'full_name'       => $name,
+                'consent_version' => '2026-09-a',
+                'locale'          => get_user_locale()
+            ])
+        ]);
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        $status = is_array($body) ? Arr::get($body, 'status') : '';
+
+        return in_array($status, ['confirm_email', 'subscribed'], true) ? $status : 'queued';
     }
 
     public function installPlugin(Request $request)

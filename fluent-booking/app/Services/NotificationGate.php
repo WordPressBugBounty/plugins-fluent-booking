@@ -3,32 +3,17 @@
 namespace FluentBooking\App\Services;
 
 /**
- * A request-scoped switch that stops booking notifications from going out.
- *
- * Some programmatic callers legitimately need to change a booking without
- * emailing the attendee — an operator backfilling a booking that was already
- * agreed on the phone, a data migration, an AI agent acting on the host's
- * behalf. There was previously no way to express that: notifications are wired
- * to the booking lifecycle hooks, and suppressing them meant unhooking whole
- * actions, which also silenced calendar sync, CRM triggers and webhooks.
- *
- * This gate is deliberately narrow. It suppresses *notifications only*.
- * Everything else a booking triggers still runs.
- *
- * The gate is request-scoped, so it covers notifications sent during the call
- * only. Reminders belong to the booking, not to the operation that moved it:
- * a silent create or reschedule still leaves the event's reminder schedule
- * intact, and the attendee gets their reminder as normal.
- *
- * Usage:
+ * Suppresses booking notifications for the current request, and nothing else:
+ * calendar sync, CRM triggers and webhooks still run, and reminders still go
+ * out later. For backfills, migrations and agent writes that shouldn't email
+ * the attendee.
  *
  *     $booking = NotificationGate::silently(function () use ($data) {
  *         return BookingService::createBooking($data);
  *     });
  *
  * Add-ons that send their own notifications (SMS, push) should check
- * NotificationGate::isSuppressed() at the top of their handlers, or hook the
- * `fluent_booking/suppress_notifications` filter.
+ * isSuppressed() or hook `fluent_booking/suppress_notifications`.
  *
  * @since 2.2.6
  */
@@ -40,9 +25,8 @@ class NotificationGate
     private static $suppressed = false;
 
     /**
-     * Run $callback with notifications turned off, then restore the previous
-     * state — including when $callback throws, so one failed call cannot leave
-     * the rest of the request silent.
+     * Run $callback with notifications off, restoring the previous state even
+     * if it throws.
      *
      * @param callable $callback
      *

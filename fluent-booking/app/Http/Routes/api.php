@@ -12,6 +12,7 @@ $router->prefix('calendars')->withPolicy('CalendarPolicy')->group(function ($rou
 
     $router->post('/', 'CalendarController@createCalendar');
     $router->post('check-slug', 'CalendarController@checkSlug');
+    $router->get('location-fields', 'CalendarController@getNewEventLocationFields');
 
     $router->get('/{id}', 'CalendarController@getCalendar')->int('id');
     $router->post('/{id}', 'CalendarController@updateCalendar')->int('id');
@@ -65,6 +66,8 @@ $router->prefix('bookings')->withPolicy('CalendarEventPolicy')->group(function (
     $router->get('event/{event_id}', 'BookingController@getEvent')->int('event_id');
     $router->get('slots/{event_id}', 'BookingController@getSlots')->int('event_id');
     $router->post('create/{event_id}', 'BookingController@createBooking')->int('event_id');
+    $router->get('reschedule/{event_id}/{id}/slots', 'BookingController@getRescheduleSlots')->int('event_id')->int('id');
+    $router->post('reschedule/{event_id}/{id}', 'BookingController@rescheduleBooking')->int('event_id')->int('id');
 });
 
 $router->prefix('schedules')->withPolicy('MeetingPolicy')->group(function ($router) {
@@ -102,6 +105,7 @@ $router->prefix('settings')->withPolicy('SettingsPolicy')->group(function ($rout
     $router->get('/pages', 'SettingsController@getPages');
     $router->post('/addons-settings', 'SettingsController@saveAddonsSettings');
     $router->post('/install-plugin', 'SettingsController@installPlugin');
+    $router->post('/optin', 'SettingsController@updateOptin');
 
     // MCP server settings — see docs/mcp-server-spec.md.
     $router->get('/mcp', 'McpController@getSettings');

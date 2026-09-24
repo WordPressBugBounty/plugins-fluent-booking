@@ -241,8 +241,17 @@ class SchedulesController extends Controller
                 return $this->sendError(['message' => __('Invalid status', 'fluent-booking')]);
             }
 
+            if (in_array($booking->status, ['cancelled', 'rejected'])) {
+                return $this->sendError(['message' => __('A cancelled or rejected booking can not be changed', 'fluent-booking')]);
+            }
+
             if ($value == 'scheduled' && $booking->payment_method && $booking->payment_order) {
                 $order = $booking->payment_order;
+
+                if (in_array($order->status, ['refunded', 'partially-refunded'])) {
+                    return $this->sendError(['message' => __('A refunded payment can not be marked as paid', 'fluent-booking')]);
+                }
+
                 $order->total_paid = $order->total_amount;
                 $order->completed_at = gmdate('Y-m-d H:i:s'); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
                 $order->status = 'paid';
@@ -259,16 +268,22 @@ class SchedulesController extends Controller
             }
 
             if ($value == 'cancelled') {
-                $cancelReason = sanitize_text_field($data['cancel_reason']);
+                $cancelReason = sanitize_text_field(Arr::get($data, 'cancel_reason', ''));
                 $booking->cancelMeeting($cancelReason, 'host', get_current_user_id());
             }
 
             if ($value == 'rejected') {
-                $rejectReason = sanitize_text_field($data['reject_reason']);
+                $rejectReason = sanitize_text_field(Arr::get($data, 'reject_reason', ''));
                 $booking->rejectMeeting($rejectReason, get_current_user_id());
             }
 
             if (in_array($value, ['cancelled', 'rejected'])) {
+                // cancelMeeting() and rejectMeeting() refuse some statuses without changing the booking.
+                if ($booking->status != $value) {
+                    /* translators: %s: Booking status */
+                    return $this->sendError(['message' => sprintf(__('This booking can not be %s', 'fluent-booking'), $value)]);
+                }
+
                 if ($booking->payment_method && Arr::get($data, 'refund_payment') == 'yes') {
                     do_action('fluent_booking/refund_payment_' . $booking->payment_method, $booking, $booking->calendar_event);
                 }
@@ -438,6 +453,7 @@ class SchedulesController extends Controller
         $this->resolveOwnedBookingOrFail($bookingId);
 
         $activities = BookingActivity::where('booking_id', $bookingId)
+            ->where('type', '!=', BookingActivity::TYPE_NOTE)
             ->orderBy('id', 'DESC')
             ->get();
 
@@ -451,9 +467,10 @@ class SchedulesController extends Controller
         $booking = $this->resolveOwnedBookingOrFail($bookingId);
 
         $activities = BookingActivity::where('booking_id', $booking->id)
+            ->where('type', '!=', BookingActivity::TYPE_NOTE)
             ->orderBy('id', 'DESC')
             ->get();
-        
+
         $activities->each(function ($activity) {
             $activity->description = wp_unslash($activity->description);
         });

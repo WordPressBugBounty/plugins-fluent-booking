@@ -37,6 +37,9 @@ class NotificationHandler
 
     private function pushRemindersToQueue($booking, $reminderTimes, $emailTo)
     {
+        // A booking can be scheduled again (e.g. no_show back to scheduled); replace, don't stack.
+        \as_unschedule_all_actions('fluent_booking/booking_schedule_reminder', [$booking->id, $emailTo], 'fluent-booking');
+
         $this->clearGroupRemindersForHost($booking, $emailTo);
 
         foreach ($reminderTimes as $time) {

@@ -199,8 +199,7 @@ class DataExporter
     }
 
     /**
-     * Sanitize a value for safe CSV output: neutralize formula injection and strip control chars.
-     * Prefix with single quote when value starts with =, +, -, or @ so spreadsheets treat as text.
+     * Make a value safe for CSV: strip control chars and neutralize formula injection.
      *
      * @param mixed $value Cell value (string, number, or null).
      * @return string Safe string for fputcsv.

@@ -9,6 +9,7 @@ use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\BookingFieldService;
 use FluentBooking\App\Services\BookingService;
 use FluentBooking\App\Services\DateTimeHelper;
+use FluentBooking\App\Services\PublicTransStrings;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\LandingPage\LandingPageHandler;
 use FluentBooking\App\Services\LandingPage\LandingPageHelper;
@@ -555,90 +556,10 @@ class FrontEndHandler
             'timezones'         => DateTimeHelper::getFlatGroupedTimeZones(),
             'current_person'    => $currentPerson,
             'start_day'         => $startDay,
-            'i18'               => [
-                'Timezone'                      => __('Timezone', 'fluent-booking'),
-                'Day'                           => __('Day', 'fluent-booking'),
-                'Days'                          => __('Days', 'fluent-booking'),
-                'Hour'                          => __('Hour', 'fluent-booking'),
-                'Hours'                         => __('Hours', 'fluent-booking'),
-                'Minute'                        => __('Minute', 'fluent-booking'),
-                'Minutes'                       => __('Minutes', 'fluent-booking'),
-                'week'                          => __('week', 'fluent-booking'),
-                'month'                         => __('month', 'fluent-booking'),
-                'year'                          => __('year', 'fluent-booking'),
-                'weeks'                         => __('weeks', 'fluent-booking'),
-                'months'                        => __('months', 'fluent-booking'),
-                'years'                         => __('years', 'fluent-booking'),
-                'Every'                         => __('Every', 'fluent-booking'),
-                'for'                           => __('for', 'fluent-booking'),
-                'Number of Occurrences'         => __('Number of Occurrences', 'fluent-booking'),
-                'occurrence'                    => __('occurrence', 'fluent-booking'),
-                'occurrences'                   => __('occurrences', 'fluent-booking'),
-                'You can only book up to'       => __('You can only book up to', 'fluent-booking'),
-                'at a time'                     => __('at a time', 'fluent-booking'),
-                'Enter Details'                 => __('Enter Details', 'fluent-booking'),
-                'Summary'                       => __('Summary', 'fluent-booking'),
-                'Payment Details'               => __('Payment Details', 'fluent-booking'),
-                'Item'                          => __('Item', 'fluent-booking'),
-                'Price'                         => __('Price', 'fluent-booking'),
-                'Quantity'                      => __('Quantity', 'fluent-booking'),
-                'Subtotal:'                     => __('Subtotal:', 'fluent-booking'),
-                'Total:'                        => __('Total:', 'fluent-booking'),
-                'Total Payment'                 => __('Total Payment', 'fluent-booking'),
-                'Payment Method'                => __('Payment Method', 'fluent-booking'),
-                'Pay Now'                       => __('Pay Now', 'fluent-booking'),
-                'processing'                    => __('Processing', 'fluent-booking'),
-                'date_time_config'              => DateTimeHelper::getI18nDateTimeConfig(),
-                'Country'                              => __('Country', 'fluent-booking'),
-                '12h'                                  => _x('12h', 'date time format switch', 'fluent-booking'),
-                '24h'                                  => _x('24h', 'date time format switch', 'fluent-booking'),
-                'spots left'                           => _x('spots left', 'for how many spots left for available booking', 'fluent-booking'),
-                'spots remaining'                      => _x('spots remaining', 'for how many spots remaining for available booking', 'fluent-booking'),
-                'Next'                                 => _x('Next', 'Booking form spot selection', 'fluent-booking'),
-                'Select on the Next Step'              => __('Select on the Next Step', 'fluent-booking'),
-                'location options'                     => __('location options', 'fluent-booking'),
-                'Your address'                         => __('Your address', 'fluent-booking'),
-                'Organizer Phone Number'               => __('Organizer Phone Number', 'fluent-booking'),
-                'In Person (Attendee Address)'         => __('In Person (Attendee Address)', 'fluent-booking'),
-                'In Person (Organizer Address)'        => __('In Person (Organizer Address)', 'fluent-booking'),
-                'Attendee Phone Number'                => __('Attendee Phone Number', 'fluent-booking'),
-                'Google Meet'                          => __('Google Meet', 'fluent-booking'),
-                'Zoom Meeting'                         => __('Zoom Meeting', 'fluent-booking'),
-                'Online Meeting'                       => __('Online Meeting', 'fluent-booking'),
-                'Phone Call'                           => __('Phone Call', 'fluent-booking'),
-                'Processing...'                        => __('Processing...', 'fluent-booking'),
-                'Loading Payment Processor...'         => __('Loading Payment Processor...', 'fluent-booking'),
-                'PM'                                   => __('PM', 'fluent-booking'),
-                'AM'                                   => __('AM', 'fluent-booking'),
-                'Name'                                 => __('Name', 'fluent-booking'),
-                'Email'                                => __('Email', 'fluent-booking'),
-                'Date'                                 => __('Date', 'fluent-booking'),
-                'Time'                                 => __('Time', 'fluent-booking'),
-                'per occurrence'                       => __('per occurrence', 'fluent-booking'),
-                'per guest'                            => __('per guest', 'fluent-booking'),
-                'Add guest'                            => __('Add guest', 'fluent-booking'),
-                'Add guests'                           => __('Add guests', 'fluent-booking'),
-                'Add another'                          => __('Add another', 'fluent-booking'),
-                'Choose File'                          => __('Choose File', 'fluent-booking'),
-                'This field is required.'              => __('This field is required.', 'fluent-booking'),
-                'No availability in'                   => __('No availability in', 'fluent-booking'),
-                'View next month'                      => __('View next month', 'fluent-booking'),
-                'View previous month'                  => __('View previous month', 'fluent-booking'),
-                'Back to Date Selection'               => __('Back to Date Selection', 'fluent-booking'),
-                'Go to previous page'                  => __('Go to previous page', 'fluent-booking'),
-                'Remove this time slot'                => __('Remove this time slot', 'fluent-booking'),
-                'Remove coupon'                        => __('Remove coupon', 'fluent-booking'),
-                'Select this time'                     => __('Select this time', 'fluent-booking'),
-                'Confirm Time'                         => __('Confirm Time', 'fluent-booking'),
-                '12 hour time format'                  => __('12 hour time format', 'fluent-booking'),
-                '24 hour time format'                  => __('24 hour time format', 'fluent-booking'),
-                'No_payment_method_description'        => __('No activated payment method found. If you are an admin please check the event payment settings', 'fluent-booking'),
-                'Please fill up the required data'     => __('Please fill up the required data', 'fluent-booking'),
-                'Please select a valid payment method' => __('Please select a valid payment method', 'fluent-booking'),
-                'Please Select'                        => __('Please Select', 'fluent-booking'),
-                'Something is wrong!'                  => __('Something is wrong!', 'fluent-booking'),
-                'Requires Confirmation'                => __('Requires Confirmation', 'fluent-booking'),
-            ],
+            // Generated from the i18() calls in resources/public; see scripts/i18n.js.
+            'i18'               => array_merge(PublicTransStrings::getStrings(), [
+                'date_time_config' => DateTimeHelper::getI18nDateTimeConfig(),
+            ]),
             'theme'             => Arr::get(get_option('_fluent_booking_settings'), 'theme', 'system-default'),
             'currency_settings' => CurrenciesHelper::getGlobalCurrencySettings()
         ];
@@ -853,7 +774,9 @@ class FrontEndHandler
             return TimeSlotServiceHandler::sendError($timeSlotService, $calendarEvent, $timezone);
         }
 
-        $availableSpot = $timeSlotService->isSpotAvailable($bookingData['start_time'], $bookingData['end_time'], $duration);
+        $isSlotLocked = Helper::lockRoundRobinSlot($calendarEvent, $bookingData['start_time'], $bookingData['end_time']);
+
+        $availableSpot = $isSlotLocked ? $timeSlotService->isSpotAvailable($bookingData['start_time'], $bookingData['end_time'], $duration) : false;
 
         if (!$availableSpot) {
             wp_send_json([
@@ -1015,7 +938,7 @@ class FrontEndHandler
             'is_display_spots'   => $calendarEvent->isDisplaySpots(),
             'duration'           => $calendarEvent->getDefaultDuration(),
             'title'              => $calendarEvent->title,
-            'location_settings'  => $this->sanitizePublicLocationSettings($calendarEvent->location_settings),
+            'location_settings'  => LocationService::sanitizePublicLocationSettings($calendarEvent->location_settings),
             'location_icon_html' => $calendarEvent->location_icon_html,
             'description'        => $calendarEvent->description,
             'pre_selects'        => null,
@@ -1051,45 +974,6 @@ class FrontEndHandler
         }
 
         return apply_filters('fluent_booking/public_event_vars', $eventVars, $calendarEvent);
-    }
-
-    private function sanitizePublicLocationSettings($locationSettings)
-    {
-        if (!is_array($locationSettings)) {
-            return [];
-        }
-
-        $safe = [];
-        foreach ($locationSettings as $location) {
-            if (!is_array($location)) {
-                continue;
-            }
-
-            $type = Arr::get($location, 'type');
-            $displayOnBooking = Arr::get($location, 'display_on_booking') === 'yes';
-
-            $sanitized = [
-                'type'               => $type,
-                'title'              => Arr::get($location, 'title'),
-                'display_on_booking' => Arr::get($location, 'display_on_booking', 'no'),
-            ];
-
-            // Only expose host-private fields when the host explicitly opted
-            // in to display them before booking.
-            if ($displayOnBooking) {
-                if ($type === 'online_meeting') {
-                    $sanitized['meeting_link'] = Arr::get($location, 'meeting_link');
-                } elseif ($type === 'phone_organizer') {
-                    $sanitized['host_phone_number'] = Arr::get($location, 'host_phone_number');
-                } elseif (in_array($type, ['in_person_organizer', 'custom'], true)) {
-                    $sanitized['description'] = Arr::get($location, 'description');
-                }
-            }
-
-            $safe[] = $sanitized;
-        }
-
-        return $safe;
     }
 
     private function sanitizePublicEventSettings($settings)

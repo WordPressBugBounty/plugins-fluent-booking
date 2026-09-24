@@ -21,14 +21,11 @@ defined('ABSPATH') || exit;
 /**
  * The `scheduling` toolset: configuration work, off by default.
  *
- * Most agent sessions read bookings and availability and never touch setup, so
- * these four tools stay out of the default context budget until an operator
- * turns them on. When they are on they cost about as much again as the core
- * nine — which is exactly why they are a separate switch rather than always
- * present.
+ * Most sessions never touch setup, and these four tools cost about as much
+ * context as the core nine, so they sit behind their own switch.
  *
- * Writes here go through RestBridge so the admin's own validation runs. Reads
- * are projected by hand, because the admin's responses are shaped for a UI.
+ * Writes go through RestBridge so the admin's validation runs. Reads are
+ * projected by hand, because admin responses are shaped for a UI.
  *
  * @see \FluentBooking\App\Modules\MCP\Support\RestBridge
  */
@@ -37,9 +34,8 @@ class SchedulingTools
     const REFERENCE_KINDS = ['hosts', 'calendars', 'location_providers', 'booking_fields', 'availability_schedules'];
 
     /**
-     * Ceiling on any one reference list. Never applied silently — every list
-     * that hits it says so and reports the real total, because a list that
-     * stops at 100 with no note reads as a complete list of 100.
+     * Cap on any one reference list. A list that hits it says so and reports
+     * the real total.
      */
     const LIST_LIMIT = 100;
 
@@ -235,9 +231,8 @@ class SchedulingTools
 
             $projected = self::projectSchedule($schedule, $timezone, true);
 
-            // The row already resolved which zone its hours are really in — a
-            // requested one only if valid, the schedule's own otherwise. Read
-            // it back rather than restating the request.
+            // Report the zone the row resolved, not the requested one, which
+            // may have been invalid.
             return MCPHelper::success($projected, ['timezone' => $projected['timezone']]);
         }
 
@@ -253,8 +248,7 @@ class SchedulingTools
 
         $schedules = [];
 
-        // Fetch one past the cap so a truncated list can say so. A list that
-        // silently stops at 100 reads as a complete list of 100.
+        // Fetch one past the cap so a truncated list can say so.
         $rows = [];
 
         foreach ($query->limit(self::LIST_LIMIT + 1)->get() as $schedule) {
@@ -310,8 +304,7 @@ class SchedulingTools
         }, function ($params) {
             $scheduleId = absint(Arr::get($params, 'schedule_id'));
 
-            // A create has no id yet, so the title stands in for one: a retry
-            // that means the same schedule names it the same way.
+            // A create has no id yet, so the title stands in for one.
             return 'availability:' . ($scheduleId ?: 'new:' . md5(strtolower(trim((string) Arr::get($params, 'title', ''))))) . ':' . sanitize_text_field(Arr::get($params, 'action', ''));
         });
     }
@@ -332,9 +325,8 @@ class SchedulingTools
                 return MCPHelper::error('missing_title', __('create needs a title.', 'fluent-booking'));
             }
 
-            // create takes a title and a timezone and lays down the stock
-            // Mon–Fri grid; it has nowhere to put hours, so refuse rather than
-            // report success on a schedule with the wrong ones.
+            // create always lays down the stock Mon-Fri grid. Refuse hours
+            // rather than report success on a schedule without them.
             if (Arr::get($params, 'weekly_schedules') || Arr::get($params, 'date_overrides')) {
                 return MCPHelper::error(
                     'hours_not_accepted_on_create',
@@ -428,10 +420,8 @@ class SchedulingTools
                 );
             }
 
-            // `update` replaces the entire grid, so the hours it overwrites are
-            // gone — there is no per-day merge and no undo. That makes it
-            // destructive in every sense that matters, and it is gated the same
-            // way delete is: preview, then a token bound to these exact hours.
+            // update replaces the whole grid with no merge and no undo, so it
+            // is gated like delete: preview, then a token bound to these hours.
             $tool        = 'fluent-booking/manage-availability';
             $entityKey   = 'availability:' . $scheduleId . ':update';
             $fingerprint = self::scheduleFingerprint($schedule);
@@ -472,14 +462,11 @@ class SchedulingTools
     }
 
     /**
-     * Preview shape for an action that only ever adds something.
+     * Preview shape for an action that only adds something.
      *
-     * `dry_run` has to mean "changed nothing" for EVERY action a tool exposes,
-     * not only the ones that happen to need a confirm token. An agent trained to
-     * preview first — and the prompts shipped with this plugin train exactly
-     * that — would otherwise find that its cautious path was the destructive
-     * one. Additive and reversible actions still answer a dry run; they just
-     * hand back no token, because none is needed to proceed.
+     * dry_run must change nothing for every action, not just the token-gated
+     * ones, or an agent's cautious preview would be the write. Additive and
+     * reversible actions answer a dry run without a token.
      *
      * @param string $action
      * @param array  $preview
@@ -612,11 +599,8 @@ class SchedulingTools
     }
 
     /**
-     * Give the scheduling writes the same retry safety the booking writes have.
-     *
-     * Without it a retried create or clone leaves two live bookable records
-     * and nothing detects it — and because wrapExecuteCallback() rejects
-     * undeclared parameters, an agent could not even opt in.
+     * Idempotency for the scheduling writes, so a retried create or clone
+     * doesn't leave two live bookable records.
      *
      * @param string   $tool
      * @param array    $params
@@ -629,8 +613,7 @@ class SchedulingTools
     {
         $key = (string) Arr::get($params, 'idempotency_key', '');
 
-        // A dry run changes nothing, so there is nothing to deduplicate — and
-        // recording one would replay a preview in place of the real write.
+        // Recording a dry run would replay the preview in place of the real write.
         if (!$key || Arr::isTrue($params, 'dry_run')) {
             return $fn();
         }
@@ -699,12 +682,8 @@ class SchedulingTools
             return MCPHelper::error('not_found', __('No event type with that id.', 'fluent-booking'));
         }
 
-        // Gate here, not at the bridge. RestBridge's policy does refuse the
-        // write, but a dry_run returns its preview before ever reaching the
-        // bridge — so without this check the preview would hand an event
-        // type's title, status and upcoming booking count to a caller with no
-        // write access to it, along with a confirm_token implying they may
-        // proceed.
+        // Gate here, not only at the bridge: a dry_run returns its preview
+        // (and a confirm_token) before it ever reaches RestBridge's policy.
         if (!PermissionManager::canWriteCalendar($event->calendar_id)) {
             return MCPHelper::error(
                 'permission_denied',
@@ -726,9 +705,7 @@ class SchedulingTools
                 ];
 
                 if ($action === 'deactivate') {
-                    // Deactivating is reversible as a database change, but it
-                    // takes a live booking page offline, so the count of what is
-                    // about to stop being bookable belongs in the preview.
+                    // Reversible, but it takes a live booking page offline.
                     $preview['effect'] = __('The public booking page stops offering slots immediately. Existing bookings are untouched.', 'fluent-booking');
                 }
 
@@ -741,8 +718,7 @@ class SchedulingTools
         if ($action === 'duplicate') {
             $targetCalendar = absint(Arr::get($params, 'calendar_id')) ?: $calendarId;
 
-            // The duplicate lands on whatever calendar_id was passed, which is
-            // not necessarily the one the permission check above covered.
+            // The target calendar may differ from the one checked above.
             if ($targetCalendar !== $calendarId && !PermissionManager::canWriteCalendar($targetCalendar)) {
                 return MCPHelper::error(
                     'permission_denied',
@@ -795,9 +771,9 @@ class SchedulingTools
                 return $payload;
             }
 
-            // These two rebuild a whole settings block, and an availability
-            // write replaces the weekly grid outright — the shape
-            // manage-availability update is already gated for.
+            // These two rebuild a whole settings block (availability replaces
+            // the weekly grid), so they need a confirm token like
+            // manage-availability update.
             if (!in_array($section, ['availability', 'limits'], true)) {
                 if ($dryRun) {
                     return self::reversiblePreview('update', [
@@ -839,17 +815,10 @@ class SchedulingTools
     }
 
     /**
-     * Translate a section write from the vocabulary get-event-types PROJECTS
-     * into the shape the admin controller reads, over the event's current
-     * values.
-     *
-     * The tool tells the agent to read a section and send it back changed, but
-     * the projection uses friendly names (`buffer_before_minutes`) and the
-     * controllers read the admin SPA's shape (`settings.buffer_time_before`).
-     * Forwarded verbatim, the controller found none of its keys and wrote its
-     * own defaults over all of them — dropping the requested change and
-     * resetting the rest. Seeding from stored values also keeps a partial write
-     * partial, since the controllers rebuild their whole key set on every POST.
+     * Map a section write from get-event-types' names (`buffer_before_minutes`)
+     * to the admin controller's shape (`settings.buffer_time_before`), seeded
+     * from stored values. The controllers rebuild their whole key set on every
+     * POST, so seeding is what keeps a partial write partial.
      *
      * @param CalendarSlot $event
      * @param string       $section
@@ -897,13 +866,8 @@ class SchedulingTools
 
     /**
      * Every key updateEventDetails() rebuilds, seeded from what is stored.
-     *
-     * It validates only title, duration and status and absorbs the rest with
-     * defaults, so a write sending just those three set max_book_per_slot to 0,
-     * reset color_schema, emptied description and — worst — wiped
-     * location_settings, leaving an event that cannot be booked at all.
-     * Seeding also makes a partial write possible: the three "required" fields
-     * come from storage when the caller does not send them.
+     * The controller defaults anything missing, including location_settings,
+     * which would leave the event unbookable.
      *
      * @return array|\WP_Error
      */
@@ -937,9 +901,8 @@ class SchedulingTools
             ]),
         ];
 
-        // Only when the caller SENDS it: omitting it keeps what is stored, but
-        // sending an empty list would clear the last location, and create
-        // refuses that same state.
+        // Only when sent: omitting it keeps what is stored, but an empty list
+        // would clear the last location.
         if (array_key_exists('location_settings', $fields)
             && is_wp_error($locationError = self::validateLocations($fields['location_settings']))) {
             return $locationError;
@@ -1020,10 +983,8 @@ class SchedulingTools
 
     /**
      * Rebuild a cap block from the by-unit map the projection returns.
-     *
-     * capLimits() re-keys the stored {unit, value} LIST into a map so an agent
-     * can look up `per_day`; the controller reads the list back. Without the
-     * inverse, sending a read cap block back writes an empty cap.
+     * capLimits() turns the stored {unit, value} list into a map; the
+     * controller expects the list.
      *
      * @param mixed $cap
      * @return array
@@ -1071,9 +1032,8 @@ class SchedulingTools
         $settings = (array) $event->settings;
         $timezone = $event->calendar ? $event->calendar->author_timezone : 'UTC';
 
-        // The controller converts the grid it receives from the author timezone
-        // into UTC, and what is stored is already UTC. Send it back through the
-        // inverse first, or every slot slides by the offset.
+        // Stored hours are UTC, but the controller converts what it receives
+        // from the author timezone. Convert back first or every slot shifts.
         $weekly = SanitizeService::weeklySchedules(
             (array) Arr::get($settings, 'weekly_schedules', []),
             'UTC',
@@ -1100,12 +1060,9 @@ class SchedulingTools
         if (array_key_exists('schedule_id', $fields)) {
             $scheduleId = absint($fields['schedule_id']);
 
-            // Bind only a schedule the caller may read. The controller assigns
-            // availability_id with no ownership test and Availability has no
-            // owner scope, so an unchecked id here binds another host's
-            // schedule to this event — after which diagnose-availability and
-            // get-available-slots read its weekly grid and timezone straight
-            // back out, through a tool that would have refused the id.
+            // The controller does no ownership check on availability_id, so
+            // an unchecked id would bind another host's schedule and expose its
+            // hours through the slot tools.
             if ($scheduleId) {
                 $schedule = Availability::find($scheduleId);
 
@@ -1154,10 +1111,9 @@ class SchedulingTools
 
         $stored = (array) $event->getBookingFields();
 
-        // Match on NAME and edit in place. saveEventBookingFields() replaces the
-        // whole set and mints a name for any entry lacking one, so returning the
-        // projection — which renames `name` to `key` — appended a second copy of
-        // every question instead of updating the originals.
+        // Match on name and edit in place. saveEventBookingFields() replaces
+        // the whole set and names any unnamed entry, and the projection exposes
+        // `name` as `key`, so unmatched fields would be duplicated.
         $byName = [];
 
         foreach ($stored as $key => $field) {
@@ -1222,14 +1178,9 @@ class SchedulingTools
     }
 
     /**
-     * An event type is not three fields. The controller reads a full settings
-     * block — schedule type, weekly hours, range, buffers — straight out of the
-     * payload, and an agent that sent only a title would create a broken event
-     * or trip an undefined-index. So start from exactly what the admin's own
-     * "new event type" screen starts from, `CalendarSlot::getEventSchema()`,
-     * and lay the agent's fields over it. An agent can then create a working
-     * event type with a title, a duration and a location, which is what it
-     * would expect to need.
+     * The controller reads a full settings block from the payload, so start
+     * from the admin's "new event type" defaults (getEventSchema()) and lay the
+     * agent's fields over them. A title, duration and location are then enough.
      *
      * @return array|\WP_Error
      */
@@ -1243,18 +1194,15 @@ class SchedulingTools
 
         $schema = (new CalendarSlot())->getEventSchema($calendar);
 
-        // The schema embeds the calendar for the UI to render; it is not a
-        // field on the event type.
+        // Embedded for the UI, not an event type field.
         unset($schema['calendar']);
 
         if (is_wp_error($locationError = self::validateLocations(Arr::get($fields, 'location_settings', [])))) {
             return $locationError;
         }
 
-        // The admin controller refuses these too, but in its own vocabulary —
-        // "Event type field is required" names neither the tool's parameter nor
-        // what a valid value looks like. Refuse here, in the terms the schema
-        // uses, before bridging.
+        // The controller refuses these too, but its messages don't name the
+        // tool's parameters or valid values.
         $required = [
             'title'      => __('a name for the event type', 'fluent-booking'),
             'duration'   => __('its length in minutes, e.g. 30', 'fluent-booking'),
@@ -1278,8 +1226,8 @@ class SchedulingTools
 
         $payload = array_merge($schema, $fields);
 
-        // Merge one level into settings rather than replacing it, so an agent
-        // changing a buffer does not wipe the weekly hours it never saw.
+        // Merge settings one level deep so a partial settings block keeps the
+        // default weekly hours.
         $payload['settings'] = array_merge(
             (array) Arr::get($schema, 'settings', []),
             (array) Arr::get($fields, 'settings', [])
@@ -1289,20 +1237,16 @@ class SchedulingTools
     }
 
     /**
-     * Deleting an event type takes its bookings with it. The admin has no guard
-     * against that — a human doing it has the schedule on screen and knows what
-     * they are throwing away. An agent does not, so it has to be told, and has
-     * to say `force` to proceed anyway.
+     * Deleting an event type deletes its bookings. The admin doesn't guard
+     * this, so an agent must pass `force` when any exist.
      *
      * @return array|\WP_Error
      */
     private static function deleteEventType(CalendarSlot $event, $params)
     {
-        // CalenderEventCleaner deletes EVERY booking on the event — no status
-        // filter, no date filter — along with their activities and, in pro,
-        // their orders and transactions. Counting only the upcoming ones let an
-        // event with years of completed bookings delete without force, under a
-        // preview that said nothing would be affected.
+        // CalenderEventCleaner deletes every booking on the event, any status
+        // or date, with their activities and (in pro) orders and transactions.
+        // So count them all, not just upcoming ones.
         $byStatus = Booking::where('event_id', $event->id)
             ->groupBy('status')
             ->selectRaw('status, COUNT(*) AS total')
@@ -1403,10 +1347,6 @@ class SchedulingTools
     /**
      * Give every reference list the same shape, and say when it was cut short.
      *
-     * The cap used to be applied bare: a 150-calendar site got 100 rows with
-     * nothing marking them as a page, so an agent concluded the other 50 did
-     * not exist.
-     *
      * @param array $result [$rows, $total]
      *
      * @return array
@@ -1439,11 +1379,8 @@ class SchedulingTools
     private static function referenceKind($kind, $params)
     {
         if ($kind === 'calendars') {
-            // PermissionGate::scopeToReadableCalendars() rather than a local
-            // user_id filter: the event-type tools gate on canReadCalendar(),
-            // which also admits shared team calendars, and a reference list
-            // that omits a calendar those tools will happily read leaves an
-            // agent unable to name an id it is allowed to use.
+            // Same scope as canReadCalendar(), which admits shared team
+            // calendars; a user_id filter would hide ids the agent may use.
             $query = PermissionGate::scopeToReadableCalendars(Calendar::orderBy('id', 'asc'), 'id');
 
             $total = (clone $query)->count();
@@ -1464,22 +1401,16 @@ class SchedulingTools
         }
 
         if ($kind === 'hosts') {
-            // Hosts are whoever owns a calendar. Enumerating WP users instead
-            // would leak every account on the site into an agent's context.
+            // Hosts are calendar owners. Listing WP users would leak every account.
             $query = PermissionGate::scopeToReadableCalendars(Calendar::query(), 'id');
 
-            // A calendar can outlive the user who owned it, and a deleted owner
-            // is not a host. Excluded in SQL so the total stays honest without
-            // reading every calendar into PHP to find out.
+            // Skip calendars whose owner was deleted, in SQL so the total stays right.
             $query->whereIn('user_id', User::select('ID'));
 
             $total = (clone $query)->distinct()->count('user_id');
 
-            // Distinct owners, capped in SQL and ordered by the first calendar
-            // each appears on: deriving hosts from a capped page of calendars
-            // could drop one entirely and still read as a complete list, but
-            // reading every calendar to find LIST_LIMIT hosts scales with the
-            // table rather than the answer.
+            // Distinct owners, capped in SQL. Deriving hosts from a capped page
+            // of calendars could silently drop one.
             $userIds = array_map('intval', (clone $query)
                 ->groupBy('user_id')
                 ->orderByRaw('min(id) asc')
@@ -1537,9 +1468,7 @@ class SchedulingTools
         if ($kind === 'location_providers') {
             $rows = [];
 
-            // The registry is grouped for the admin's location picker; flatten
-            // it, and keep `disabled` so an agent can see which providers are
-            // Pro-only rather than trying one and getting a validation error.
+            // Flatten the picker's groups. `disabled` marks Pro-only providers.
             foreach ((new CalendarSlot())->getLocationFields() as $group) {
                 foreach ((array) Arr::get($group, 'options', []) as $type => $option) {
                     $rows[] = [
@@ -1573,9 +1502,8 @@ class SchedulingTools
 
         $rows = [];
 
-        // getBookingFields(), not getMeta('booking_fields'): the accessor
-        // merges the built-in fields over the stored ones, and get-event-types
-        // already reads it. Two sources for one answer drift.
+        // getBookingFields() merges built-in fields over stored ones, and is
+        // what get-event-types reads too.
         foreach ((array) $event->getBookingFields() as $field) {
             if (!is_array($field)) {
                 continue;
@@ -1594,8 +1522,7 @@ class SchedulingTools
     }
 
     /**
-     * Usage counts for a page of schedules in one grouped query rather than one
-     * count per row: the list returns up to LIST_LIMIT of them.
+     * Usage counts for a page of schedules in one grouped query.
      *
      * @param array $scheduleIds
      *
@@ -1629,11 +1556,8 @@ class SchedulingTools
     {
         $own = Arr::get($schedule, 'value.timezone', 'UTC');
 
-        // Only honour a requested zone we can actually render in. Reporting a
-        // timezone the hours are NOT expressed in is worse than ignoring the
-        // parameter: the list used to stamp every schedule with whatever the
-        // caller asked for while returning each one's own stored hours, so an
-        // agent asking for Asia/Tokyo was told the whole site ran on Tokyo time.
+        // Only honour a valid zone, and never label hours with a zone they
+        // aren't expressed in.
         $requested = $timezone && in_array($timezone, timezone_identifiers_list(), true) ? $timezone : '';
 
         $row = [
@@ -1641,8 +1565,8 @@ class SchedulingTools
             'title'          => $schedule->key,
             'host_id'        => (int) $schedule->object_id,
             'default'        => Arr::isTrue($schedule, 'value.default'),
-            // The zone the hours below are in. On the summary row there are no
-            // hours, so this is always the schedule's own.
+            // The zone the hours are in. Summary rows have no hours, so it is
+            // always the schedule's own there.
             'timezone'       => $full && $requested ? $requested : $own,
             // The list hands its count in; a single schedule looks its own up.
             'usage_count'    => $usageCount === null
@@ -1654,10 +1578,8 @@ class SchedulingTools
             return $row;
         }
 
-        // Hours are stored in UTC; getFormattedSchedule() renders them in the
-        // schedule's own zone. Rendering them in the caller's is the same
-        // conversion with a different target, so do it properly rather than
-        // return a mislabelled grid.
+        // Hours are stored in UTC. getFormattedSchedule() only renders the
+        // schedule's own zone, so convert for any other.
         if ($requested && $requested !== $own) {
             $row['weekly_schedules'] = SanitizeService::weeklySchedules(Arr::get($schedule, 'value.weekly_schedules', []), 'UTC', $requested);
             $row['date_overrides'] = SanitizeService::slotDateOverrides(Arr::get($schedule, 'value.date_overrides', []), 'UTC', $requested);
@@ -1674,8 +1596,7 @@ class SchedulingTools
 
         $formatted = AvailabilityService::getFormattedSchedule($schedule);
 
-        // The admin shape carries a gravatar URL — a hundred bytes of nothing,
-        // on every row, forever.
+        // Pick the grids out; the admin shape also carries a gravatar URL.
         $row['weekly_schedules'] = Arr::get($formatted, 'settings.weekly_schedules', []);
         $row['date_overrides'] = Arr::get($formatted, 'settings.date_overrides', []);
 
@@ -1683,9 +1604,8 @@ class SchedulingTools
     }
 
     /**
-     * Reading someone else's schedule is a lesser privilege than editing it:
-     * `read_and_use_other_availabilities` exists precisely so a host can point
-     * an event type at a colleague's hours without being able to change them.
+     * Stricter than canReadSchedule(): `read_and_use_other_availabilities`
+     * lets a host use a colleague's hours but not edit them.
      *
      * @return bool
      */
@@ -1732,8 +1652,7 @@ class SchedulingTools
                 continue;
             }
 
-            // Models come back as objects, not arrays; casting one to an array
-            // does not surface its attributes, so read the property first.
+            // Models come back as objects, and an array cast hides their attributes.
             $out['id'] = is_object($record) ? (int) $record->id : (int) Arr::get((array) $record, 'id', 0);
             break;
         }

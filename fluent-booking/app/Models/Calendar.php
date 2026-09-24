@@ -5,6 +5,7 @@ namespace FluentBooking\App\Models;
 use FluentBooking\App\Models\Model;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\LandingPage\LandingPageHelper;
+use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\Framework\Support\Arr;
 
 class Calendar extends Model
@@ -66,6 +67,22 @@ class Calendar extends Model
     public function events()
     {
         return $this->hasMany(CalendarSlot::class, 'calendar_id');
+    }
+
+    /**
+     * The calendar owner plus every host its events already list.
+     *
+     * @return int[]
+     */
+    public function getMemberIds()
+    {
+        $memberIds = [(int) $this->user_id];
+
+        foreach ($this->events()->get(['settings']) as $event) {
+            $memberIds = array_merge($memberIds, array_map('intval', (array) Arr::get($event->settings, 'team_members', [])));
+        }
+
+        return array_values(array_unique($memberIds));
     }
 
     public function user()
@@ -266,12 +283,21 @@ class Calendar extends Model
 
         $deletedUser = __('Deleted User', 'fluent-booking');
 
-        return $calendars->map(function ($calendar) use ($deletedUser) {
+        // Every permitted user gets this list; only those who manage other hosts need their emails.
+        $showEmail = PermissionManager::canManageOtherHosts();
+
+        return $calendars->map(function ($calendar) use ($deletedUser, $showEmail) {
             $user = $calendar->user;
+
+            $label = $deletedUser;
+            if ($user) {
+                $label = $showEmail ? $user->display_name . ' (' . $user->user_email . ')' : $user->display_name;
+            }
+
             return [
                 'id'           => $user ? $user->ID : (int)$calendar->user_id,
                 'name'         => $user ? $user->full_name : $deletedUser,
-                'label'        => $user ? $user->display_name . ' (' . $user->user_email . ')' : $deletedUser,
+                'label'        => $label,
                 'avatar'       => $calendar->getAuthorPhoto(),
                 'calendar_id'  => $calendar->id,
                 'deleted_user' => $user ? false : true

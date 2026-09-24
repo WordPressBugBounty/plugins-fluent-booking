@@ -229,6 +229,78 @@ class CrmContactService
         ];
     }
 
+    /**
+     * The contact a note can be copied to, or null when FluentCRM is inactive,
+     * the email has no contact, or the current user cannot manage contacts.
+     *
+     * @param string $email
+     * @return array|null {contact_id, name, profile_url}
+     */
+    public static function getNoteTarget($email)
+    {
+        if (!self::canWriteNotes()) {
+            return null;
+        }
+
+        $contact = self::getContact($email);
+
+        if (!$contact) {
+            return null;
+        }
+
+        return [
+            'contact_id'  => (int) $contact->id,
+            'name'        => trim((string) $contact->full_name) ?: (string) $contact->email,
+            'profile_url' => fluentcrm_menu_url_base() . 'subscribers/' . $contact->id,
+        ];
+    }
+
+    /**
+     * Add a note to the contact's FluentCRM profile, as FluentCRM's own
+     * "Add note" does: same permission, same sanitizer, same hook.
+     *
+     * @param string $email
+     * @param string $title Plain text.
+     * @param string $description HTML. Passed through wp_kses_post.
+     * @param string $type A FluentCRM activity type (fluentcrm_activity_types()).
+     * @return int|\WP_Error The new note id.
+     */
+    public static function addContactNote($email, $title, $description, $type = 'note')
+    {
+        if (!self::canWriteNotes()) {
+            return new \WP_Error('crm_permission', __('You do not have permission to add notes to CRM contacts.', 'fluent-booking'));
+        }
+
+        $contact = self::getContact($email);
+
+        if (!$contact) {
+            return new \WP_Error('crm_contact_not_found', __('No CRM contact found for this booking.', 'fluent-booking'));
+        }
+
+        $data = \FluentCrm\App\Services\Sanitize::contactNote([
+            'subscriber_id' => (int) $contact->id,
+            'title'         => (string) $title,
+            'description'   => (string) $description,
+            'type'          => $type,
+            'created_at'    => current_time('mysql'),
+        ]);
+
+        $data['created_by'] = get_current_user_id();
+
+        $note = \FluentCrm\App\Models\SubscriberNote::create($data);
+
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- FluentCRM's own hook, fired so CRM automations see a note added from here like one added in the CRM
+        do_action('fluent_crm/note_added', $note, $contact, $data);
+
+        return (int) $note->id;
+    }
+
+    private static function canWriteNotes()
+    {
+        return self::isActive()
+            && \FluentCrm\App\Services\PermissionManager::currentUserCan('fcrm_manage_contacts');
+    }
+
     private static function getContact($email)
     {
         if (!self::isActive() || !$email) {

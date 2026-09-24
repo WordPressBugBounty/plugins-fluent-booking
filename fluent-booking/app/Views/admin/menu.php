@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
  * @var array  $menuItems
  * @var array  $settings
  * @var array  $rightItems
+ * @var string $upgradeUrl
  */
 ?>
 
@@ -62,6 +63,11 @@ defined( 'ABSPATH' ) || exit;
             </ul>
 
             <div class="fframe_settings">
+                <?php if (!empty($upgradeUrl)): ?>
+                    <a class="fcal_upgrade_pro_btn" href="<?php echo esc_url($upgradeUrl); ?>" target="_blank" rel="noopener">
+                        <?php esc_html_e('Upgrade to Pro', 'fluent-booking'); ?>
+                    </a>
+                <?php endif; ?>
                 <div class="settings_menu_wrapper" data-key="color_mode">
                     <a class="settings_menu fcal_color_mode" onclick="toggleColorMode()">
                         <span class="el-icon">

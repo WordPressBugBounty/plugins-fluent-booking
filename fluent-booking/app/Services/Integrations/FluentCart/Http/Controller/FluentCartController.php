@@ -9,6 +9,7 @@ use FluentCart\App\Models\Product as CartProduct;
 use FluentCart\App\Models\ProductDetail as CartProductDetail;
 use FluentCart\App\Models\ProductVariation as CartProductVariant;
 use FluentCart\App\Services\Permission\PermissionManager as CartPermission;
+use FluentBooking\App\Services\CurrenciesHelper;
 use FluentBooking\App\Services\Integrations\FluentCart\CartHelper;
 use FluentBooking\Framework\Support\Arr;
 
@@ -44,8 +45,8 @@ class FluentCartController extends Controller
         $detailData = [
             'post_id'          => $createdPostId,
             'fulfillment_type' => 'digital',
-            'min_price'        => $price * 100,
-            'max_price'        => $price * 100,
+            'min_price'        => CurrenciesHelper::toCents($price),
+            'max_price'        => CurrenciesHelper::toCents($price),
         ];
 
         $productDetail = CartProductDetail::create($detailData);
@@ -59,7 +60,7 @@ class FluentCartController extends Controller
             'total_stock'      => 1,
             'available'        => 1,
             'fulfillment_type' => 'digital',
-            'item_price'       => $price * 100,
+            'item_price'       => CurrenciesHelper::toCents($price),
             'other_info'       => [
                 'description'        => '',
                 'payment_type'       => 'onetime',

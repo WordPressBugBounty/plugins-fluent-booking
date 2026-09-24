@@ -5,13 +5,15 @@ namespace FluentBooking\App\Services\Integrations\FluentForms;
 use FluentBooking\App\Services\BookingFieldService;
 use FluentBooking\App\Services\LocationService;
 use FluentBooking\Framework\Support\Arr;
+use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\CalendarSlot;
+use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\DateTimeHelper;
 use FluentBooking\App\Services\BookingService;
-use FluentBooking\App\Services\TimeSlotService;
 use FluentBooking\App\Hooks\Handlers\TimeSlotServiceHandler;
 use FluentBooking\App\Hooks\Handlers\FrontEndHandler;
 use FluentForm\App\Models\Submission;
+use FluentForm\App\Helpers\Helper as FluentFormHelper;
 use FluentForm\App\Modules\Form\FormFieldsParser;
 use FluentForm\App\Services\FormBuilder\ShortCodeParser;
 use FluentBooking\App\Vite;
@@ -19,6 +21,9 @@ use FluentBooking\App\Vite;
 
 class FluentFormInit
 {
+    // Fluent Forms keys its Offline Payment method 'test'.
+    const FF_OFFLINE_METHOD = 'test';
+
     protected $hostId;
 
     public function init()
@@ -31,6 +36,7 @@ class FluentFormInit
     {
         add_action('fluentform/validate_input_item_fcal_booking', [$this, 'handleValidations'], 10, 3);
         add_action('fluentform/notify_on_form_submit', [$this, 'handleFormSubmitted'], 10, 3);
+        add_action('fluentform/after_payment_status_change', [$this, 'handlePaymentStatusChanged'], 10, 2);
         add_action('fluentform/conversational_question', [$this, 'loadConversationalAsset'], 10, 3);
 
         add_filter('fluentform/conversational_field_types', function ($fieldTypes) {
@@ -109,7 +115,9 @@ class FluentFormInit
             return TimeSlotServiceHandler::sendError($timeSlotService, $calendarEvent, $timeZone);
         }
 
-        $availableSpot = $timeSlotService->isSpotAvailable($startDateTime, $endDateTime, $duration);
+        $isSlotLocked = Helper::lockRoundRobinSlot($calendarEvent, $startDateTime, $endDateTime);
+
+        $availableSpot = $isSlotLocked ? $timeSlotService->isSpotAvailable($startDateTime, $endDateTime, $duration) : false;
 
         if (!$availableSpot) {
             $message = __('This selected time slot is not available. Maybe someone booked the spot just a few seconds ago.', 'fluent-booking');
@@ -195,6 +203,33 @@ class FluentFormInit
         return '';
     }
 
+    /**
+     * Read the Fluent Forms values mapped onto the event's custom booking fields.
+     * The form's own field rules decide what is required; values are only sanitized here.
+     *
+     * @param array $field parsed fcal_booking field
+     * @param array $formData submitted form values keyed by field name
+     * @param CalendarSlot $event
+     *
+     * @return array
+     */
+    private function getMappedFieldsData($field, $formData, CalendarSlot $event)
+    {
+        $fieldMap = array_filter((array) Arr::get($field, 'raw.settings.cal_guest_fields.field_map', []));
+
+        if (!$fieldMap) {
+            return [];
+        }
+
+        // Form values arrive unslashed; getCustomFieldsData() unslashes, so slash to keep backslashes.
+        $postedData = [];
+        foreach ($fieldMap as $bookingFieldKey => $formFieldName) {
+            $postedData[$bookingFieldKey] = wp_slash(Arr::get($formData, $formFieldName));
+        }
+
+        return BookingFieldService::getCustomFieldsData($postedData, $event, array_keys($fieldMap));
+    }
+
     public function handleFormSubmitted($entryId, $formDataX, $form)
     {
         $fields = FormFieldsParser::getInputs($form, ['rules', 'raw', 'name']);
@@ -207,7 +242,7 @@ class FluentFormInit
             return;
         }
 
-        if (\FluentForm\App\Helpers\Helper::getSubmissionMeta($entryId, 'fluent_booking_id')) {
+        if (FluentFormHelper::getSubmissionMeta($entryId, 'fluent_booking_id')) {
             return; // Already processed
         }
 
@@ -315,6 +350,8 @@ class FluentFormInit
                 $bookingData['status'] = 'pending';
             }
 
+            $bookingData = $this->maybeAddPaymentData($bookingData, $entry);
+
             if ($entry->user_id) {
                 $bookingData['person_user_id'] = $entry->user_id;
             }
@@ -332,9 +369,12 @@ class FluentFormInit
             $bookingData['location_details'] = $selectedLocation;
 
             try {
-                $booking = BookingService::createBooking($bookingData, $event);
+                $customFieldsData = $this->getMappedFieldsData($bookingField, $submittedData, $event);
 
-                \FluentForm\App\Helpers\Helper::getSubmissionMeta($entry->id, 'fluent_booking_id', $booking->id);
+                $booking = BookingService::createBooking($bookingData, $event, $customFieldsData);
+
+                // Must persist, or the guard above misses a payment retry on the same submission.
+                FluentFormHelper::setSubmissionMeta($entry->id, 'fluent_booking_id', $booking->id, $form->id);
 
                 $fieldData = $submittedData[$fieldName];
                 $fieldData['booking_id'] = $booking->id;
@@ -370,6 +410,263 @@ class FluentFormInit
                 ]);
             }
         }
+    }
+
+    /**
+     * Fluent Forms fires notify_on_form_submit before the gateway runs, so the row is
+     * written to hold the slot but waits for the payment, as the cart integration does.
+     * Offline is honoured up front, like the native offline method.
+     *
+     * @param array $bookingData
+     * @param object $entry fluentform_submissions row
+     *
+     * @return array
+     */
+    private function maybeAddPaymentData($bookingData, $entry)
+    {
+        $submissionStatus = isset($entry->payment_status) ? $entry->payment_status : '';
+
+        if (!$submissionStatus) {
+            return $bookingData; // Not a payment submission
+        }
+
+        $paymentStatus = $this->mapPaymentStatus($submissionStatus);
+        $isOffline = isset($entry->payment_method) && $entry->payment_method === self::FF_OFFLINE_METHOD;
+
+        // 'offline' is the only method FiveMinuteScheduler::maybeAutoCancelBooking exempts.
+        $bookingData['payment_method'] = $isOffline ? 'offline' : 'fluentform';
+        $bookingData['payment_status'] = $paymentStatus;
+
+        if ($paymentStatus != 'paid' && !$isOffline) {
+            $bookingData['status'] = 'pending';
+        }
+
+        return $bookingData;
+    }
+
+    /**
+     * @param string $submissionStatus Fluent Forms payment status
+     *
+     * @return string FluentBooking payment status
+     */
+    private function mapPaymentStatus($submissionStatus)
+    {
+        $statusMap = [
+            'paid'               => 'paid',
+            'refunded'           => 'refunded',
+            'partially-refunded' => 'partially-refunded',
+            'failed'             => 'failed',
+            'cancelled'          => 'failed'
+        ];
+
+        // pending / processing / requires_review all mean "not settled yet"
+        return Arr::get($statusMap, $submissionStatus, 'pending');
+    }
+
+    /**
+     * @param string $newStatus Fluent Forms payment status
+     * @param object $submission Submission model or fluentform_submissions row
+     */
+    public function handlePaymentStatusChanged($newStatus, $submission)
+    {
+        $submissionId = $this->readSubmissionId($submission);
+
+        if (!$submissionId) {
+            return;
+        }
+
+        // Fires for every payment on the site; Fluent Forms' indexed meta is the cheap check.
+        if (!FluentFormHelper::getSubmissionMeta($submissionId, 'fluent_booking_id')) {
+            return;
+        }
+
+        // A form can carry several booking fields, so a submission can own several bookings.
+        $bookings = Booking::where('source', 'fluentform')
+            ->where('source_id', $submissionId)
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            return;
+        }
+
+        $paymentStatus = $this->mapPaymentStatus($newStatus);
+
+        foreach ($bookings as $booking) {
+            if ($paymentStatus == 'paid') {
+                $this->confirmPaidBooking($booking);
+                continue;
+            }
+
+            if ($booking->payment_status == $paymentStatus) {
+                continue;
+            }
+
+            if ($this->undoesSettledOutcome($paymentStatus, $booking->payment_status)) {
+                continue;
+            }
+
+            // Failure and refund leave the booking status alone, as the native gateways do.
+            $this->settlePaymentStatus($booking, $paymentStatus);
+        }
+    }
+
+    /**
+     * One payment module passes a Submission model, whose columns live behind __get,
+     * the other a plain row. Property access reads both; an array cast reads only the row.
+     *
+     * @param object $submission
+     *
+     * @return int
+     */
+    private function readSubmissionId($submission)
+    {
+        if (!is_object($submission)) {
+            return 0;
+        }
+
+        return isset($submission->id) ? (int)$submission->id : 0;
+    }
+
+    /**
+     * Statuses that already record an outcome. An unsettled event landing on one of
+     * these is stale delivery, not a state change.
+     */
+    const SETTLED_PAYMENT_STATUSES = ['paid', 'refunded', 'partially-refunded'];
+
+    /**
+     * @param string $paymentStatus
+     *
+     * @return bool
+     */
+    private function isSettled($paymentStatus)
+    {
+        return in_array($paymentStatus, self::SETTLED_PAYMENT_STATUSES, true);
+    }
+
+    /**
+     * Redelivered events arrive out of order, and one carrying no outcome must not
+     * overwrite a recorded one - flattening a refund would hide it from the paid path.
+     *
+     * @param string $paymentStatus incoming
+     * @param string $currentPaymentStatus stored on the booking
+     *
+     * @return bool
+     */
+    private function undoesSettledOutcome($paymentStatus, $currentPaymentStatus)
+    {
+        return !$this->isSettled($paymentStatus) && $this->isSettled($currentPaymentStatus);
+    }
+
+    /**
+     * @param string $paymentStatus
+     *
+     * @return bool
+     */
+    private function isRefunded($paymentStatus)
+    {
+        return in_array($paymentStatus, ['refunded', 'partially-refunded'], true);
+    }
+
+    /**
+     * The precedence between two events landing together is settled in SQL, not against
+     * the row as it was read: a refund is the final outcome and lands whatever arrived
+     * first, anything else only fills in a booking with no outcome recorded yet.
+     *
+     * @param \FluentBooking\App\Models\Booking $booking
+     * @param string $paymentStatus
+     */
+    private function settlePaymentStatus($booking, $paymentStatus)
+    {
+        $query = Booking::where('id', $booking->id);
+
+        if (!$this->isRefunded($paymentStatus)) {
+            $query->whereNotIn('payment_status', self::SETTLED_PAYMENT_STATUSES);
+        }
+
+        $query->update([
+            'payment_status' => $paymentStatus,
+            'updated_at'     => gmdate('Y-m-d H:i:s') // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+        ]);
+    }
+
+    /**
+     * @param \FluentBooking\App\Models\Booking $booking
+     */
+    private function confirmPaidBooking($booking)
+    {
+        if ($booking->payment_status == 'paid') {
+            return;
+        }
+
+        $calendarEvent = $booking->calendar_event;
+
+        if (!$calendarEvent) {
+            return;
+        }
+
+        // Webhooks arrive late and out of order, and a refund is the last word on an
+        // order - a stale 'paid' must not settle it again, let alone put it back on
+        // the calendar. Logged rather than dropped, so the mismatch is visible.
+        if ($this->isRefunded($booking->payment_status)) {
+            do_action('fluent_booking/log_booking_activity', [
+                'booking_id'  => $booking->id,
+                'status'      => 'closed',
+                'type'        => 'error',
+                'title'       => __('Fluent Forms: Payment status could not be changed', 'fluent-booking'),
+                /* translators: %s is the current payment status of the booking */
+                'description' => sprintf(__('A paid notification arrived after the order was %s, so the booking was left unchanged.', 'fluent-booking'), $booking->getPaymentStatus())
+            ]);
+            return;
+        }
+
+        if ($booking->status != 'pending') {
+            // Honoured up front, or already moved on - only settle the payment.
+            $this->settlePaymentStatus($booking, 'paid');
+            return;
+        }
+
+        $isRequireConfirmation = $calendarEvent->isConfirmationRequired($booking->start_time, $booking->created_at);
+
+        // Awaiting approval stays pending; paying only releases the held-back notifications.
+        $newStatus = $isRequireConfirmation ? 'pending' : 'scheduled';
+
+        // Gateways redeliver, so only the request that settles the row dispatches the hooks.
+        $flagged = Booking::where('id', $booking->id)
+            ->where('status', 'pending')
+            ->whereNotIn('payment_status', self::SETTLED_PAYMENT_STATUSES)
+            ->update([
+                'status'         => $newStatus,
+                'payment_status' => 'paid',
+                'updated_at'     => gmdate('Y-m-d H:i:s') // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+            ]);
+
+        if (!$flagged) {
+            return;
+        }
+
+        $booking = Booking::with(['calendar_event', 'calendar'])->find($booking->id);
+
+        do_action('fluent_booking/log_booking_activity', [
+            'booking_id'  => $booking->id,
+            'status'      => 'closed',
+            'type'        => 'success',
+            'title'       => __('Payment completed on Fluent Forms', 'fluent-booking'),
+            /* translators: %s is the booking status after the payment has been completed */
+            'description' => sprintf(__('The form payment has been paid and the appointment is now in %s status.', 'fluent-booking'), $booking->getBookingStatus())
+        ]);
+
+        $bookingData = [
+            'name'  => $booking->first_name . ' ' . $booking->last_name,
+            'email' => $booking->email,
+            'phone' => $booking->phone
+        ];
+
+        // this pre hook is for early actions that require for remote calendars and locations
+        do_action('fluent_booking/pre_after_booking_' . $newStatus, $booking, $calendarEvent, $bookingData);
+
+        $booking = Booking::with(['calendar_event', 'calendar'])->find($booking->id);
+
+        do_action('fluent_booking/after_booking_' . $newStatus, $booking, $calendarEvent, $bookingData);
     }
 
     public function loadConversationalAsset($question, $field, $form)
@@ -509,7 +806,7 @@ class FluentFormInit
     protected function makeElementId($data, $form)
     {
         if (isset($data['attributes']['name'])) {
-            $formInstance = \FluentForm\App\Helpers\Helper::$formInstance;
+            $formInstance = FluentFormHelper::$formInstance;
             if (!empty($data['attributes']['id'])) {
                 return $data['attributes']['id'];
             }

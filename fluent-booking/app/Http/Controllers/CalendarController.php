@@ -119,6 +119,52 @@ class CalendarController extends Controller
         ];
     }
 
+    public function getNewEventLocationFields(Request $request)
+    {
+        $eventType = SanitizeService::checkCollection(
+            sanitize_text_field($request->get('event_type', 'single')),
+            CalendarSlot::getEventTypes(),
+            'single'
+        );
+
+        // Resolve the organizer the same way createCalendar() does, so the
+        // connection checks run against the host the event will be saved under.
+        $canAssignOthers = PermissionManager::canManageOtherHosts();
+
+        $userId = get_current_user_id();
+        $requestedUserId = (int) $request->get('user_id');
+        if ($requestedUserId && $canAssignOthers) {
+            $userId = $requestedUserId;
+        }
+
+        $calendarEvent = new CalendarSlot();
+        $calendarEvent->event_type = $eventType;
+
+        if ($calendarEvent->isMultiHostEvent()) {
+            $teamMembers = array_values(array_unique(array_filter(
+                array_map('intval', (array) $request->get('team_members', []))
+            )));
+
+            if (!PermissionManager::canAssignHosts($teamMembers, [$userId])) {
+                return $this->sendError([
+                    'message' => __('You are not allowed to create a calendar for another user', 'fluent-booking')
+                ], 403);
+            }
+
+            if ($teamMembers && !in_array($userId, $teamMembers, true)) {
+                $userId = reset($teamMembers);
+            }
+
+            $calendarEvent->settings = ['team_members' => $teamMembers];
+        }
+
+        $calendarEvent->user_id = $userId;
+
+        return [
+            'location_fields' => $calendarEvent->getLocationFields()
+        ];
+    }
+
     public function createCalendar(Request $request)
     {
         $data = $request->get('calendar');
@@ -156,7 +202,7 @@ class CalendarController extends Controller
 
         do_action('fluent_booking/before_create_calendar', $data, $this);
 
-        if (!empty($data['user_id']) && PermissionManager::userCan(['manage_all_data', 'invite_team_members'])) {
+        if (!empty($data['user_id']) && PermissionManager::canManageOtherHosts()) {
             $user = get_user_by('ID', $data['user_id']);
         } else {
             $user = get_user_by('ID', get_current_user_id());
@@ -216,14 +262,14 @@ class CalendarController extends Controller
                 }
             }
 
-            if (!in_array($user->ID, $teamMembers, true)) {
-                // Same privileged act as passing an explicit user_id above; gate it identically.
-                if (!PermissionManager::userCan(['manage_all_data', 'invite_team_members'])) {
-                    return $this->sendError([
-                        'message' => __('You are not allowed to create a calendar for another user', 'fluent-booking')
-                    ], 403);
-                }
+            // Gated even when the creator is listed too, not only when they are absent.
+            if (!PermissionManager::canAssignHosts($teamMembers, [$user->ID])) {
+                return $this->sendError([
+                    'message' => __('You are not allowed to create a calendar for another user', 'fluent-booking')
+                ], 403);
+            }
 
+            if (!in_array($user->ID, $teamMembers, true)) {
                 $user = get_user_by('ID', reset($teamMembers));
                 if (!$user) {
                     return $this->sendError([
@@ -360,8 +406,9 @@ class CalendarController extends Controller
         $calendar = Calendar::findOrFail($calendarId);
 
         return [
-            'settings'  => LandingPageHelper::getSettings($calendar),
-            'share_url' => $calendar->getLandingPageUrl(true)
+            'settings'   => LandingPageHelper::getSettings($calendar),
+            'share_url'  => $calendar->getLandingPageUrl(true),
+            'public_url' => $this->getSharePublicUrl($calendar, intval($request->get('event_id')))
         ];
     }
 
@@ -399,8 +446,23 @@ class CalendarController extends Controller
         LandingPageHelper::updateSettings($calendar, $sharingSettings);
 
         return [
-            'message' => __('Landing Page settings has been updated', 'fluent-booking')
+            'message'    => __('Landing Page settings has been updated', 'fluent-booking'),
+            'public_url' => $this->getSharePublicUrl($calendar, intval($request->get('event_id')))
         ];
+    }
+
+    private function getSharePublicUrl($calendar, $eventId)
+    {
+        if ($eventId) {
+            $event = CalendarSlot::where('calendar_id', $calendar->id)
+                ->where('id', $eventId)
+                ->first();
+            if ($event) {
+                return $event->getPublicUrl();
+            }
+        }
+
+        return $calendar->getLandingPageUrl();
     }
 
     public function updateCalendar(Request $request, $calendarId)
@@ -533,6 +595,26 @@ class CalendarController extends Controller
 
         $this->validate($slot, $validationConfig['rules'], $validationConfig['messages']);
 
+        $teamMembers = array_values(array_unique(array_filter(
+            array_map('intval', (array) Arr::get($slot, 'settings.team_members', []))
+        )));
+
+        cache_users($teamMembers);
+
+        foreach ($teamMembers as $memberId) {
+            if (!get_user_by('ID', $memberId)) {
+                return $this->sendError([
+                    'message' => __('Invalid Team Member', 'fluent-booking')
+                ], 422);
+            }
+        }
+
+        if ($teamMembers && !PermissionManager::canAssignHosts($teamMembers, $calendar->getMemberIds())) {
+            return $this->sendError([
+                'message' => __('You are not allowed to create a calendar for another user', 'fluent-booking')
+            ], 403);
+        }
+
         $availability = AvailabilityService::getDefaultSchedule($calendar->user_id);
 
         $slotData = [
@@ -553,11 +635,11 @@ class CalendarController extends Controller
                 'buffer_time_before'  => sanitize_text_field(Arr::get($slot['settings'], 'buffer_time_before', '0')),
                 'buffer_time_after'   => sanitize_text_field(Arr::get($slot['settings'], 'buffer_time_after', '0')),
                 'slot_interval'       => sanitize_text_field(Arr::get($slot['settings'], 'slot_interval', '')),
-                'team_members'        => array_map('intval', Arr::get($slot['settings'], 'team_members', []))
+                'team_members'        => $teamMembers
             ],
             'status'            => SanitizeService::checkCollection($slot['status'], ['active', 'draft'], 'active'),
             'color_schema'      => sanitize_text_field(Arr::get($slot, 'color_schema', '#0099ff')),
-            'event_type'        => sanitize_text_field(Arr::get($slot, 'event_type')),
+            'event_type'        => SanitizeService::checkCollection(sanitize_text_field(Arr::get($slot, 'event_type')), CalendarSlot::getEventTypes(), 'single'),
             'availability_type' => 'existing_schedule',
             'availability_id'   => $availability ? $availability->id : null,
             'location_type'     => sanitize_text_field(Arr::get($slot, 'location_type')),
@@ -807,6 +889,16 @@ class CalendarController extends Controller
         $calendar = Calendar::findOrFail($newCalendarId);
 
         $originalEvent = CalendarSlot::with('event_metas')->where('calendar_id', $calendarId)->findOrFail($eventId);
+
+        $teamMembers = Arr::get($originalEvent->settings, 'team_members', []);
+
+        // Cloning into another calendar carries the source hosts along with it.
+        if ($teamMembers && $calendar->id != $calendarId
+            && !PermissionManager::canAssignHosts($teamMembers, $calendar->getMemberIds())) {
+            return $this->sendError([
+                'message' => __('You are not allowed to create a calendar for another user', 'fluent-booking')
+            ], 403);
+        }
 
         $clonedEvent = $originalEvent->replicate();
 

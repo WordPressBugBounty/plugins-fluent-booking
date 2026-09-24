@@ -7,52 +7,25 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * Safety rails for mutating MCP tools. Annotations are UX hints, not safety —
- * this is where real protection lives for the writes that touch someone's
- * calendar (create, reschedule, cancel).
+ * Safety rails for destructive MCP writes. Tool annotations are only hints;
+ * the real protection is here.
  *
- * Two mechanisms:
+ * 1. Confirm tokens. A dry_run returns a preview and a token bound to the
+ *    record's current state and to the exact parameters previewed. Executing
+ *    needs the token back with the same parameters, so an agent can't act on a
+ *    record that has since changed, or run a different change than the one
+ *    that was approved.
+ * 2. Idempotency keys. A retry with the same key returns the first result
+ *    instead of booking twice. This must wrap the token check, see idempotent().
  *
- *  1. Dry-run + confirmation token. A destructive action called with
- *     dry_run:true computes the effect, binds it to BOTH the target's current
- *     state (a fingerprint) AND the exact parameters that were previewed (a
- *     parameter digest), stashes a short-lived record, and returns a preview.
- *     To execute, the caller passes that confirm_token back with the SAME
- *     parameters. If the record changed in the meantime the fingerprint no
- *     longer matches; if the caller changed what it is asking for, the digest
- *     no longer matches. Either way we force a fresh preview — so an agent can
- *     neither act on a booking somebody else already moved, nor execute a
- *     different change from the one a human approved.
+ * Records live in wp_options rather than transients: INSERT IGNORE gives us an
+ * atomic claim (get + delete transient is a race), and an object-cache flush
+ * can't drop an idempotency record and let a duplicate write through.
  *
- *  2. Idempotency keys. The caller passes an idempotency_key; the first
- *     execution for that key is recorded, and a retry with the same key returns
- *     the first result instead of booking or emailing twice. This is the guard
- *     against an agent re-issuing a create after a timeout, so it MUST wrap the
- *     confirm-token check rather than sit inside it — see idempotent().
- *
- * Storage is a dedicated options-backed store rather than transients. Two
- * reasons, both of which the transient API cannot give us:
- *
- *  - Atomic claim. `INSERT IGNORE` against the unique index on `option_name`
- *    lets exactly one of N concurrent requests claim a key — the primitive core
- *    uses for its own locks. `get_transient()` followed by `delete_transient()`
- *    is a read-then-write race: two agents holding the same token both read it
- *    before either deletes, and both execute. (`add_option()` is not a
- *    substitute; see claim().)
- *  - Durability. An object-cache flush drops transients. Losing a confirm token
- *    degrades safely (a fresh dry-run is required); losing an idempotency
- *    record does not — it degrades into the duplicate write the key existed to
- *    prevent.
- *
- * CONTRACT (enforced by scripts/check-mcp-budget.php and
- * scripts/check-mcp-permissions.php): every ability whose annotations include
- * `destructive => true` MUST treat `dry_run` as non-mutating for EVERY action it
- * exposes, and MUST route each mutating action through confirm() before
- * mutating. `create-booking` and `manage-booking` are the reference
- * implementations. When adding a new destructive ability — here or in Pro, which
- * registers under the same namespace via fluent_booking/mcp_loaded — follow this
- * contract; the permission-matrix gate calls every action of every destructive
- * tool with dry_run:true and fails the build if any row count moves.
+ * Contract: every ability annotated `destructive => true`, including Pro's,
+ * must treat dry_run as non-mutating and pass each write through confirm().
+ * create-booking and manage-booking are the reference. The mcp:permissions
+ * gate dry-runs every destructive action and fails if any row count moves.
  *
  * @since 2.2.6
  */
@@ -62,37 +35,25 @@ class WriteGuard
 
     const IDEM_TTL = 86400;    // remember an idempotency key for a day.
 
-    /**
-     * Option-name prefix for the record store. Kept short: option_name is
-     * indexed at 191 characters and every key here ends in an md5.
-     */
+    // Kept short: option_name is indexed at 191 chars and every key ends in an md5.
     const STORE_PREFIX = 'fcal_mcp_g_';
 
     const CONFIRM_NEXT_STEP = 'Call this tool again with EXACTLY the same parameters plus confirm_token (and an idempotency_key) to execute. Changing any parameter invalidates the token.';
 
     /**
-     * Build a dry-run preview response with a confirmation token bound to both
-     * the target's current state and the parameters being previewed.
+     * Build a dry-run preview with a confirm token.
      *
-     * @param string $tool        Ability name (namespacing the token).
-     * @param string $entityKey   Stable id of the target, e.g. "booking:42".
-     * @param string $fingerprint A string capturing the mutable state we care
-     *                            about (e.g. "scheduled|2026-09-01 14:00:00").
-     *                            If this differs at execute time, the token is
-     *                            rejected.
-     * @param array  $preview     The human/agent-facing preview payload.
-     * @param string $paramsDigest Digest of the parameters this preview
-     *                            describes, from paramsDigest(). If the caller
-     *                            executes with different parameters, the token
-     *                            is rejected.
+     * @param string $tool         Ability name.
+     * @param string $entityKey    Target id, e.g. "booking:42".
+     * @param string $fingerprint  The target's mutable state; a change rejects the token.
+     * @param array  $preview      The preview payload.
+     * @param string $paramsDigest From paramsDigest(); different parameters reject the token.
      *
      * @return array
      */
     public static function preview($tool, $entityKey, $fingerprint, array $preview, $paramsDigest = '')
     {
-        // wp_generate_password draws from wp_rand, which prefers random_int;
-        // wp_generate_uuid4 falls back to mt_rand. For a token that gates a
-        // write, take the stronger source.
+        // wp_generate_password() uses random_int; wp_generate_uuid4() can fall back to mt_rand.
         $token = substr(wp_hash($tool . '|' . $entityKey . '|' . $fingerprint . '|' . wp_generate_password(32, false, false)), 0, 32);
 
         self::write(self::confirmKey($tool, $entityKey), [
@@ -110,8 +71,7 @@ class WriteGuard
     }
 
     /**
-     * Validate a confirm_token against the target's current fingerprint and the
-     * parameters it was minted for.
+     * Check a confirm_token against the target's current state and parameters.
      *
      * @param string $tool
      * @param string $entityKey
@@ -159,11 +119,8 @@ class WriteGuard
             );
         }
 
-        // The token authorises the change that was PREVIEWED, not merely the
-        // record it was previewed against. Without this an agent could preview a
-        // cancellation with no refund, then execute the same cancellation with
-        // refund_payment:true on the strength of the operator's approval of the
-        // first one.
+        // The token approves the previewed change, not just the record. Otherwise
+        // a preview without a refund could be executed with refund_payment:true.
         if ((string) $stored['params'] !== (string) $paramsDigest) {
             self::delete($key);
             return MCPHelper::error(
@@ -173,15 +130,9 @@ class WriteGuard
             );
         }
 
-        // One-shot, and atomically so: two concurrent requests holding the same
-        // token both reach this line, and claim() lets exactly one through.
-        //
-        // Keyed on the TOKEN, not on the entity. Keying it on the entity would
-        // make the marker outlive the token it describes and block the next
-        // legitimately-minted token for the rest of the TTL — so an agent that
-        // previewed and cancelled one booking could not preview and reschedule
-        // the same booking for another five minutes, and would be told its fresh
-        // token was "already used".
+        // Single use, claimed atomically so only one of two concurrent requests
+        // gets through. Keyed on the token rather than the booking, so a fresh
+        // token for the same booking isn't blocked for the rest of the TTL.
         if (!self::claim(self::usedKey($token), 1, self::CONFIRM_TTL)) {
             return MCPHelper::error(
                 'confirmation_expired',
@@ -196,37 +147,23 @@ class WriteGuard
     }
 
     /**
-     * Run $fn at most once per idempotency key (per user + tool + entity). A
-     * repeat call with the same key on the SAME entity returns the first
-     * result. If no key is supplied, $fn runs normally (no dedupe) — keys are
-     * recommended but not forced.
+     * Run $fn at most once per idempotency key, scoped to user, tool and
+     * entity. Without a key, $fn just runs.
      *
-     * ORDERING MATTERS. This must be the OUTERMOST wrapper on a destructive
-     * write, with the confirm() check inside $fn. The reverse — confirm() first,
-     * idempotency inside — cannot work: confirm() consumes the token, so the
-     * retry this method exists to absorb is rejected as `confirmation_expired`
-     * before the cached result is ever consulted, and the agent's recovery path
-     * is a fresh dry_run and a second booking.
+     * This must be the outermost wrapper, with confirm() inside $fn. The other
+     * way round, confirm() consumes the token and the retry fails before it
+     * ever reaches the cached result.
      *
-     * The key is entity-scoped so reusing one idempotency_key across different
-     * records (e.g. "cancel-1" for two bookings) can't replay the first
-     * booking's result and silently skip the second mutation.
-     *
-     * WHAT IS STORED is a reference, never the response. The response carries
-     * BookingProjector::full() — unmasked email, phone, country, internal note
-     * and every answer the attendee gave — and wp_options is the table most
-     * likely to end up in a support export or a staging clone, where no
-     * exporter or eraser keyed on the booking tables would ever find it. The
-     * replay callback rebuilds the response from the live record instead.
+     * Only a reference to the result is stored, never the response itself: the
+     * response holds attendee PII, and wp_options ends up in exports and
+     * staging clones. $replay rebuilds the response from the live record.
      *
      * @param string        $tool
      * @param string        $entityKey
      * @param string        $key
      * @param callable      $fn
      * @param string        $paramsDigest
-     * @param callable|null $replay Rebuilds the response from the stored
-     *                              reference. Without one a replay returns the
-     *                              reference itself.
+     * @param callable|null $replay Rebuilds the response from the stored reference.
      *
      * @return mixed
      */
@@ -242,12 +179,8 @@ class WriteGuard
         $cached = self::read($cacheKey);
 
         if (is_array($cached) && array_key_exists('ref', $cached)) {
-            // A key identifies one attempt at one change, not a licence to skip
-            // any later change. Reusing a key with DIFFERENT parameters — say a
-            // second reschedule of the same booking to a new time — would
-            // otherwise return the first call's success and quietly perform no
-            // move at all, which is the worst of both worlds: the agent is told
-            // it worked and nothing happened.
+            // Same key, different parameters: refuse, or a second reschedule
+            // would report success without moving anything.
             if ((string) Arr::get($cached, 'params', '') !== (string) $paramsDigest) {
                 return MCPHelper::error(
                     'idempotency_conflict',
@@ -269,9 +202,7 @@ class WriteGuard
             return self::flagReplay(MCPHelper::success($ref));
         }
 
-        // Claim the key before running, not after. get-then-set would let two
-        // concurrent retries of the same request both miss and both execute,
-        // which is the failure the key exists to prevent.
+        // Claim before running, so two concurrent retries can't both execute.
         if (!self::claim($lockKey, 1, 120)) {
             return MCPHelper::error(
                 'in_progress',
@@ -280,16 +211,12 @@ class WriteGuard
             );
         }
 
-        // Everything from here to the release is inside try/finally, recording
-        // the result included: a mutation that succeeded and a record that was
-        // never written is exactly the divergence the key exists to prevent, so
-        // a failure to persist has to be reported rather than swallowed.
         try {
             $result = $fn();
 
+            // Only successes are recorded, so a failure stays retryable. If the
+            // record can't be written, say so rather than invite a duplicate retry.
             if (!is_wp_error($result)) {
-                // Only successful results are recorded — a failure should stay
-                // retryable with the same key.
                 if (!self::write($cacheKey, ['ref' => self::resultRef($result), 'params' => (string) $paramsDigest], self::IDEM_TTL)
                     && is_array($result)) {
                     $result['idempotency_warning'] = __('This change was applied, but the idempotency record could not be stored. Do not retry with the same key — check the result before acting again.', 'fluent-booking');
@@ -303,12 +230,7 @@ class WriteGuard
     }
 
     /**
-     * Mark a response as a replay, in `meta` and nowhere else.
-     *
-     * The two return paths above used to place it differently — the rebuilt one
-     * merged into the envelope, the reference one into `data` — so an agent
-     * checking one place missed the other and re-issued a write it had already
-     * made, which is the failure the key exists to prevent.
+     * Mark a response as a replay. Always in `meta`, so agents check one place.
      *
      * @param array $response
      *
@@ -340,9 +262,7 @@ class WriteGuard
 
         $ref = [];
 
-        // A whitelist of identity and outcome fields, all scalar and none of
-        // them attendee data. Anything richer is rebuilt by the replay
-        // callback from the live record.
+        // Identity and outcome fields only, no attendee data.
         foreach (['id', 'action', 'created', 'message'] as $key) {
             if (isset($result['data'][$key]) && is_scalar($result['data'][$key])) {
                 $ref[$key] = $result['data'][$key];
@@ -359,12 +279,9 @@ class WriteGuard
     }
 
     /**
-     * A stable digest of the parameters that actually change what a call does.
-     *
-     * The three control parameters are excluded by definition: `dry_run` differs
-     * between the preview and the execution, `confirm_token` is absent from the
-     * preview, and `idempotency_key` legitimately varies between a call and its
-     * retry. Everything else is binding.
+     * A stable digest of the parameters that change what a call does. The
+     * control parameters are left out, since they differ between a preview,
+     * its execution and a retry.
      *
      * @param array $params
      * @param array $ignore Extra keys to exclude.
@@ -383,8 +300,7 @@ class WriteGuard
     }
 
     /**
-     * Recursively sort keys so an agent that emits the same parameters in a
-     * different order still matches its own preview.
+     * Sort keys recursively so parameter order doesn't break the match.
      *
      * @param mixed $value
      * @return mixed
@@ -410,9 +326,8 @@ class WriteGuard
     }
 
     /**
-     * Fingerprint for a booking: everything a caller could act on stale.
-     * Deliberately includes updated_at so an edit we do not otherwise model
-     * (a note change, a payment transition) still invalidates a pending token.
+     * A booking's fingerprint. updated_at catches edits we don't track
+     * separately, like a note or payment change.
      *
      * @param \FluentBooking\App\Models\Booking $booking
      *
@@ -429,19 +344,13 @@ class WriteGuard
         ]);
     }
 
-    /**
-     * How many rows one SELECT of the purge reads, and how many such passes it
-     * makes before giving up for the day. The product is the ceiling on a
-     * single run: enough for a busy site, bounded enough that the daily task
-     * cannot outrun a 30-second Action Scheduler tick and be killed mid-sweep.
-     */
+    // Batch size x passes caps one run, to stay inside a 30s Action Scheduler tick.
     const PURGE_BATCH = 500;
 
     const PURGE_MAX_PASSES = 40;
 
     /**
-     * Drop every expired record. Wired to the daily scheduler — the store is
-     * options-backed, so unlike transients nothing prunes it for us.
+     * Delete expired records. Runs daily, since nothing else prunes options.
      *
      * @return int rows removed
      */
@@ -454,9 +363,7 @@ class WriteGuard
         $offset  = 0;
 
         for ($pass = 0; $pass < self::PURGE_MAX_PASSES; $pass++) {
-            // option_value comes back with the name. Reading it here rather
-            // than calling get_option() per row turns three queries a row into
-            // one query a batch.
+            // Read values in the same query instead of get_option() per row.
             $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                 $wpdb->prepare(
                     "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s ORDER BY option_id ASC LIMIT %d OFFSET %d",
@@ -477,18 +384,12 @@ class WriteGuard
             foreach ($rows as $row) {
                 $record = maybe_unserialize($row['option_value']);
 
-                // Delete only rows whose stored expiry is genuinely in the
-                // past, and re-check the value we just read rather than
-                // trusting the name alone: a preview that renewed the record
-                // between the SELECT and the DELETE would otherwise have its
-                // fresh token swept away.
+                // Keep live records. Rows without a valid envelope can never
+                // be used, so they go too.
                 if (is_array($record) && !empty($record['expires']) && $record['expires'] >= $now) {
                     continue;
                 }
 
-                // A row with no usable envelope is a leftover from an older
-                // format or a partial write; it can never be honoured, so it
-                // goes too.
                 $expired[] = $row['option_name'];
             }
 
@@ -504,8 +405,7 @@ class WriteGuard
                 }
             }
 
-            // Rows that survived stay in the table, so the next batch has to
-            // start past them rather than re-reading the same live records.
+            // Skip past the rows we kept.
             $offset += count($rows) - count($expired);
 
             if (count($rows) < self::PURGE_BATCH) {
@@ -519,33 +419,10 @@ class WriteGuard
     }
 
     /**
-     * Atomic claim: exactly one of N concurrent callers gets true.
-     *
-     * `INSERT IGNORE` against the unique index on `option_name`, which is the
-     * primitive WordPress core itself uses for locking
-     * (`WP_Upgrader::create_lock()`). Notably NOT `add_option()`: that looks
-     * atomic and is not. Core checks existence first and then issues
-     *
-     *     INSERT ... ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)
-     *
-     * so a second caller whose row already exists performs an UPDATE, changes
-     * the value (our expiry differs), gets a non-zero affected-row count, and is
-     * told it took the claim. Two callers, two `true`s, no mutual exclusion —
-     * and for a token consumption or a refund that is the whole ballgame.
-     * `INSERT IGNORE` returns 0 rows when the key exists, which is the answer we
-     * actually need.
-     *
-     * @param string $key
-     * @param mixed  $value
-     * @param int    $ttl
-     *
-     * @return bool true when this caller took the claim
-     */
-    /**
      * Take a short exclusive window for one repeatable action.
      *
-     * @param string $key    caller-scoped identifier
-     * @param int    $ttl    seconds the window lasts
+     * @param string $key caller-scoped identifier
+     * @param int    $ttl seconds the window lasts
      *
      * @return bool true when the caller may proceed
      */
@@ -554,11 +431,23 @@ class WriteGuard
         return self::claim(self::STORE_PREFIX . 'cd_' . md5($key), 1, $ttl);
     }
 
+    /**
+     * Atomic claim: exactly one of N concurrent callers gets true.
+     *
+     * Uses INSERT IGNORE, as core's WP_Upgrader::create_lock() does. Not
+     * add_option(): it runs INSERT ... ON DUPLICATE KEY UPDATE, so a second
+     * caller updates the row and is also told it succeeded.
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $ttl
+     *
+     * @return bool true when this caller took the claim
+     */
     private static function claim($key, $value, $ttl)
     {
-        // A stale claim must not block forever: clear an expired one, then try.
-        // Deliberately before the insert and never after — stealing a claim we
-        // did not place is how one caller frees another caller's live lock.
+        // Clear an expired claim before inserting, never after, so we can't
+        // remove a lock someone else just took.
         $existing = self::readRaw($key);
 
         if (is_array($existing) && !empty($existing['expires']) && $existing['expires'] < time()) {
@@ -585,8 +474,7 @@ class WriteGuard
             )
         );
 
-        // The row went in behind the options cache's back, so a `notoptions`
-        // entry saying it does not exist has to go.
+        // We bypassed the options API, so clear any stale `notoptions` entry.
         self::forgetCached($key);
 
         return (bool) $inserted;
@@ -610,8 +498,7 @@ class WriteGuard
     }
 
     /**
-     * The stored record with its envelope, without the expiry check read()
-     * applies. Used where the expiry itself is the thing being inspected.
+     * The stored record and its envelope, without read()'s expiry check.
      *
      * @param string $key
      * @return array|null
@@ -660,9 +547,7 @@ class WriteGuard
 
         self::forgetCached($key);
 
-        // update_option() returns false when the stored value is already
-        // identical, which is a success for our purposes — so confirm by
-        // reading rather than trusting the return.
+        // update_option() returns false for an unchanged value, so read it back.
         if ($updated) {
             return true;
         }
@@ -684,8 +569,7 @@ class WriteGuard
 
     private static function confirmKey($tool, $entityKey)
     {
-        // User-scoped: a token minted by one operator/session can't be consumed
-        // by another, even for the same booking.
+        // Per user, so one user can't consume another user's token.
         return self::STORE_PREFIX . 'c' . get_current_user_id() . '_' . md5($tool . '|' . $entityKey);
     }
 
@@ -694,10 +578,7 @@ class WriteGuard
         return self::STORE_PREFIX . 'i' . get_current_user_id() . '_' . md5($tool . '|' . $entityKey . '|' . $key);
     }
 
-    /**
-     * The one-shot marker for a single token. Tokens are already unguessable and
-     * user-scoped, so the token alone identifies the consumption.
-     */
+    // Tokens are unguessable and per user, so the token alone is a unique key.
     private static function usedKey($token)
     {
         return self::STORE_PREFIX . 'u_' . md5((string) $token);

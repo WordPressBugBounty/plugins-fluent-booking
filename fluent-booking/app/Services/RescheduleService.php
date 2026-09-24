@@ -6,18 +6,9 @@ use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\CalendarSlot;
 
 /**
- * Moves an existing booking to a new time.
- *
- * This logic used to live inline in FrontEndHandler::handleRescheduling(), where
- * it was reachable only through the public booking form and signalled every
- * failure with wp_send_json() — which made it impossible to call from anywhere
- * else without terminating the request. It is extracted here so the public form
- * and programmatic callers (the MCP server among them) run the exact same steps
- * and emit the exact same hooks. Failures come back as WP_Error; the caller
- * decides how to render them.
- *
- * Behaviour is intentionally identical to the original inline version: a
- * reschedule changes the time and leaves `status` alone.
+ * Moves an existing booking to a new time. Shared by the public form and
+ * programmatic callers such as MCP, so all fire the same hooks. Failures come
+ * back as WP_Error. A reschedule changes the time and leaves `status` alone.
  *
  * @since 2.2.6
  */
@@ -41,10 +32,7 @@ class RescheduleService
      */
     public static function reschedule(Booking $booking, CalendarSlot $calendarEvent, $startTime, $timezone, $args = [])
     {
-        // The booking must be rescheduled against its own event. Reject mixed-object
-        // requests where the posted event_id differs from the booking's event so the
-        // availability validation cannot be performed under a different event than the
-        // one actually being modified.
+        // Availability must be validated against the booking's own event.
         if ((int) $booking->event_id !== (int) $calendarEvent->id) {
             return new \WP_Error('invalid_reschedule_request', __('Invalid rescheduling request', 'fluent-booking'), ['status' => 422]);
         }
@@ -65,18 +53,15 @@ class RescheduleService
 
         $reason = isset($args['reason']) ? sanitize_textarea_field($args['reason']) : '';
 
-        // The pivot is synced before the row is saved, so a failure between them
-        // left hosts() naming the new host while the row said the old one.
+        // The host pivot syncs before the row saves, so keep both in one transaction.
         try {
             Helper::dbTransaction(function () use ($booking, $rescheduleBy, $startTime, $timezone, $endDateTime, $previousBooking, $reason, $args) {
-                // Below the guards: both return, so writing above them stamped a
-                // reschedule that never happened, and NotificationHandler reads
-                // this to pick the host- or attendee-worded email.
+                // Written after the guards so a refused reschedule leaves no trace.
+                // NotificationHandler reads it to pick the host or attendee email.
                 $booking->updateMeta('rescheduled_by_type', $rescheduleBy);
 
                 if ($booking->isMultiGuestBooking()) {
-                    // Need to handle group booking type here
-                    // check for existing group
+                    // Join the existing group at the new time, if any.
                     $parent = Booking::where('status', 'scheduled')
                         ->where('event_id', $booking->event_id)
                         ->where('start_time', $startTime)

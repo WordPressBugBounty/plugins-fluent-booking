@@ -84,7 +84,7 @@ $app->addFilter('fluent_booking/calendar_setting_menu_items', function ($items, 
         $enabled = Arr::get($settings, 'can_cancel') == 'no' ? true : false;
         $settings['can_not_cancel'] = [
             'enabled'   => $enabled,
-            'message'   => 'Sorry! you can not cancel this',
+            'message'   => 'Sorry! you cannot cancel this',
             'type'      => 'always',
             'condition' => [
                 'unit'  => 'minutes',
@@ -97,7 +97,7 @@ $app->addFilter('fluent_booking/calendar_setting_menu_items', function ($items, 
         $enabled = Arr::get($settings, 'can_reschedule') == 'no' ? true : false;
         $settings['can_not_reschedule'] = [
             'enabled'   => $enabled,
-            'message'   => 'Sorry! you can not reschedule this',
+            'message'   => 'Sorry! you cannot reschedule this',
             'type'      => 'always',
             'condition' => [
                 'unit'  => 'minutes',

@@ -8,6 +8,7 @@ use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Models\Meta;
 use FluentBooking\App\Models\BookingMeta;
+use FluentBooking\App\Modules\MCP\Support\SlotLock;
 use FluentBooking\Framework\Support\Arr;
 
 class Helper
@@ -999,43 +1000,44 @@ class Helper
             return $defalt;
         }
 
-        $ipAddress = '';
-
-        $serverData = $_SERVER;
-        $HTTP_CF_CONNECTING_IP = Arr::get($serverData, 'HTTP_CF_CONNECTING_IP');
-        $RemoteAddr = Arr::get($serverData, 'REMOTE_ADDR');
-        $clientIp = Arr::get($serverData, 'HTTP_CLIENT_IP');
-        $HTTP_X_FORWARDED_FOR = Arr::get($serverData, 'HTTP_X_FORWARDED_FOR');
-        if ($HTTP_CF_CONNECTING_IP) {
-            //If it's a valid Cloudflare request
-
-            if (self::isCfIp($RemoteAddr)) {
-                //Use the CF-Connecting-IP header.
-                $ipAddress = $HTTP_CF_CONNECTING_IP;
-            } else {
-                //If it isn't valid, then use REMOTE_ADDR.
-                $ipAddress = $RemoteAddr;
-            }
-        } else if ($RemoteAddr == '127.0.0.1') {
-            // most probably it's local reverse proxy
-            if ($clientIp) {
-                $ipAddress = $clientIp;
-            } else if ($HTTP_X_FORWARDED_FOR) {
-                $ipAddress = (string)rest_is_ip_address(trim(current(preg_split('/,/', sanitize_text_field($HTTP_X_FORWARDED_FOR)))));
-            }
-        }
-
-        if (!$ipAddress) {
-            $ipAddress = $RemoteAddr;
-        }
-
-        $ipAddress = preg_replace('/^(\d+\.\d+\.\d+\.\d+):\d+$/', '\1', $ipAddress);
+        $ipAddress = self::resolveClientIp($_SERVER);
 
         $ipAddress = apply_filters('fluent_booking/user_ip', $ipAddress, []);
 
         $ipAddress = sanitize_text_field(wp_unslash($ipAddress));
 
         return $ipAddress;
+    }
+
+    /**
+     * Pick the client address out of a request's server vars.
+     *
+     * Kept apart from getIp(), which caches its answer for the request, so the
+     * header-trust rules can be exercised one request shape at a time.
+     *
+     * @param array $serverData $_SERVER or an equivalent
+     * @return string
+     */
+    public static function resolveClientIp($serverData)
+    {
+        $remoteAddr = preg_replace('/^(\d+\.\d+\.\d+\.\d+):\d+$/', '\1', (string)Arr::get($serverData, 'REMOTE_ADDR'));
+        $cloudflareIp = (string)Arr::get($serverData, 'HTTP_CF_CONNECTING_IP');
+        $trustedProxies = (array)apply_filters('fluent_booking/trusted_proxies', ['127.0.0.1']);
+
+        // A proxy appends the peer it saw, so only the right-most hop is reliable;
+        // anything to its left is whatever the client chose to send
+        $hops = explode(',', (string)Arr::get($serverData, 'HTTP_X_FORWARDED_FOR'));
+        $forwardedIp = rest_is_ip_address(trim(end($hops)));
+
+        if ($cloudflareIp && self::isCfIp($remoteAddr)) {
+            return $cloudflareIp;
+        }
+
+        if ($forwardedIp && in_array($remoteAddr, $trustedProxies, true)) {
+            return $forwardedIp;
+        }
+
+        return $remoteAddr;
     }
 
     /**
@@ -1744,7 +1746,7 @@ class Helper
                 'title'   => __('Booking Confirmation Email to Attendee', 'fluent-booking'),
                 'email'   => [
                     'subject' => 'Booking Confirmation between {{host.name}} & {{guest.full_name}}',
-                    'body'    => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $checkImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">Your event has been scheduled</h2><hr /><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{host.name}}</p><p><strong>When</strong></p><p>{{booking.full_start_end_guest_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} - you</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Additional notes</strong></p><p>{{guest.note}}</p><hr /><p style="text-align: center;">' . __('Need to make a change?', 'fluent-booking') . ' <a href="##booking.reschedule_url##">' . __('Reschedule', 'fluent-booking') . '</a> or <a href="##booking.cancelation_url##">' . __('Cancel', 'fluent-booking') . '</p><hr/>' . self::getAddToCalendarHtml($assetUrl)
+                    'body'    => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $checkImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">Your event has been scheduled</h2><hr /><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{host.name}}</p><p><strong>When</strong></p><p>{{booking.all_bookings_short_times_guest_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} - you</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Additional notes</strong></p><p>{{guest.note}}</p><hr /><p style="text-align: center;">' . __('Need to make a change?', 'fluent-booking') . ' <a href="##booking.reschedule_url##">' . __('Reschedule', 'fluent-booking') . '</a> or <a href="##booking.cancelation_url##">' . __('Cancel', 'fluent-booking') . '</p><hr/>' . self::getAddToCalendarHtml($assetUrl)
                 ],
             ],
             'booking_conf_host'        => [
@@ -1754,7 +1756,7 @@ class Helper
                 'email'   => [
                     'additional_recipients' => '',
                     'subject'               => 'New Booking: {{guest.full_name}} @ {{booking.start_date_time_for_host}}',
-                    'body'                  => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $checkImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">A new event has been scheduled</h2><hr /><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{guest.full_name}}</p><p><strong>When</strong></p><p>{{booking.full_start_end_host_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} ({{guest.email}}) - Guest</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Note</strong></p><p>{{guest.note}}</p><p><strong>Additional Data</strong></p><p>{{guest.form_data_html}}</p><hr /><p style="text-align: center;"><a href="##booking.admin_booking_url##">View on the Website</a></p>'
+                    'body'                  => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $checkImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">A new event has been scheduled</h2><hr /><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{guest.full_name}}</p><p><strong>When</strong></p><p>{{booking.all_bookings_short_times_host_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} ({{guest.email}}) - Guest</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Note</strong></p><p>{{guest.note}}</p><p><strong>Additional Data</strong></p><p>{{guest.form_data_html}}</p><hr /><p style="text-align: center;"><a href="##booking.admin_booking_url##">View on the Website</a></p>'
                 ],
             ],
             'reminder_to_attendee'     => [
@@ -1830,7 +1832,7 @@ class Helper
                 'email'   => [
                     'additional_recipients' => '',
                     'subject'               => 'Awaiting Approval: {{guest.full_name}} @ {{booking.start_date_time_for_host}}',
-                    'body'                  => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $scheduleImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">A booking is still waiting for your approval</h2><hr /><p>Someone has requested to schedule an event on your calendar. Here are the details:</p><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{guest.full_name}}</p><p><strong>When</strong></p><p>{{booking.full_start_end_host_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} ({{guest.email}}) - Guest</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Note</strong></p><p>{{guest.note}}</p><p><strong>Additional Data</strong></p><p>{{guest.form_data_html}}</p><hr />' . self::getConfirmAndRejectButton($assetUrl) . '<p style="text-align: center;"><a href="##booking.admin_booking_url##">View on the Website</a></p>'
+                    'body'                  => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $scheduleImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">A booking is still waiting for your approval</h2><hr /><p>Someone has requested to schedule an event on your calendar. Here are the details:</p><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{guest.full_name}}</p><p><strong>When</strong></p><p>{{booking.all_bookings_short_times_host_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} ({{guest.email}}) - Guest</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Note</strong></p><p>{{guest.note}}</p><p><strong>Additional Data</strong></p><p>{{guest.form_data_html}}</p><hr />' . self::getConfirmAndRejectButton($assetUrl) . '<p style="text-align: center;"><a href="##booking.admin_booking_url##">View on the Website</a></p>'
                 ],
             ],
             'booking_request_attendee' => [
@@ -1838,7 +1840,7 @@ class Helper
                 'title'   => __('Booking Submission Confirmation (email to Attendee)', 'fluent-booking'),
                 'email'   => [
                     'subject' => 'Booking Submitted: Meeting between {{host.name}} & {{guest.full_name}}',
-                    'body'    => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $scheduleImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">Your booking has been submitted</h2><hr /><p>Please wait for the host to confirm your booking.</p><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{host.name}}</p><p><strong>When</strong></p><p>{{booking.full_start_end_guest_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} - you</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Additional notes</strong></p><p>{{guest.note}}</p><hr /><p style="text-align: center;">' . __('Need to make a change?', 'fluent-booking') . ' <a href="##booking.reschedule_url##">' . __('Reschedule', 'fluent-booking') . '</a> or <a href="##booking.cancelation_url##">' . __('Cancel', 'fluent-booking') . '</p>'
+                    'body'    => '<p style="text-align: center;"><img class="alignnone  wp-image-76" src="' . $scheduleImage . '" alt="" width="60" height="60" /></p><h2 class="p1" style="text-align: center;">Your booking has been submitted</h2><hr /><p>Please wait for the host to confirm your booking.</p><p><strong>Event Name</strong></p><p>{{booking.event_name}} with {{host.name}}</p><p><strong>When</strong></p><p>{{booking.all_bookings_short_times_guest_timezone}}</p><p><strong>Who</strong></p><ul><li>{{host.name}} - Organizer</li><li>{{guest.full_name}} - you</li></ul><p><strong>Where</strong></p><p>{{booking.location_details_html}}</p><p><strong>Additional notes</strong></p><p>{{guest.note}}</p><hr /><p style="text-align: center;">' . __('Need to make a change?', 'fluent-booking') . ' <a href="##booking.reschedule_url##">' . __('Reschedule', 'fluent-booking') . '</a> or <a href="##booking.cancelation_url##">' . __('Cancel', 'fluent-booking') . '</p>'
                 ],
             ],
             'declined_by_host'         => [
@@ -1969,7 +1971,8 @@ class Helper
                         '{{booking.phone}}'        => __('Guest Main Phone Number (if provided)', 'fluent-booking'),
                         '{{guest.note}}'           => __('Guest Note', 'fluent-booking'),
                         '{{guest.timezone}}'       => __('Guest Timezone', 'fluent-booking'),
-                        '{{guest.total_guest}}'    => __('Total Guest Count', 'fluent-booking')
+                        '{{guest.total_guest}}'    => __('Total Guest Count', 'fluent-booking'),
+                        '{{guest.form_data_html}}' => __('Guest Form Submitted Data (HTML)', 'fluent-booking')
                     ]
                 ],
                 'booking' => [
@@ -2420,15 +2423,44 @@ class Helper
     }
 
     /**
+     * Hold a round robin slot for the rest of the request, so concurrent public
+     * bookings cannot pick the same least-loaded host. Locks every host, since
+     * the host is only chosen inside isSpotAvailable() and another event can
+     * share it. Same keys MCP locks with.
+     * Released at shutdown because wp_send_json() exits past any finally.
+     *
+     * @param CalendarSlot $event
+     * @param string       $startTimeUtc
+     * @param string       $endTimeUtc
+     *
+     * @return bool false when another request holds the slot
+     */
+    public static function lockRoundRobinSlot($event, $startTimeUtc, $endTimeUtc)
+    {
+        if (!$event->isRoundRobin()) {
+            return true;
+        }
+
+        $locks = SlotLock::acquireInterval($event->id, $startTimeUtc, $endTimeUtc, $event->getHostIds());
+
+        if ($locks) {
+            register_shutdown_function([SlotLock::class, 'releaseAll'], $locks);
+        }
+
+        return (bool) $locks;
+    }
+
+    /**
      * Per-IP fixed-window rate limiter for public AJAX/REST endpoints.
      *
      * @param string $action Action name (e.g. apply_coupon, schedule_meeting).
      * @param int    $limit  Max requests per window.
      * @param int    $window Window in seconds.
+     * @param bool   $perIp  False for one shared bucket that a spoofed IP cannot reset.
      * @return bool True if under the limit (and the count was incremented),
      *              false if over.
      */
-    public static function checkRateLimit($action, $limit, $window = 60)
+    public static function checkRateLimit($action, $limit, $window = 60, $perIp = true)
     {
         $args = apply_filters('fluent_booking/public_ajax_ratelimit', [
             'limit'  => $limit,
@@ -2438,7 +2470,7 @@ class Helper
         $limit  = max(1, (int) (isset($args['limit']) ? $args['limit'] : $limit));
         $window = max(1, (int) (isset($args['window']) ? $args['window'] : $window));
 
-        $key   = 'fcal_ratelimit_' . $action . '_' . md5(self::getIp());
+        $key   = 'fcal_ratelimit_' . $action . ($perIp ? '_' . md5(self::getIp()) : '');
         $count = (int) get_transient($key);
 
         if ($count >= $limit) {

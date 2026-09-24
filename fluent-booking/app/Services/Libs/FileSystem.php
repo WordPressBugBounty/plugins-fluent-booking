@@ -31,6 +31,25 @@ class FileSystem
     }
 
     /**
+     * Whether a URL points at a file this application uploaded (renamed by _renameFileName)
+     * @return bool
+     */
+    public function _isUploadedFileUrl($url)
+    {
+        $name = is_string($url) ? basename((string) wp_parse_url($url, PHP_URL_PATH)) : '';
+
+        // The prefix also rules out the folder's own .htaccess and index.php.
+        if (!preg_match('/^fluentbooking-[a-f0-9]{32}-fluentbooking-/', $name)) {
+            return false;
+        }
+
+        $folderName = apply_filters('fluent_booking/upload_folder_name', 'fluent-booking');
+        $expected = wp_upload_dir()['baseurl'] . '/' . $folderName . '/' . $name;
+
+        return set_url_scheme($url) === set_url_scheme($expected) && file_exists($this->_getDir() . '/' . $name);
+    }
+
+    /**
      * Get absolute path of file using custom upload dir name of this application
      * @return string [file path]
      */

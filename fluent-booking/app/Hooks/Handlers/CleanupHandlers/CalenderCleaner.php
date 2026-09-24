@@ -3,6 +3,7 @@
 namespace FluentBooking\App\Hooks\Handlers\CleanupHandlers;
 
 use FluentBooking\App\Models\Booking;
+use FluentBooking\App\Models\BookingHost;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Models\Availability;
 use FluentBooking\App\Models\Meta;
@@ -62,7 +63,28 @@ class CalenderCleaner
                         ->where('event_id', $event->id)
                         ->whereHas('hosts', function ($query) use ($calendarUserId){
                             $query->where('user_id', $calendarUserId);
-                        })->delete();
+                        })
+                        ->withCount('hosts')
+                        ->chunkById(100, function ($bookings) use ($calendarUserId) {
+                            $sharedBookingIds = [];
+
+                            foreach ($bookings as $booking) {
+                                // A collective booking still happens with its other hosts.
+                                if ($booking->hosts_count > 1) {
+                                    $sharedBookingIds[] = $booking->id;
+                                    continue;
+                                }
+
+                                $bookingId = $booking->id;
+                                do_action('fluent_booking/before_delete_booking', $booking);
+                                $booking->delete();
+                                do_action('fluent_booking/after_delete_booking', $bookingId);
+                            }
+
+                            if ($sharedBookingIds) {
+                                BookingHost::query()->where('user_id', $calendarUserId)->whereIn('booking_id', $sharedBookingIds)->delete();
+                            }
+                        });
                 }
             }
         }

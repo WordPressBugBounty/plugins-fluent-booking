@@ -13,30 +13,20 @@ defined('ABSPATH') || exit;
 /**
  * Why does this event show no slots?
  *
- * The highest-volume FluentBooking support question, answered in one call.
- *
- * Design constraint: this class does NOT re-derive availability. Slot maths
- * lives in TimeSlotService and a second implementation would eventually
- * disagree with the first, which for a diagnostic is worse than useless —
- * it would confidently explain an outcome that never happened. So the approach
- * is: take the real engine's output as ground truth, read the configuration
- * through the model's own accessors, and *attribute* each empty date to the
- * first rule that accounts for it, in the order the engine applies them.
- *
- * Attribution order matters and mirrors TimeSlotService::getDates():
+ * This does not recompute availability; a second implementation would drift
+ * from TimeSlotService. It takes the engine's real output and attributes each
+ * empty date to the first rule that explains it, in the engine's order
+ * (TimeSlotService::getDates()):
  *   event active → bookable window → date override closes the day →
  *   weekday has no hours → frequency cap reached → every slot booked →
  *   minimum notice (today only)
  *
- * A date that survives all of those and still has no slots is reported as
- * `unexplained` rather than guessed at. An honest "I don't know" is worth more
- * to whoever is holding the support ticket than a plausible wrong answer.
+ * A date none of these explain is reported as `unexplained`, not guessed at.
  */
 class AvailabilityDiagnostics
 {
     /**
-     * Statuses that occupy a slot. Mirrors TimeSlotService::getBookedSlots() —
-     * a booking in any of these states blocks its time.
+     * Statuses that block a slot. Mirrors TimeSlotService::getBookedSlots().
      */
     const BLOCKING_STATUSES = ['pending', 'reserved', 'approved', 'scheduled', 'completed'];
 
@@ -52,10 +42,8 @@ class AvailabilityDiagnostics
     {
         $scheduleTimezone = $event->getScheduleTimezone($hostId);
 
-        // Stored hours are UTC. Every check below reports them under the
-        // schedule's own timezone, so convert once here rather than labelling
-        // raw UTC as local — the same call AvailabilityService makes when it
-        // renders a schedule for the admin.
+        // Stored hours are UTC; report them in the schedule's timezone, as
+        // AvailabilityService does for the admin.
         $weeklySlots = SanitizeService::weeklySchedules(
             (array) $event->getWeeklySlots($hostId),
             'UTC',
@@ -80,14 +68,8 @@ class AvailabilityDiagnostics
             $totalSlots += count($times);
         }
 
-        // Two different questions, previously answered by one number:
-        //   - "is the per-day cap reached" is per EVENT TYPE (booking_frequency
-        //     is an event-type setting), and
-        //   - "is the day full" is per HOST, because any booking on any event
-        //     occupies the host's time.
-        // Using the host-wide count for both reported `daily_cap_reached` on a
-        // day where the cap was nowhere near, whenever the host happened to be
-        // busy on some other event type.
+        // The per-day cap counts this event type only; "day is full" counts
+        // everything on the host's calendar.
         $bookingsByDate     = self::bookingCountsByDate($event, $from, $to, $hostId, $timezone);
         $eventBookingsByDate = self::bookingCountsByDate($event, $from, $to, $hostId, $timezone, true);
 
@@ -136,13 +118,10 @@ class AvailabilityDiagnostics
     }
 
     /**
-     * The configuration audit: every rule that can remove slots, with the value
-     * it is actually set to.
+     * Every rule that can remove slots, with its current value.
      *
-     * `passed` answers "is this rule permitting anything at all", not "did it
-     * remove something" — a buffer of 15 minutes passes even though it does
-     * remove slots, because it is configured sanely. A failing check is one
-     * that on its own explains an empty calendar.
+     * A check fails only when it alone explains an empty calendar; a buffer
+     * that removes some slots still passes.
      *
      * @return array
      */
@@ -287,10 +266,8 @@ class AvailabilityDiagnostics
             }
 
             $day     = strtolower(gmdate('D', strtotime($date))); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-            // Host-wide: anything on the host's calendar occupies their time.
+            // Host-wide count, and this event type's count for its own cap.
             $booked  = isset($bookingsByDate[$date]) ? (int) $bookingsByDate[$date] : 0;
-            // This event type only: booking_frequency is an event-type setting,
-            // so it must be measured against this event's own bookings.
             $onEvent = isset($eventBookingsByDate[$date]) ? (int) $eventBookingsByDate[$date] : 0;
 
             $reason = 'unexplained';
@@ -355,11 +332,8 @@ class AvailabilityDiagnostics
     }
 
     /**
-     * Bookings per date that occupy time on this event's hosts.
-     *
-     * Counted against the same host set and the same blocking statuses the slot
-     * engine uses, so "3 bookings" here means the same three the engine removed
-     * slots for.
+     * Bookings per local date on this event's hosts, using the engine's host
+     * set and blocking statuses.
      *
      * @return array date => count
      */
@@ -375,9 +349,8 @@ class AvailabilityDiagnostics
                 $query->whereIn('user_id', $hostIds);
             })
             ->whereIn('status', self::BLOCKING_STATUSES)
-            // The window is a LOCAL one — empty_dates walks dates in $timezone —
-            // so the UTC column has to be bounded by the UTC instants those
-            // local days start and end at, not by the bare date strings.
+            // The dates are local to $timezone, so bound the UTC column by
+            // those days' UTC start and end.
             ->where('start_time', '>=', MCPHelper::dayBoundaryToUtc($from, $timezone, false))
             ->where('start_time', '<=', MCPHelper::dayBoundaryToUtc($to, $timezone, true));
 
@@ -388,7 +361,7 @@ class AvailabilityDiagnostics
         $counts = [];
 
         foreach ($query->get(['id', 'start_time']) as $booking) {
-            // Bucketed by the LOCAL date, for the same reason.
+            // Bucket by local date too.
             $date = DateTimeHelper::convertFromUtc($booking->start_time, $timezone, 'Y-m-d');
 
             $counts[$date] = isset($counts[$date]) ? $counts[$date] + 1 : 1;
@@ -414,11 +387,8 @@ class AvailabilityDiagnostics
     }
 
     /**
-     * Weekdays with hours, as day => "09:00-17:00, 18:00-20:00".
-     *
-     * Rendered as strings rather than nested arrays: this is read by a human
-     * through an agent, and three keys per slot per day would triple the
-     * payload for information nobody acts on programmatically.
+     * Weekdays with hours, as day => "09:00-17:00, 18:00-20:00". Strings keep
+     * the payload small; nobody parses these.
      *
      * @return array
      */
@@ -453,10 +423,7 @@ class AvailabilityDiagnostics
     }
 
     /**
-     * Minutes as something a person reads without arithmetic.
-     *
-     * "43200 minutes" is technically the notice period and practically useless
-     * to whoever is holding the support ticket; "30 days" is the same fact.
+     * Minutes in the largest whole unit, e.g. 43200 → "30 days".
      *
      * @param int $minutes
      * @return string
@@ -497,10 +464,8 @@ class AvailabilityDiagnostics
     }
 
     /**
-     * Date overrides inside the queried window, flagged by what they do.
-     *
-     * An override present in the day-block list with no replacement slots closes
-     * the day; one with slots replaces that day's hours.
+     * Date overrides inside the window. One without slots closes the day; one
+     * with slots replaces that day's hours.
      *
      * @return array
      */
@@ -564,17 +529,9 @@ class AvailabilityDiagnostics
     }
 
     /**
-     * External busy time, asked of the engine rather than inferred.
-     *
-     * `fluent_booking/remote_booked_events` is the exact filter
-     * TimeSlotService::getBookedSlots() applies to pull Google/Outlook/Apple/
-     * CalDAV busy blocks into the slot calculation, so running it here reports
-     * what the engine actually saw — not what a guess at where connections are
-     * stored would suggest. This is the usual answer when every other check
-     * passes and slots are still missing.
-     *
-     * Counts and providers only. Pulling the titles of a host's private calendar
-     * events into an agent's context is not this tool's job.
+     * External calendar busy time, via the same `fluent_booking/remote_booked_events`
+     * filter TimeSlotService::getBookedSlots() uses, so it reports what the engine saw.
+     * Counts and providers only; private event titles stay out of the agent's context.
      *
      * @param CalendarSlot $event
      * @param string       $from

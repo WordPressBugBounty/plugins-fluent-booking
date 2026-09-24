@@ -8,6 +8,7 @@ use FluentBooking\App\Models\Calendar;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\CalendarEventService;
 use FluentBooking\App\Services\Helper;
+use FluentBooking\App\Services\LocationService;
 use FluentBooking\Framework\Support\Arr;
 
 class BlockEditorHandler
@@ -51,7 +52,7 @@ class BlockEditorHandler
                         'durations'    => $event->getAvailableDurations(),
                         'locations'    => $event->defaultLocationHtml(),
                         'payment_html' => $event->getPaymentHtml(),
-                        'loc_settings' => $event->location_settings,
+                        'loc_settings' => LocationService::sanitizePublicLocationSettings($event->location_settings),
                         'description'  => $event->short_description
                     ];
                 }
@@ -60,7 +61,7 @@ class BlockEditorHandler
                     'id'          => (string)$calendar->id,
                     'title'       => $calendar->title,
                     'description' => wpautop(Helper::excerpt($calendar->description, 200)),
-                    'author'      => $calendar->getAuthorProfile(),
+                    'author'      => Arr::only($calendar->getAuthorProfile(), ['name', 'avatar']),
                     'event_order' => $calendar->getMeta('event_order'),
                     'events'      => $formattedEvents
                 ];

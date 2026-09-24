@@ -6,6 +6,7 @@ use FluentBooking\App\App;
 use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\BookingService;
+use FluentBooking\App\Services\RescheduleService;
 use FluentBooking\App\Services\DateTimeHelper;
 use FluentBooking\App\Services\BookingFieldService;
 use FluentBooking\App\Hooks\Handlers\FrontEndHandler;
@@ -401,6 +402,87 @@ class BookingController extends Controller
         return [
             'bookings' => $formattedBookings,
             'total'    => $totalBookings
+        ];
+    }
+
+    public function getRescheduleSlots(Request $request, $eventId, $bookingId)
+    {
+        return $this->getEvent($request, $eventId);
+    }
+
+    public function rescheduleBooking(Request $request, $eventId, $bookingId)
+    {
+        $booking = Booking::with(['calendar_event'])->findOrFail($bookingId);
+
+        $data = $request->all();
+
+        $this->validate($data, [
+            'event_time' => 'required',
+            'timezone'   => 'required'
+        ], [
+            'event_time.required' => __('Please select a date and time', 'fluent-booking'),
+            'timezone.required'   => __('Please select the timezone', 'fluent-booking')
+        ]);
+
+        $calendarEvent = $booking->calendar_event;
+
+        if (!$calendarEvent || (int) $calendarEvent->id !== (int) $eventId) {
+            return $this->sendError(['message' => __('The event of this booking was not found', 'fluent-booking')], 422);
+        }
+
+        if (!in_array($booking->status, ['scheduled', 'pending', 'approved', 'rescheduled'], true)) {
+            return $this->sendError(['message' => __('This booking can not be rescheduled', 'fluent-booking')], 422);
+        }
+
+        $timezone = sanitize_text_field(Arr::get($data, 'timezone'));
+
+        if (!in_array($timezone, \DateTimeZone::listIdentifiers(), true)) {
+            return $this->sendError(['message' => __('Please select a valid timezone', 'fluent-booking')], 422);
+        }
+
+        $eventTime = sanitize_text_field(Arr::get($data, 'event_time'));
+
+        if (!\DateTime::createFromFormat('Y-m-d H:i:s', $eventTime)) {
+            return $this->sendError(['message' => __('Please select a valid date and time', 'fluent-booking')], 422);
+        }
+
+        $startTime = DateTimeHelper::convertToUtc($eventTime, $timezone);
+        $endTime = gmdate('Y-m-d H:i:s', strtotime($startTime) + ($booking->slot_minutes * 60)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+
+        $hostUserId = null;
+
+        if (!Arr::isTrue($data, 'ignore_availability')) {
+            $timeSlotService = TimeSlotServiceHandler::initService($calendarEvent->calendar, $calendarEvent);
+
+            if (is_wp_error($timeSlotService)) {
+                return $this->sendError(['message' => $timeSlotService->get_error_message()], 422);
+            }
+
+            $isSlotLocked = Helper::lockRoundRobinSlot($calendarEvent, $startTime, $endTime);
+
+            if (!$isSlotLocked || !$timeSlotService->isSpotAvailable($startTime, $endTime, $booking->slot_minutes)) {
+                return $this->sendError([
+                    'message' => __('This selected time slot is not available. Maybe someone booked the spot just a few seconds ago.', 'fluent-booking')
+                ], 422);
+            }
+
+            if ($calendarEvent->isRoundRobin()) {
+                $hostUserId = $timeSlotService->hostUserId;
+            }
+        }
+
+        $result = RescheduleService::reschedule($booking, $calendarEvent, $startTime, $timezone, [
+            'reason'       => Arr::get($data, 'reason', ''),
+            'host_user_id' => $hostUserId,
+            'source'       => __('Admin Panel', 'fluent-booking')
+        ]);
+
+        if (is_wp_error($result)) {
+            return $this->sendError(['message' => $result->get_error_message()], 422);
+        }
+
+        return [
+            'message' => __('Booking has been rescheduled', 'fluent-booking')
         ];
     }
 

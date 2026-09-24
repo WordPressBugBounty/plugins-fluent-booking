@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    '5acfa953fb947d9c094f156813b35f4f' => $vendorDir . '/wpfluent/framework/src/WPFluent/Support/mbstring-loader.php',
+    '6c475849da538134242f5be99200fc96' => $vendorDir . '/wpfluent/framework/src/WPFluent/Support/Polyfills/loader.php',
 );

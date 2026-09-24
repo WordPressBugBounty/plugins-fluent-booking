@@ -110,9 +110,8 @@ class ElementorIntegration
         }
 
         $calId = intval($_POST['cal_id']);
-        $events = []; // Fetch events using your getCalendarEvents method or similar
+        $events = [];
 
-        // Example of fetching events (you need to replace this with your actual method)
         $events = $this->getCalendarEvents($calId);
 
         wp_send_json_success($events);

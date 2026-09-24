@@ -229,7 +229,7 @@ class AvailabilityController extends Controller
         $updatedSettings = [
             'default'          => true,
             'timezone'         => Arr::get($schedule, 'value.timezone', 'UTC'),
-            'date_overrides'   => Arr::get($schedule, 'value.data_overrides', []),
+            'date_overrides'   => Arr::get($schedule, 'value.date_overrides', []),
             'weekly_schedules' => Arr::get($schedule, 'value.weekly_schedules'),
         ];
 

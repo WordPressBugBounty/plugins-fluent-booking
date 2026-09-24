@@ -95,6 +95,27 @@ class PermissionManager
         return self::userCan(['manage_all_data', 'manage_other_calendars']);
     }
 
+    /**
+     * Whether the current user may make $memberIds hosts. Anyone outside $allowedIds
+     * is someone new being assigned, which is the same act as creating a calendar
+     * for another user.
+     *
+     * @param int[] $memberIds
+     * @param int[] $allowedIds
+     * @return bool
+     */
+    public static function canAssignHosts($memberIds, $allowedIds)
+    {
+        $memberIds  = array_map('intval', (array) $memberIds);
+        $allowedIds = array_map('intval', (array) $allowedIds);
+
+        if (!array_diff($memberIds, $allowedIds)) {
+            return true;
+        }
+
+        return self::canManageOtherHosts();
+    }
+
     public static function hasCalendarAccess($calendar)
     {
         $hasAccess = self::userCan('manage_all_data') || $calendar->user_id == get_current_user_id();
@@ -136,6 +157,16 @@ class PermissionManager
         }
 
         return false;
+    }
+
+    /**
+     * Whether the current user may act for, assign or see the details of other hosts.
+     *
+     * @return bool
+     */
+    public static function canManageOtherHosts()
+    {
+        return self::userCan(['manage_all_data', 'invite_team_members']);
     }
 
     public static function getUserPermissions($user = null, $formatted = false)

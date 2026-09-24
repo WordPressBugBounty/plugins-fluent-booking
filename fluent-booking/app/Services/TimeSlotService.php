@@ -181,10 +181,10 @@ class TimeSlotService
 
         list($scheduleTimezone, $dstTime) = $this->getTimezoneInfo();
 
-        $fromStartTime = $this->maybeDayLightSavingTime($fromTime, $dstTime, $scheduleTimezone);
         $toEndTime = $this->maybeDayLightSavingTime($toTime, $dstTime, $scheduleTimezone);
 
-        $fromTime = gmdate('Y-m-d 00:00:00', strtotime($fromStartTime)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+        // Start from the requested time, not the DST-shifted one: the shift can cross into the next UTC day and drop that day's bookings.
+        $fromTime = gmdate('Y-m-d 00:00:00', $fromTimeStamp); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
         $toTime = gmdate('Y-m-d 23:59:59', strtotime($toEndTime)); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 
         $slots = $this->getDates($fromTime, $toTime, $duration, true);
@@ -203,6 +203,13 @@ class TimeSlotService
 
     protected function isSlotExists($availableSlots, $fromTimeStamp, $toTimeStamp)
     {
+        // Slot generation only checks notice on today and the horizon on the last day.
+        if ($fromTimeStamp < strtotime($this->calendarSlot->getMinBookableDateTime()) ||
+            $toTimeStamp > $this->getMaxBookingTimestamp(null, gmdate('Y-m-d H:i:s', $toTimeStamp), 'UTC') // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+        ) {
+            return false;
+        }
+
         $left = 0;
         $right = count($availableSlots) - 1;
 

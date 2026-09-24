@@ -38,10 +38,12 @@ class FiveMinuteScheduler
             return true;
         }
 
-        Booking::whereIn('id', $bookings->pluck('id'))
-            ->update(['status' => 'completed']);
-
         foreach ($bookings as $booking) {
+            // Flag each row just before its hook, so a run that dies mid-loop leaves the rest for the next run.
+            if (!Booking::where('id', $booking->id)->where('status', 'scheduled')->update(['status' => 'completed'])) {
+                continue;
+            }
+
             $booking->status = 'completed';
             do_action('fluent_booking/booking_schedule_completed', $booking, $booking->calendar_event);
         }
@@ -63,13 +65,17 @@ class FiveMinuteScheduler
             return true;
         }
 
-        Booking::whereIn('id', $bookings->pluck('id'))
-            ->update([
+        foreach ($bookings as $booking) {
+            // Flag each row just before its hook, so a run that dies mid-loop leaves the rest for the next run.
+            $flagged = Booking::where('id', $booking->id)->where('status', 'pending')->update([
                 'status'     => 'cancelled',
                 'updated_at' => gmdate('Y-m-d H:i:s'), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             ]);
 
-        foreach ($bookings as $booking) {
+            if (!$flagged) {
+                continue;
+            }
+
             $booking->status = 'cancelled';
             do_action('fluent_booking/booking_schedule_auto_cancelled', $booking, $booking->calendar_event);
         }
@@ -94,13 +100,17 @@ class FiveMinuteScheduler
             return true;
         }
 
-        Booking::whereIn('id', $bookings->pluck('id'))
-            ->update([
+        foreach ($bookings as $booking) {
+            // Flag each row just before its hook, so a run that dies mid-loop leaves the rest for the next run.
+            $flagged = Booking::where('id', $booking->id)->where('status', 'pending')->update([
                 'status'     => 'cancelled',
                 'updated_at' => gmdate('Y-m-d H:i:s'), // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             ]);
 
-        foreach ($bookings as $booking) {
+            if (!$flagged) {
+                continue;
+            }
+
             $booking->status = 'cancelled';
             do_action('fluent_booking/booking_schedule_auto_cancelled', $booking, $booking->calendar_event);
         }

@@ -11,14 +11,10 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * Event types — what can be booked, and on what terms.
+ * Event types: what can be booked, and on what terms.
  *
- * List and detail are one tool rather than two. They take the same filters, and
- * the response shape difference is unambiguous (an `event_id` returns one
- * configured event, its absence returns rows), so a second ~500-token schema
- * would buy nothing. The detail payload is where the answers to "why is this
- * event behaving like that" live, which is also what makes it the natural
- * companion to diagnose-availability.
+ * List and detail share one tool to save a schema: with `event_id` it returns
+ * one event's full configuration, without it a list of rows.
  */
 class EventTypeTools
 {
@@ -121,11 +117,7 @@ class EventTypeTools
      */
     private static function getList($params)
     {
-        // The SAME visibility rule getOne() enforces. The list used to filter
-        // on `user_id = me` while getOne() gated on canReadCalendar(), which
-        // also admits shared team calendars — so an event type could be absent
-        // from the list and fully readable by id, and an agent had no way to
-        // discover the ids it was allowed to use.
+        // Same visibility rule as getOne(), so every readable id is listable.
         $query = PermissionGate::scopeToReadableCalendars(CalendarSlot::query(), 'calendar_id');
 
         $calendarId = absint(Arr::get($params, 'calendar_id'));
@@ -182,7 +174,7 @@ class EventTypeTools
     }
 
     /**
-     * Compact row — enough to pick an event, nothing more.
+     * Compact row, enough to pick an event.
      *
      * @param CalendarSlot $event
      * @return array
@@ -201,17 +193,6 @@ class EventTypeTools
         ];
     }
 
-    /**
-     * Full configuration for one event.
-     *
-     * The limits block is the part that matters: buffers, notice period,
-     * per-day caps and the bookable window are the settings that make an event
-     * show fewer slots than an operator expects, and reading them here is the
-     * first step of every availability investigation.
-     *
-     * @param CalendarSlot $event
-     * @return array
-     */
     /**
      * The event's configured locations, in create-booking's vocabulary.
      *
@@ -242,14 +223,20 @@ class EventTypeTools
         return $out;
     }
 
+    /**
+     * Full configuration for one event. The limits block (buffers, notice,
+     * caps, bookable window) explains why an event shows fewer slots.
+     *
+     * @param CalendarSlot $event
+     * @return array
+     */
     private static function detail(CalendarSlot $event)
     {
         $settings = (array) $event->settings;
 
         $data = array_merge(self::row($event), [
             'description'       => $event->getDescription(),
-            // The legacy column, kept for callers that read it. It is empty on
-            // events that do have a location, which is why `locations` exists.
+            // Legacy column, often empty even when locations are set.
             'location_type'     => $event->location_type,
             'locations'         => self::locations($event),
             'multi_duration'    => (bool) $event->isMultiDurationEnabled(),
@@ -289,9 +276,7 @@ class EventTypeTools
             'slot_interval_minutes' => (int) $event->getSlotInterval(),
             'range_type'            => Arr::get($settings, 'range_type', 'range_days'),
             'range_days'            => (int) Arr::get($settings, 'range_days', 0),
-            // getCutoutSeconds() is the authority: the setting is stored as a
-            // {value, unit} pair, so reading the raw value would report "4" for
-            // both four hours and four days.
+            // The setting is a {value, unit} pair; getCutoutSeconds() resolves it.
             'minimum_notice_minutes' => (int) round($event->getCutoutSeconds() / MINUTE_IN_SECONDS),
             'booking_frequency'     => self::capLimits(Arr::get($settings, 'booking_frequency', [])),
             'booking_duration'      => self::capLimits(Arr::get($settings, 'booking_duration', [])),
@@ -301,10 +286,7 @@ class EventTypeTools
     /**
      * Normalise a booking-frequency / booking-duration cap block.
      *
-     * The stored shape is a LIST of {unit, value} pairs, not a map — reading it
-     * as `limits.per_day` yields null on every event that has a per-day cap,
-     * which would tell an agent investigating a fully-booked day that no cap
-     * exists. Re-keyed by unit here so it is usable as a lookup.
+     * Stored as a list of {unit, value} pairs, not a map. Re-keyed by unit.
      *
      * @param mixed $config
      * @return array
@@ -333,10 +315,8 @@ class EventTypeTools
     }
 
     /**
-     * The questions an attendee is asked, reduced to what a caller creating a
-     * booking actually needs: the key to send, whether it is required, and what
-     * the options are. The full field definition carries render metadata that
-     * would triple the payload for no gain.
+     * Booking form fields, reduced to what create-booking needs: key, whether
+     * required, and options. Render metadata is dropped.
      *
      * @param CalendarSlot $event
      * @return array

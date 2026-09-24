@@ -4,12 +4,13 @@ namespace FluentBooking\App\Hooks\Handlers;
 
 use FluentBooking\App\App;
 use FluentBooking\App\Vite;
+use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\Calendar;
-use FluentBooking\App\Models\CalendarSlot;
 use FluentBooking\App\Services\DateTimeHelper;
 use FluentBooking\App\Services\Helper;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\App\Services\TransStrings;
+use FluentBooking\Framework\Support\Arr;
 
 class AdminMenuHandler
 {
@@ -17,19 +18,18 @@ class AdminMenuHandler
     {
         add_action('admin_menu', [$this, 'add']);
 
-        add_action('admin_enqueue_scripts', function () {
-            if (!isset($_REQUEST['page']) || $_REQUEST['page'] != 'fluent-booking') { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        add_action('admin_enqueue_scripts', function ($hookSuffix) {
+            if ($hookSuffix !== 'toplevel_page_fluent-booking') {
                 return;
             }
-            $this->enqueueAssets();
-        }, 100);
 
-        add_action('admin_head', function () {
-            if (!isset($_REQUEST['page']) || $_REQUEST['page'] != 'fluent-booking') { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                return;
-            }
-            $this->printThemeClass();
-        }, 1);
+            $this->enqueueAssets();
+
+            add_action('admin_head', function () {
+                $this->printThemeClass();
+            }, 1);
+
+        }, 100);
     }
 
     /**
@@ -123,6 +123,86 @@ JS;
             'fluent-booking#/settings/general-settings',
             [$this, 'render']
         );
+
+        if ($this->shouldShowUpgrade()) {
+            add_submenu_page(
+                'fluent-booking',
+                __('Upgrade to Pro', 'fluent-booking'),
+                '<span class="fcal_upgrade_pro_menu">' . esc_html__('Upgrade to Pro', 'fluent-booking') . '</span>',
+                'manage_options',
+                Helper::getUpgradeUrl('admin_sidebar_menu')
+            );
+
+            add_action('admin_head', [$this, 'printUpgradeMenuStyle']);
+            add_action('admin_footer', [$this, 'printUpgradeMenuScript']);
+        }
+    }
+
+    /**
+     * The upsell is for whoever can buy the license, so it stays hidden once Pro is loaded
+     * and from hosts who only reach the app through their own calendars.
+     *
+     * @return bool
+     */
+    public function shouldShowUpgrade()
+    {
+        return !defined('FLUENT_BOOKING_PRO_DIR_FILE') && current_user_can('manage_options');
+    }
+
+    /**
+     * Onboarding asks on its final step. The dashboard card waits until the site has a completed
+     * booking, when FluentBooking has proven useful, and counts one the way the Bookings page's
+     * "Completed" tab does.
+     *
+     * @return array
+     */
+    private function getOptinVars()
+    {
+        $showPrompt = $this->showOptinPrompt();
+
+        return [
+            'share_stats' => Arr::get((array) Helper::getMeta('option', 0, 'optin'), 'share_stats', ''),
+            'can_manage'  => PermissionManager::userCan('manage_all_data'),
+            'show_prompt' => $showPrompt,
+            'show_card'   => $showPrompt && Booking::applyComputedStatus('completed')->exists(),
+        ];
+    }
+
+    /**
+     * The email opt-in prompt (dashboard card and onboarding) is for free sites that have not
+     * subscribed yet. Closing it hides it for 30 days.
+     *
+     * @return bool
+     */
+    private function showOptinPrompt()
+    {
+        if (defined('FLUENT_BOOKING_PRO_DIR_FILE') || !PermissionManager::userCan('manage_all_data')) {
+            return false;
+        }
+
+        $optin = (array) Helper::getMeta('option', 0, 'optin');
+
+        if (!empty($optin['email'])) {
+            return false;
+        }
+
+        return empty($optin['dismissed_at']) || (time() - (int) $optin['dismissed_at']) > 30 * DAY_IN_SECONDS;
+    }
+
+    public function printUpgradeMenuStyle()
+    {
+        echo '<style id="fluent-booking-upgrade-menu">#adminmenu .fcal_upgrade_pro_menu{color:#72aee6;font-weight:500;}</style>';
+    }
+
+    /**
+     * The submenu points off-site, and WordPress gives submenu links no target, so it would
+     * otherwise take the admin away from the dashboard.
+     *
+     * @return void
+     */
+    public function printUpgradeMenuScript()
+    {
+        echo '<script id="fluent-booking-upgrade-menu-js">(function(){var s=document.querySelector("#adminmenu .fcal_upgrade_pro_menu");if(s&&s.parentNode){s.parentNode.setAttribute("target","_blank");s.parentNode.setAttribute("rel","noopener");}})();</script>';
     }
 
     public function render()
@@ -193,13 +273,14 @@ JS;
         $assets = $app['url.assets'];
 
         $portalVars = apply_filters('fluent_booking/admin_portal_vars', [
-            'name'      => $name,
-            'slug'      => $slug,
-            'menuItems' => $menuItems,
-            'settings'  => $settingItems,
-            'baseUrl'   => $baseUrl,
-            'logo'      => $assets . 'images/logo.svg',
-            'dark_logo' => $assets . 'images/logo_dark.svg',
+            'name'       => $name,
+            'slug'       => $slug,
+            'menuItems'  => $menuItems,
+            'settings'   => $settingItems,
+            'baseUrl'    => $baseUrl,
+            'logo'       => $assets . 'images/logo.svg',
+            'dark_logo'  => $assets . 'images/logo_dark.svg',
+            'upgradeUrl' => $this->shouldShowUpgrade() ? Helper::getUpgradeUrl('top_bar') : '',
         ]);
 
         do_action('fluent_booking/admin_app_rendering');
@@ -220,7 +301,7 @@ JS;
         });
     }
 
-    public function enqueueAssets()
+    public function enqueueAssets($withApp = true)
     {
         $app = App::getInstance();
 
@@ -326,6 +407,12 @@ JS;
 
         Vite::enqueueStyle('fluent_booing_admin_app', 'admin_css', [], $assetsVersion, 'all');
 
+        // The dashboard payload is per-user and includes every host's email address,
+        // so the app bundle is only ever emitted for an authenticated, permitted viewer.
+        if (!$withApp || !get_current_user_id()) {
+            return;
+        }
+
         do_action($slug . '_loading_app'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
 
         Vite::enqueueScript($slug . '_admin_app', 'admin_app', array('jquery'), $assetsVersion);
@@ -388,7 +475,6 @@ JS;
         $overrideSelectTimes = Helper::getOverrideSelectTimes();
         $statusChangingTimes = Helper::getBookingStatusChangingTimes();
         $defaultTermsAndConditions = Helper::getDefaultTermsAndConditions();
-        $locationFields = (new CalendarSlot())->getLocationFields();
 
         return apply_filters('fluent_booking/admin_vars', [
             'slug'                   => $slug = $app->config->get('app.slug'),
@@ -402,7 +488,6 @@ JS;
             'buffer_times'           => $bufferTimes,
             'slot_intervals'         => $slotIntervals,
             'schedule_schema'        => $scheduleSchema,
-            'location_fields'        => $locationFields,
             'custom_field_types'     => $customFieldTypes,
             'week_select_times'      => $weekSelectTimes,
             'duration_lookup'        => $durationLookup,
@@ -436,6 +521,7 @@ JS;
             'has_pro'                 => defined('FLUENT_BOOKING_PRO_DIR_FILE'),
             'require_upgrade'         => defined('FLUENT_BOOKING_PRO_DIR_FILE') && !defined('FLUENT_BOOKING_LITE'),
             'dashboard_notices'       => apply_filters('fluent_booking/dashboard_notices', []),
+            'optin'                   => $this->getOptinVars(),
             'payment_methods'         => apply_filters('fluent_booking/payment/get_all_methods', []),
             'trans'                   => TransStrings::getStrings(),
             'date_format'             => DateTimeHelper::getDateFormatter(true),

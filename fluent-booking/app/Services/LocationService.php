@@ -226,4 +226,43 @@ class LocationService
         }
         return $locationOptions;
     }
+
+    public static function sanitizePublicLocationSettings($locationSettings)
+    {
+        if (!is_array($locationSettings)) {
+            return [];
+        }
+
+        $safe = [];
+        foreach ($locationSettings as $location) {
+            if (!is_array($location)) {
+                continue;
+            }
+
+            $type = Arr::get($location, 'type');
+            $displayOnBooking = Arr::get($location, 'display_on_booking') === 'yes';
+
+            $sanitized = [
+                'type'               => $type,
+                'title'              => Arr::get($location, 'title'),
+                'display_on_booking' => Arr::get($location, 'display_on_booking', 'no'),
+            ];
+
+            // Only expose host-private fields when the host explicitly opted
+            // in to display them before booking.
+            if ($displayOnBooking) {
+                if ($type === 'online_meeting') {
+                    $sanitized['meeting_link'] = Arr::get($location, 'meeting_link');
+                } elseif ($type === 'phone_organizer') {
+                    $sanitized['host_phone_number'] = Arr::get($location, 'host_phone_number');
+                } elseif (in_array($type, ['in_person_organizer', 'custom'], true)) {
+                    $sanitized['description'] = Arr::get($location, 'description');
+                }
+            }
+
+            $safe[] = $sanitized;
+        }
+
+        return $safe;
+    }
 }

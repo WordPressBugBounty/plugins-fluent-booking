@@ -3,48 +3,31 @@
 namespace FluentBooking\App\Modules\MCP\Support;
 
 use FluentBooking\App\Models\Booking;
+use FluentBooking\App\Models\BookingActivity;
 use FluentBooking\Framework\Support\Arr;
 
 defined('ABSPATH') || exit;
 
 /**
- * Booking model → agent-facing payload, at two levels of detail.
+ * Booking model → agent payload, at two levels of detail. Enforces the
+ * response budget in docs/mcp-server-spec.md §10.
  *
- * This class is where the response budget in docs/mcp-server-spec.md §10 is
- * actually enforced, so both shapes are deliberate rather than "whatever the
- * model has".
+ * `row()` is the ~120-token collection shape. `full()` is a single-record read;
+ * form answers, guests, hosts and activity are still opt-in via `include[]`.
  *
- * `row()` is what a collection returns: about 120 tokens, enough to identify a
- * booking, sort it, and decide whether to open it. `full()` is a single-record
- * read and can afford everything — but even there the expensive pieces (form
- * answers, guests, hosts, activity) are opt-in through `include[]`, because most
- * questions about a booking do not need any of them.
+ * `row()` masks the attendee email; `full()` returns it.
  *
- * PII rule: `row()` masks the attendee email. A collection of twenty bookings
- * has no business emitting twenty live addresses — that is both a disclosure
- * surface and a pointless token cost. The real address is available from
- * `full()`, which is a deliberate single-record read the caller had to ask for.
+ * Neither emits the booking `hash`: it is a bearer credential that lets an
+ * unauthenticated request cancel the meeting
+ * (FrontEndHandler::ajaxHandleCancelMeeting()). `get-booking` still accepts one.
  *
- * Neither shape emits the booking `hash`. That value is a bearer credential:
- * FrontEndHandler::ajaxHandleCancelMeeting() accepts it from an unauthenticated
- * request as sufficient authority to cancel the meeting. Putting twenty of them
- * in a list response would push twenty cancel-anything tokens into a model
- * provider's context and whatever transcript the client keeps — while masking
- * the email beside them. Agents address bookings by `id`; `get-booking` still
- * ACCEPTS a hash so an operator can paste one, it just never hands one out.
- *
- * Trust rule: every string an attendee typed goes through MCPHelper::untrusted()
- * and is grouped under one `attendee_supplied` object carrying an explicit
- * warning, rather than being scattered among fields the site itself wrote. The
- * agent reading this response also holds create-booking, manage-booking and the
- * scheduling write tools, so "who wrote this text" is a security property here,
- * not a presentation detail.
+ * Attendee-typed text goes through MCPHelper::untrusted() and is grouped under
+ * `attendee_supplied`, since the agent reading it also holds write tools.
  */
 class BookingProjector
 {
     /**
-     * Relations a collection query needs eager-loaded. Without this a
-     * twenty-row list fires twenty extra queries for the event title alone.
+     * Relations to eager-load for row(), to avoid a query per row.
      *
      * @return array
      */
@@ -78,9 +61,7 @@ class BookingProjector
                 'group_id'    => $booking->group_id === null ? null : (int) $booking->group_id,
                 'status'      => $booking->status,
                 'duration'    => (int) $booking->slot_minutes,
-                // Attendee-authored, so neutralised even though it sits at the
-                // top level: a name is needed for display on every row, and a
-                // display name is a poor place to hide an instruction.
+                // Attendee-authored, so neutralised even at the top level.
                 'attendee'    => MCPHelper::untrusted(trim($booking->first_name . ' ' . $booking->last_name), 200),
                 'email'       => $includePii ? $email : MCPHelper::maskEmail($email),
             ],
@@ -111,9 +92,8 @@ class BookingProjector
                     : null,
                 'phone'             => MCPHelper::untrusted($booking->phone, 60),
                 'country'           => $booking->country,
-                // Host-authored, so it stays out of the untrusted envelope —
-                // but still stripped, because operators paste attendee mail
-                // into these.
+                // Host-authored, but still stripped: operators paste attendee
+                // mail into notes.
                 'internal_note'     => MCPHelper::untrusted($booking->internal_note),
                 'location'          => MCPHelper::untrusted($booking->getLocationAsText(), 500),
                 'source'            => $booking->source,
@@ -137,7 +117,6 @@ class BookingProjector
             $data['activities'] = self::activities($booking, $timezone);
         }
 
-        // Last key in the object, and the only one that carries the warning.
         $data['attendee_supplied'] = self::attendeeSupplied(
             $booking,
             in_array('custom_fields', $include, true)
@@ -147,16 +126,9 @@ class BookingProjector
     }
 
     /**
-     * Everything on this booking that a member of the public typed.
-     *
-     * Kept as one labelled object rather than spread through the response, for
-     * the same reason a query parameter is bound rather than concatenated: the
-     * consumer needs to be able to tell, structurally, where its own data ends
-     * and someone else's input begins. The consumer here is a model that also
-     * holds the write tools, and the input arrives through an unauthenticated
-     * booking form.
-     *
-     * Every value has already been through MCPHelper::untrusted().
+     * Everything on this booking a member of the public typed, in one labelled
+     * object so the agent can tell it apart from site data. Every value has
+     * been through MCPHelper::untrusted().
      *
      * @param Booking $booking
      * @param bool    $withCustomFields
@@ -170,8 +142,7 @@ class BookingProjector
             $supplied['message'] = $message;
         }
 
-        // A booking carries at most one of these, so always-present nulls would
-        // be three wasted keys on every read.
+        // Keys only when set; a booking has at most one of these.
         if ($cancel = MCPHelper::untrusted($booking->getCancelReason(true))) {
             $supplied['cancel_reason'] = $cancel;
             $supplied['cancelled_by']  = $booking->cancelled_by;
@@ -193,9 +164,7 @@ class BookingProjector
     }
 
     /**
-     * The attendee's answers to the event's custom questions, as a list of
-     * {field, label, value}. The formatted form carries render metadata the
-     * agent has no use for.
+     * The attendee's custom-question answers as a list of {field, label, value}.
      *
      * @param Booking $booking
      * @return array
@@ -219,16 +188,11 @@ class BookingProjector
                 $value = $field;
             }
 
-            // A LIST keyed by the stable field name, not a map keyed by the
-            // display label. Labels are attendee-visible text that has just been
-            // stripped and truncated, so two distinct fields ("<b>Phone</b>" and
-            // "Phone") can normalise to the same string — and as array keys the
-            // second would silently overwrite the first, losing an answer with
-            // no trace.
+            // A list, not a map keyed by label: two labels can strip to the
+            // same string and one answer would overwrite the other.
             $out[] = [
                 'field' => (string) $key,
-                // Both halves are attendee-reachable: the answer obviously, and
-                // the label on any field an agent was allowed to add through
+                // Labels are untrusted too: an agent can add fields via
                 // manage-event-type.
                 'label' => MCPHelper::untrusted($label, 200),
                 'value' => MCPHelper::untrusted($value),
@@ -255,7 +219,7 @@ class BookingProjector
             $userIds[] = (int) $bookingHost->user_id;
         }
 
-        // One query for the lot rather than one per host.
+        // Prime the user cache in one query.
         if ($userIds) {
             cache_users(array_unique($userIds));
         }
@@ -274,9 +238,7 @@ class BookingProjector
     }
 
     /**
-     * The booking's activity timeline, newest first and capped: an old booking
-     * can carry dozens of entries and the recent ones are what explain its
-     * current state.
+     * The booking's activity timeline, newest 20 first.
      *
      * @param Booking $booking
      * @param string  $timezone
@@ -287,6 +249,7 @@ class BookingProjector
         $activities = [];
 
         $records = $booking->booking_activities()
+            ->where('type', '!=', BookingActivity::TYPE_NOTE)
             ->orderBy('id', 'DESC')
             ->limit(20)
             ->get();
@@ -296,8 +259,7 @@ class BookingProjector
                 [
                     'type'        => $activity->type,
                     'title'       => $activity->title,
-                    // Activity descriptions embed cancellation reasons and
-                    // other attendee text, so they are untrusted too.
+                    // Descriptions can embed attendee text, e.g. cancel reasons.
                     'description' => MCPHelper::untrusted($activity->description, 500),
                 ],
                 MCPHelper::timePair($activity->created_at, $timezone, 'at')
@@ -308,8 +270,7 @@ class BookingProjector
     }
 
     /**
-     * The ORM returns DateTime objects for timestamp columns; JSON-encoding one
-     * produces three keys where a single string will do.
+     * DateTime to a plain string; JSON-encoding the object gives three keys.
      *
      * @param mixed $value
      * @return string|null

@@ -17,30 +17,21 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * Every mutation the MCP server performs on a booking, in one place.
+ * Every booking mutation the MCP server performs.
  *
- * The rule this class exists to enforce: an agent's write must be
- * indistinguishable from the same write done by a human in wp-admin. Same
- * validation, same status transitions, same hooks — so remote calendars sync,
- * CRM triggers fire, webhooks deliver, and payment side effects happen exactly
- * as they would otherwise. Where the plugin already has a service for the job
- * (BookingService::createBooking, RescheduleService::reschedule,
- * Booking::cancelMeeting) we call it rather than reimplementing it; the drift
- * risk of a second implementation is not worth the convenience.
- *
- * The one thing MCP writes do that admin writes do not: every one of them lands
- * an activity row tagged with the acting user and `via MCP`, so an operator
- * reading a booking's timeline can always tell an agent's action from a
- * human's.
+ * An agent's write should behave exactly like the same write in wp-admin: same
+ * validation, transitions and hooks, so calendar sync, webhooks and payments
+ * all fire. Existing services (BookingService::createBooking,
+ * RescheduleService::reschedule, Booking::cancelMeeting) are called, not
+ * reimplemented. Each write also logs an activity row naming the acting user.
  *
  * @since 2.2.6
  */
 class BookingWriter
 {
     /**
-     * Columns manage-booking's `update_details` may write, mirroring
-     * SchedulesController::patchBooking()'s whitelist minus the two that have
-     * their own actions (status, payment_status).
+     * Columns `update_details` may write: patchBooking()'s whitelist minus
+     * status and payment_status, which have their own actions.
      */
     const EDITABLE_FIELDS = ['first_name', 'last_name', 'email', 'phone', 'internal_note'];
 
@@ -50,9 +41,7 @@ class BookingWriter
     private static $guestsDropped = [];
 
     /**
-     * Statuses a booking can move to, and what each one is allowed to move from.
-     * Mirrors Booking::cancelMeeting()/rejectMeeting() and the admin's own
-     * transitions so an agent cannot reach a state the UI would refuse.
+     * Allowed status transitions, mirroring the model and admin rules.
      */
     public static function statusTransitions()
     {
@@ -66,13 +55,8 @@ class BookingWriter
     }
 
     /**
-     * Create a booking on an attendee's behalf.
-     *
-     * Deliberately mirrors BookingController::createBooking(): resolve the
-     * duration, convert the requested wall-clock time to UTC, resolve the
-     * location from the event's own configured locations, assign a round-robin
-     * host, re-check availability against the live slot engine, then hand off to
-     * BookingService so every downstream integration behaves normally.
+     * Create a booking on an attendee's behalf, following the same steps as
+     * BookingController::createBooking().
      *
      * @param CalendarSlot $event
      * @param array        $params
@@ -128,9 +112,8 @@ class BookingWriter
             'message'          => sanitize_textarea_field(Arr::get($params, 'message', '')),
             'phone'            => sanitize_text_field(Arr::get($params, 'phone', '')),
             'status'           => $event->isConfirmationEnabled() ? 'pending' : 'scheduled',
-            // Not 'admin': the admin source drives UI affordances that assume a
-            // human filled the form. An agent-created booking is its own thing
-            // and reporting should be able to tell them apart.
+            // Not 'admin': that source drives UI that assumes a human filled
+            // the form, and reports should tell the two apart.
             'source'           => 'mcp',
             'event_type'       => $event->event_type,
             'slot_minutes'     => $duration,
@@ -165,8 +148,7 @@ class BookingWriter
             );
         }
 
-        // Round robin picks the host the public page would have picked, so the
-        // agent's booking lands on the same person a self-service booking would.
+        // Pick the same round-robin host the public page would.
         if ($event->isRoundRobin() && !$hostUserId) {
             $sortedHostIds = $event->getHostIdsSortedByBookings($startTime);
             $bookingData['host_user_id'] = $sortedHostIds[0];
@@ -180,18 +162,9 @@ class BookingWriter
             return MCPHelper::error('slot_service_unavailable', $service->get_error_message());
         }
 
-        // Hold the slot for the duration of the check-then-write. Availability
-        // is computed by a query and the booking is a separate INSERT, so
-        // without this two agents that both pass isSpotAvailable() before either
-        // writes will both write — the "re-checked at execute time" guarantee
-        // narrows the race, it does not remove it. An agent can fire these far
-        // faster than a human clicking through a booking page, and MCP hands the
-        // same slot to whoever asks first.
-        // Every host the booking would occupy, so two event types sharing an
-        // owner cannot both write. getHostIds() is the event's own answer: one
-        // id for a single or group event, all of them for a collective.
-        // Round robin is the exception — its host is chosen inside
-        // isSpotAvailable(), so it locks the event first and the host below.
+        // Hold the slot across check-then-write, or two requests that both pass
+        // isSpotAvailable() before either inserts will both book it. Round
+        // robin locks the event here and its host once one is chosen below.
         $lock     = self::lockSlot($event, $startTime, $endTime, $hostUserId);
         $hostLock = false;
 
@@ -217,10 +190,8 @@ class BookingWriter
                 );
             }
 
-            // isSpotAvailable() can outrun the lease on a team event with a
-            // cold calendar cache, and an expired lease is stolen without
-            // question — so re-assert it before writing rather than trusting
-            // that the lock taken above is still ours.
+            // isSpotAvailable() can outrun the lease (team event, cold calendar
+            // cache) and an expired lease can be taken, so re-assert it.
             if (!SlotLock::renewAll($lock)) {
                 return MCPHelper::error(
                     'slot_locked',
@@ -234,8 +205,7 @@ class BookingWriter
 
                 $bookingData['host_user_id'] = $hostUserId;
 
-                // The first lock could only name the event: round robin has no
-                // host until the line above settles one. Claim that host now.
+                // Round robin has a host only now, so claim it.
                 $hostLock = SlotLock::acquireInterval($event->id, $startTime, $endTime, [$hostUserId]);
 
                 if (!$hostLock) {
@@ -246,9 +216,8 @@ class BookingWriter
                     );
                 }
 
-                // The check above settled this host while only the event was
-                // locked, so another event type could have taken the person in
-                // between. Re-check under the host lock.
+                // Another event type could have booked this host before the
+                // host lock, so re-check under it.
                 $availableSpot = $service->isSpotAvailable($startTime, $endTime, $duration, $hostUserId);
 
                 if (!$availableSpot) {
@@ -285,11 +254,8 @@ class BookingWriter
 
             $booking = $notify ? $create() : NotificationGate::silently($create);
         } catch (\Throwable $e) {
-            // Not $e->getMessage(): an ORM or PDO failure carries table names,
-            // SQL fragments and absolute paths, and returning it here would walk
-            // straight past the scrubbing AbilitiesRegistrar does for exactly
-            // this reason. Catching Throwable rather than Exception also means a
-            // TypeError from a downstream service is handled the same way.
+            // Never return $e->getMessage(): DB errors leak table names, SQL
+            // and paths, bypassing AbilitiesRegistrar's scrubbing.
             self::logException('create-booking', $e);
 
             return MCPHelper::error(
@@ -297,9 +263,8 @@ class BookingWriter
                 __('The booking could not be created. The site logged the details.', 'fluent-booking')
             );
         } finally {
-            // Every exit from the block above releases the slot, the early
-            // returns included — a lock left behind would block the slot for its
-            // whole TTL after a failure that changed nothing.
+            // Release on every exit, early returns included, so a failure
+            // doesn't block the slot for the lock's TTL.
             SlotLock::releaseAll($lock);
             SlotLock::releaseAll($hostLock);
         }
@@ -324,9 +289,8 @@ class BookingWriter
     }
 
     /**
-     * Move a booking to a new time. Delegates to the same RescheduleService the
-     * public booking form uses, so the two can never disagree about group
-     * re-assignment, round-robin hosts or which emails go out.
+     * Move a booking to a new time via the same RescheduleService the public
+     * booking form uses.
      *
      * @param Booking $booking
      * @param array   $params
@@ -350,13 +314,8 @@ class BookingWriter
             );
         }
 
-        // Fall back to the ATTENDEE's zone, not the site's. This used to read
-        // `resolveTimezone(...) ?: $booking->person_time_zone`, and
-        // resolveTimezone() never returns anything falsy — its last line is
-        // `return 'UTC'` — so the fallback was unreachable and an omitted
-        // timezone silently meant "site time". For an attendee in Tokyo that
-        // moved the meeting and then overwrote their stored zone with the
-        // site's on the way out.
+        // Default to the attendee's zone, not the site's. resolveTimezone()
+        // never returns empty, so the fallback has to be chosen up front.
         $requested = trim((string) Arr::get($params, 'timezone', ''));
 
         $timezone = $requested
@@ -384,8 +343,7 @@ class BookingWriter
             return MCPHelper::error('slot_service_unavailable', $service->get_error_message());
         }
 
-        // Same check-then-write race as create(), and the same hold over it,
-        // round-robin key included.
+        // Same check-then-write lock as create().
         $lock     = self::lockSlot($event, $startTime, $endTime, $hostUserId);
         $hostLock = false;
 
@@ -398,8 +356,7 @@ class BookingWriter
         }
 
         try {
-            // Re-check at execute time, not just at preview time — the slot may
-            // have been taken during the confirm round-trip.
+            // The slot may have been taken during the confirm round-trip.
             if (!$service->isSpotAvailable($startTime, $endTime, $duration, $hostUserId)) {
                 return MCPHelper::error(
                     'slot_unavailable',
@@ -411,8 +368,7 @@ class BookingWriter
                 );
             }
 
-            // Same reason as create(): isSpotAvailable() can outrun the lease,
-            // and an expired one is stolen without question.
+            // As in create(): isSpotAvailable() can outrun the lease.
             if (!SlotLock::renewAll($lock)) {
                 return MCPHelper::error(
                     'slot_locked',
@@ -462,9 +418,8 @@ class BookingWriter
                     'reason'         => Arr::get($params, 'reason', ''),
                     'host_user_id'   => $hostUserId,
                     'source'         => __('the MCP server', 'fluent-booking'),
-                    // An agent always acts for the host; it holds host
-                    // credentials, not the attendee's booking link, so the
-                    // guest-side reschedule window must not apply to it.
+                    // The agent holds host credentials, so the guest-side
+                    // reschedule window doesn't apply.
                     'rescheduled_by' => 'host',
                 ]);
             };
@@ -486,9 +441,7 @@ class BookingWriter
             return MCPHelper::error('reschedule_failed', $result->get_error_message());
         }
 
-        // RescheduleService writes its own row, but it records the ROLE ("by
-        // host") rather than the person. Every other MCP write names the
-        // operator, and reschedule is the one most worth attributing.
+        // RescheduleService's own row records the role ("by host"), not the person.
         self::logActivity(
             $result,
             __('Booking Rescheduled via MCP', 'fluent-booking'),
@@ -530,8 +483,7 @@ class BookingWriter
             );
         }
 
-        // Both say a meeting already happened. Marking one three weeks out as
-        // completed reads to every report as a meeting that took place.
+        // Both statuses mean the meeting already happened.
         if (in_array($action, ['complete', 'no_show'], true) && $booking->end_time > gmdate('Y-m-d H:i:s')) { // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
             return MCPHelper::error(
                 'not_yet_occurred',
@@ -581,9 +533,8 @@ class BookingWriter
     }
 
     /**
-     * The transition itself. Cancel and reject go through the model methods so
-     * their reason handling, activity rows and hooks stay in one place; the
-     * others mirror patchBooking()'s own sequence.
+     * The transition itself. Cancel and reject go through the model methods;
+     * the others mirror patchBooking()'s sequence.
      *
      * @return true|\WP_Error
      */
@@ -592,11 +543,7 @@ class BookingWriter
         $from = self::statusTransitions()[$action]['from'];
 
         if ($action === 'cancel' || $action === 'reject') {
-            // Re-read immediately before mutating so the model's own status
-            // guard runs against current data rather than whatever was loaded
-            // when the request started. An agent can fire these far faster than
-            // a human clicking in wp-admin, so the read-to-write window matters
-            // here in a way it does not there.
+            // Re-read so the model's status guard sees current data.
             $fresh = Booking::find($booking->id);
 
             if (!$fresh || !in_array($fresh->status, $from, true)) {
@@ -609,13 +556,9 @@ class BookingWriter
 
             $priorStatus = $fresh->status;
 
-            // The re-read above narrows the window; it does not close it. Two
-            // hosts cancelling the same collective booking both see `scheduled`
-            // and both proceed — and with refund_payment set, both fire the
-            // gateway's refund hook. So claim the transition atomically first,
-            // exactly as the non-cancel branch below does, and only let the
-            // winner run the side effects. cancelMeeting()/rejectMeeting() then
-            // do their own work on a row we already own.
+            // The re-read doesn't close the race: two hosts cancelling the same
+            // booking would both run side effects, refunds included. Claim the
+            // transition atomically so only the winner proceeds.
             $claimed = Booking::where('id', $fresh->id)
                 ->whereIn('status', $from)
                 ->update(['status' => $target]);
@@ -628,19 +571,13 @@ class BookingWriter
                 );
             }
 
-            // Hand the model back the status it actually held — not $from[0] —
-            // so cancelMeeting() runs its normal transition instead of
-            // short-circuiting on "already cancelled", and so anything keyed on
-            // the prior status (pending vs scheduled) still sees the truth.
+            // Restore the real prior status in memory so cancelMeeting() doesn't
+            // short-circuit on "already cancelled" and sees pending vs scheduled.
             $fresh->status = $priorStatus;
 
-            // The claim above moved the persisted status ahead of the work that
-            // gives it meaning — the reason, the activity row, the hooks, the
-            // notification, the refund. A failure before any of it must put the
-            // row back. A failure after must not: the hook cancelMeeting() and
-            // rejectMeeting() fire mails the attendee and deletes the remote
-            // calendar event, so reverting there leaves a live booking whose
-            // attendee holds a cancellation. This marks which side it fell on.
+            // A failure before the cancel/reject hook fires rolls the claim back.
+            // After it, the attendee is already notified and the remote event
+            // deleted, so no rollback. $notified marks which side we're on.
             $notified = false;
 
             $marker = function () use (&$notified) {
@@ -682,8 +619,7 @@ class BookingWriter
                 remove_action($hook, $marker, PHP_INT_MIN);
             }
 
-            // The refund runs after the cancellation is already out. Failing
-            // to move the money is not a reason to un-cancel.
+            // A failed refund doesn't un-cancel the booking.
             try {
                 self::maybeRefund($fresh, $params);
             } catch (\Throwable $e) {
@@ -699,14 +635,11 @@ class BookingWriter
             return true;
         }
 
-        // Same read-then-claim as the cancel branch: the claim reports success,
-        // not which of the allowed statuses the row actually held, and a
-        // rollback needs the real one.
+        // The claim doesn't report which allowed status the row held, and a
+        // rollback needs it.
         $priorStatus = Booking::where('id', $booking->id)->value('status');
 
-        // Compare-and-set. Two agents racing the same transition both pass the
-        // in-memory status check; only the one whose UPDATE matches a row still
-        // in an allowed status gets to fire the side effects.
+        // Compare-and-set so only one racing request fires the side effects.
         $claimed = Booking::where('id', $booking->id)
             ->whereIn('status', $from)
             ->update(['status' => $target]);
@@ -723,13 +656,9 @@ class BookingWriter
 
         $notified = false;
 
-        // The claim moved the persisted status ahead of the work that gives it
-        // meaning — the order, the payment status, the activity row, the hooks.
-        // Cancel and reject already put the row back when that work fails; this
-        // branch makes the same claim, so it owes the same guarantee.
+        // Same rollback rule as the cancel branch.
         try {
-            // Confirming a booking that was paid for settles its order, exactly
-            // as the admin's confirm does.
+            // Confirming a paid booking settles its order, as the admin does.
             if ($action === 'confirm' && $booking->payment_method && $booking->payment_order) {
                 $settled = self::settlePayment($booking, $booking->payment_order);
 
@@ -739,9 +668,7 @@ class BookingWriter
                     return $settled;
                 }
 
-                // The admin's confirm writes this row too. Payment reporting
-                // reads the activity trail, so skipping it would make an
-                // agent-confirmed payment look like it never settled.
+                // Payment reporting reads this activity row.
                 do_action('fluent_booking/log_booking_activity', [
                     'booking_id'  => $booking->id,
                     'status'      => 'closed',
@@ -754,7 +681,7 @@ class BookingWriter
                 do_action('fluent_booking/payment/update_payment_status_paid', $booking);
             }
 
-            // Same commit point as the cancel branch.
+            // Past this point the attendee may be notified; no rollback.
             $notified = true;
 
             do_action('fluent_booking/booking_schedule_' . $target, $booking, $booking->calendar_event);
@@ -771,11 +698,8 @@ class BookingWriter
                 return self::partiallyCompleted($booking->id, $target);
             }
 
-            // Payment state is left as it is. A booking that is paid for but
-            // still awaiting approval is a normal state here, not a broken one:
-            // it is exactly where a gateway leaves a booking on an event that
-            // requires confirmation. Rolling the order back would invent a
-            // refund that never happened. Only the status claim is undone.
+            // Only the status is rolled back. Paid but pending is a normal
+            // state for events that need confirmation.
             self::rollbackStatus($booking->id, $priorStatus, $target);
 
             return MCPHelper::error(
@@ -788,15 +712,8 @@ class BookingWriter
     }
 
     /**
-     * Mark an order paid and the booking with it, as one commit.
-     *
-     * The two rows state the same fact, and they were written in sequence: a
-     * failure between them left the order settled while the booking still read
-     * unpaid, which is a divergence no later call reconciles.
-     *
-     * Only the two writes are inside the transaction. The hooks stay outside
-     * deliberately — a listener that makes an outbound request would otherwise
-     * hold both row locks for the length of someone else's HTTP call.
+     * Mark an order and its booking paid in one transaction. Hooks run outside
+     * it so a listener's HTTP call doesn't hold the row locks.
      *
      * @param Booking $booking
      * @param object  $order
@@ -828,7 +745,9 @@ class BookingWriter
     }
 
     /**
-     * Claim the slot for every host this booking would occupy.
+     * Claim the slot for every host this booking would occupy, so two event
+     * types sharing a host can't both book it. Round robin locks the event
+     * only, since its host isn't chosen yet.
      *
      * @param CalendarSlot $event
      * @param string       $startTime
@@ -858,10 +777,7 @@ class BookingWriter
 
     /**
      * Undo a claimed status transition whose side effects did not complete.
-     *
-     * Conditional on the row still holding the status we claimed: if something
-     * downstream already moved it on, that later state is the current truth and
-     * stamping the old one back over it would be its own corruption.
+     * Only applies if the row still holds the claimed status.
      *
      * @param int    $bookingId
      * @param string $priorStatus
@@ -894,9 +810,8 @@ class BookingWriter
     }
 
     /**
-     * Cancelling or rejecting a paid booking can refund it, but only when the
-     * caller asks explicitly — an agent must never move money as a side effect
-     * of a status change.
+     * Refund a cancelled or rejected paid booking, only when refund_payment is
+     * explicitly set.
      */
     private static function maybeRefund(Booking $booking, $params)
     {
@@ -908,8 +823,7 @@ class BookingWriter
     }
 
     /**
-     * Edit an attendee's details on an existing booking. Reversible, so it is
-     * not gated behind a confirm token — but it still writes an activity row.
+     * Edit an attendee's details. Reversible, so no confirm token.
      *
      * @param Booking $booking
      * @param array   $fields
@@ -976,9 +890,7 @@ class BookingWriter
             $booking->save();
 
             foreach ($updates as $key => $value) {
-                // patchBooking fires one hook per column; keeping that shape
-                // means existing listeners (the changed-email notification
-                // among them) behave identically.
+                // One hook per column, as patchBooking fires them.
                 do_action('fluent_booking/after_patch_booking_' . $key, $booking, $booking->calendar_event, $before[$key]);
             }
 
@@ -1009,9 +921,7 @@ class BookingWriter
      */
     public static function resendEmail(Booking $booking, $emailTo, $params = [])
     {
-        // The whole action is "send an email". Silently sending one after the
-        // caller asked for silence — and after the dry run reported
-        // notifications_requested:false — is worse than refusing.
+        // The action is sending an email, so refuse if notifications are off.
         if (!self::wantsNotifications($params)) {
             return MCPHelper::error(
                 'notifications_disabled',
@@ -1019,8 +929,7 @@ class BookingWriter
             );
         }
 
-        // The template says the booking is going ahead, so sending it for a
-        // cancelled or rejected one tells the attendee the opposite of the truth.
+        // The template says the booking is going ahead.
         if (!in_array($booking->status, ['scheduled', 'rescheduled', 'pending'], true)) {
             return MCPHelper::error(
                 'not_resendable',
@@ -1077,9 +986,8 @@ class BookingWriter
     }
 
     /**
-     * Whether the caller may act on this booking. Read access is not enough:
-     * writing requires being one of the booking's hosts, or holding write
-     * access to its calendar, or site-wide booking management.
+     * Whether the caller may change this booking: site-wide booking access,
+     * or being a host of the booking or its event.
      *
      * @param Booking $booking
      *
@@ -1113,20 +1021,11 @@ class BookingWriter
     }
 
     /**
-     * Notifications are on unless the caller turns them off — a booking the
-     * attendee never hears about is a strange default, and matches what the
-     * same action in wp-admin would do.
+     * Whether the caller asked for notifications on this change. On unless
+     * turned off, matching wp-admin.
      *
-     * @param array $params
-     *
-     * @return bool
-     */
-    /**
-     * Whether the caller asked for notifications on this change.
-     *
-     * Reported as `notifications_requested`, not `notifications_sent`: nothing
-     * here waits on SMTP, calendar sync or Twilio, so it cannot claim delivery.
-     * Failures land in the booking's activity log.
+     * Reported as `notifications_requested`, not `sent`: nothing here waits on
+     * delivery.
      *
      * @param array $params
      *
@@ -1142,17 +1041,9 @@ class BookingWriter
     }
 
     /**
-     * Everything create() checks before it touches the slot engine, so a dry run
-     * can run the same gauntlet.
-     *
-     * A preview that succeeds and an execute that then fails on `location_required`
-     * is worse than no preview: the agent reports "ready to book" to a human,
-     * gets approval, and only then discovers the call was never valid. The
-     * preview is a promise about the execute, so it has to be checked against
-     * the same rules.
-     *
-     * Availability is deliberately NOT part of this — it is re-checked at
-     * execute time by design, and the preview says so.
+     * The checks create() runs before the slot engine, so a dry run can't pass
+     * a call the execute would reject. Availability is re-checked at execute
+     * time instead.
      *
      * @param CalendarSlot $event
      * @param array        $params
@@ -1251,10 +1142,8 @@ class BookingWriter
     }
 
     /**
-     * Resolve the booking's location from the event's configured locations. An
-     * agent may name a location type; when it does not, and the event offers
-     * exactly one, we use it — asking a model to choose between one option is
-     * a round-trip for nothing.
+     * Resolve the booking's location from the event's configured locations.
+     * With no location_type given, a single configured location is used.
      *
      * @param CalendarSlot $event
      * @param array        $params
@@ -1345,8 +1234,7 @@ class BookingWriter
         $rejected = [];
 
         foreach ((array) Arr::get($params, 'guests', []) as $guest) {
-            // Accept either shape. An agent naturally sends addresses; a group
-            // event needs a name per seat, so an object is allowed too.
+            // An email string or a {name, email} object.
             if (is_array($guest)) {
                 $email = sanitize_email((string) Arr::get($guest, 'email', ''));
                 $name  = sanitize_text_field((string) Arr::get($guest, 'name', ''));
@@ -1368,12 +1256,8 @@ class BookingWriter
                 continue;
             }
 
-            // A multi-guest event seats each guest as their own attendee, and
-            // BookingService::prepareBookingData() reads $guest['name'] and
-            // $guest['email'] off every entry. Handing it bare strings raised
-            // "Cannot access offset of type string on string" on PHP 8 and
-            // produced nameless attendees on 7.4 — so the group-event path, the
-            // one the seat arithmetic below exists for, could never work.
+            // Multi-guest events seat each guest as an attendee, and
+            // BookingService::prepareBookingData() expects name and email keys.
             $guests[] = [
                 'name'  => $name ?: self::nameFromEmail($email),
                 'email' => $email,
@@ -1387,8 +1271,7 @@ class BookingWriter
         if ($isMultiGuest && is_array($availableSpot)) {
             $remaining = (int) Arr::get($availableSpot, 'remaining', $event->getMaxBookingPerSlot());
 
-            // Minus one: the attendee themself takes a seat. On a group event
-            // with a single seat left this is 0, which drops every guest.
+            // Minus one for the attendee's own seat.
             if (min($remaining, $limit) - 1 < $limit) {
                 $reason = 'no_seats_left';
             }
@@ -1405,18 +1288,15 @@ class BookingWriter
             ];
         }
 
-        // Every one of these three drops used to be silent, so an agent asked
-        // to book four people was told `created: true` for a booking with one.
+        // Reported back so the agent knows which guests weren't booked.
         self::$guestsDropped = $rejected;
 
         return $kept;
     }
 
     /**
-     * How many requested guests a create could actually seat, for the preview.
-     *
-     * Addresses and the guest field's own limit only — a group event's free
-     * seats are re-read at execute time, so this is a ceiling, not a promise.
+     * How many requested guests a create could seat, for the preview. A ceiling:
+     * group event seats are only checked at execute time.
      *
      * @param CalendarSlot $event
      * @param array        $params
@@ -1441,10 +1321,8 @@ class BookingWriter
     }
 
     /**
-     * Guests the last create() was asked for and did not book.
-     *
-     * Request-scoped: set by sanitizeGuests() during the create, read once by
-     * the tool building the response. One MCP call creates one booking.
+     * Guests the last create() was asked for and did not book. Request-scoped;
+     * one MCP call creates one booking.
      *
      * @return array
      */
@@ -1469,8 +1347,7 @@ class BookingWriter
     }
 
     /**
-     * Every MCP write leaves a trail naming the operator and the channel, so a
-     * booking's timeline distinguishes an agent's action from a human's.
+     * Log an activity row naming the operator and the MCP channel.
      *
      * @param Booking $booking
      * @param string  $title

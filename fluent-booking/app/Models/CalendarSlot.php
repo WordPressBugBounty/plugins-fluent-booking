@@ -139,6 +139,16 @@ class CalendarSlot extends Model
         return $this->event_type == 'group_event';
     }
 
+    /**
+     * Every value event_type can hold, on both fcal_calendar_slots and fcal_bookings.
+     *
+     * @return array
+     */
+    public static function getEventTypes()
+    {
+        return ['single', 'group', 'round_robin', 'collective', 'single_event', 'group_event'];
+    }
+
     public function isRoundRobin()
     {
         return $this->event_type == 'round_robin';

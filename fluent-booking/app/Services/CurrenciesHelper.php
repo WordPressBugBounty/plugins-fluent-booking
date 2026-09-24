@@ -431,6 +431,14 @@ class CurrenciesHelper
         ));
     }
 
+    // Every money write goes through here so the ledger and the gateway cannot diverge.
+    // Rounds rather than truncates: 2.01 * 100 is 200.99999999999997 in IEEE-754, so
+    // intval() records 200 where the card is charged 201. Factor is 1 for zero-decimal.
+    public static function toCents($value, $conversionFactor = 100)
+    {
+        return (int) round((float) $value * $conversionFactor);
+    }
+
     public static function isZeroDecimal($currencyCode)
     {
         $currencyCode = strtoupper($currencyCode);

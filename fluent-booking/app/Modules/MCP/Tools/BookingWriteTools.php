@@ -16,39 +16,26 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * The two tools that change something.
+ * The write tools. `create-booking` has its own parameter shape; everything
+ * acting on an existing booking goes through `manage-booking` behind an
+ * `action` enum.
  *
- * `create-booking` stands alone because its parameter shape — attendee details,
- * custom fields, guests, location — shares nothing with the others. Everything
- * that acts on a booking that already exists goes through `manage-booking`
- * behind an `action` enum, which is where Cal.com spends six separate tools.
- *
- * Destructive actions will not execute without a confirm_token minted by a dry
- * run. The token is bound to BOTH a fingerprint of the booking's current state
- * — so a booking that moved while the agent was thinking cannot be acted on
- * with stale numbers — AND a digest of the parameters that were previewed, so
- * the change that executes is the change a human approved. Reversible actions
- * (complete, no_show, resend_email, and update_details on anything but the
- * email address) execute directly.
- *
- * "Destructive" is decided per call rather than per action name, because two of
- * them are only destructive sometimes. See needsConfirmation().
+ * Destructive calls need a confirm_token from a dry run (see WriteGuard).
+ * Whether a call is destructive is decided per call, see needsConfirmation().
  *
  * @see \FluentBooking\App\Modules\MCP\Support\WriteGuard for the contract.
  */
 class BookingWriteTools
 {
     /**
-     * Actions that must be previewed before they can execute. These either
-     * cannot be undone from the agent's side (cancel, reject) or move a real
-     * person's calendar entry (create, reschedule).
+     * manage-booking actions that always need a preview: they can't be undone
+     * (cancel, reject) or move a real person's calendar entry (reschedule).
      */
     const DESTRUCTIVE_ACTIONS = ['reschedule', 'cancel', 'reject'];
 
     /**
-     * Ceiling on `guests`. Enforced in the schema so an oversized payload is
-     * refused before WordPress decodes it and the sanitizer walks every entry —
-     * the per-event seat limit further down only applies after all that work.
+     * Ceiling on `guests`, enforced in the schema so an oversized payload is
+     * refused before the sanitizer walks it. The seat limit applies later.
      */
     const MAX_GUESTS = 50;
 
@@ -253,10 +240,8 @@ class BookingWriteTools
 
         $tool      = 'fluent-booking/create-booking';
         $timezone  = MCPHelper::resolveTimezone(Arr::get($params, 'timezone', ''));
-        // A create has no existing entity, so the token is bound to the exact
-        // slot being claimed. Two agents previewing the same slot mint separate
-        // user-scoped tokens; the availability re-check at execute time is what
-        // stops the second one from double-booking.
+        // No existing entity, so bind the token to the slot being claimed. The
+        // availability re-check at execute time prevents double-booking.
         $entityKey = 'event:' . $eventId . ':' . Arr::get($params, 'start_time', '') . ':' . strtolower((string) Arr::get($params, 'email', ''));
 
         $digest = WriteGuard::paramsDigest($params);
@@ -275,11 +260,8 @@ class BookingWriteTools
             );
         }
 
-        // idempotent() OUTSIDE confirm(), not the other way round. confirm()
-        // consumes the token, so with the old ordering the retry-after-timeout
-        // this key exists to absorb was rejected as `confirmation_expired`
-        // before the recorded result was ever consulted — and the agent's
-        // recovery path was a fresh dry_run and a second booking.
+        // idempotent() must wrap confirm(): confirm() consumes the token, so a
+        // retry would otherwise fail before reaching the recorded result.
         return WriteGuard::idempotent($tool, $entityKey, Arr::get($params, 'idempotency_key', ''), function () use ($tool, $entityKey, $event, $params, $timezone, $digest) {
             $confirmed = WriteGuard::confirm($tool, $entityKey, self::createFingerprint($event), Arr::get($params, 'confirm_token', ''), $digest);
 
@@ -298,9 +280,7 @@ class BookingWriteTools
                 'booking' => BookingProjector::full($booking, $timezone),
             ];
 
-            // A guest the caller asked for and did not get has to be named. An
-            // agent told `created: true` for a four-person booking that seated
-            // one otherwise reports a wrong number as a right one.
+            // Name any requested guest who wasn't seated.
             if ($dropped = BookingWriter::droppedGuests()) {
                 $data['guests_dropped'] = $dropped;
             }
@@ -365,9 +345,7 @@ class BookingWriteTools
             }
 
             if (!$needsConfirmation) {
-                // Reversible actions still honour dry_run, because an agent that
-                // previews everything by habit should not be punished for it —
-                // it just does not need a token to follow up.
+                // Reversible actions still honour dry_run; they just need no token.
                 return MCPHelper::success(
                     ['dry_run' => true, 'preview' => $preview],
                     ['timezone' => $timezone],
@@ -382,8 +360,7 @@ class BookingWriteTools
             );
         }
 
-        // See createBooking(): the idempotency wrapper has to sit OUTSIDE the
-        // confirm-token check, because the check is one-shot.
+        // idempotent() wraps confirm(), see createBooking().
         return WriteGuard::idempotent($tool, $entityKey, Arr::get($params, 'idempotency_key', ''), function () use ($tool, $entityKey, $booking, $action, $params, $timezone, $digest, $needsConfirmation) {
             if ($needsConfirmation) {
                 $confirmed = WriteGuard::confirm(
@@ -406,12 +383,8 @@ class BookingWriteTools
     }
 
     /**
-     * Rebuild a write's response from the reference the idempotency record
-     * keeps, reading the booking as it stands now.
-     *
-     * The record itself holds ids only — see WriteGuard::idempotent() — so a
-     * replay re-projects rather than handing back a day-old copy of the
-     * attendee's details.
+     * Rebuild a write's response from the idempotency record's booking id,
+     * reading the booking as it stands now. See WriteGuard::idempotent().
      *
      * @param array  $ref
      * @param string $timezone
@@ -440,21 +413,13 @@ class BookingWriteTools
     }
 
     /**
-     * Whether this particular call has to be previewed and confirmed first.
+     * Whether this call has to be previewed and confirmed first. Besides
+     * DESTRUCTIVE_ACTIONS, two cases depend on the parameters:
      *
-     * Most of the answer is the action name, but two cases are only destructive
-     * depending on what is being asked, and both were previously waved through
-     * as "reversible":
-     *
-     *  - `update_details` changing `email`. Reversible in the database and not
-     *    reversible anywhere else: the address becomes the delivery target for
-     *    `resend_email`, which carries the meeting join link and lands at the
-     *    new address without the real attendee hearing about it. Rewriting a
-     *    booking's contact address is not an edit, it is a redirection.
-     *  - `confirm` on a booking with an unsettled payment order. It marks the
-     *    order paid and fires the payment-completed hooks. Nothing about a
-     *    booking's money state should move without the operator seeing it
-     *    first.
+     *  - `update_details` changing `email`: future emails, join link included,
+     *    go to the new address without the attendee being told.
+     *  - `confirm` with an unsettled payment order: it marks the order paid and
+     *    fires the payment-completed hooks.
      *
      * @param Booking $booking
      * @param string  $action
@@ -522,15 +487,14 @@ class BookingWriteTools
     }
 
     /**
-     * What a create would do, without doing it. Deliberately names every
-     * recipient: the operator reading the agent's transcript should be able to
-     * see who is about to be emailed before approving.
+     * What a create would do, without doing it. Includes who would be emailed,
+     * so the operator sees it before approving.
      *
      * @return array|\WP_Error
      */
     private static function previewCreate(CalendarSlot $event, $params, $timezone)
     {
-        // The same checks the execute runs, so "the dry run worked" means something.
+        // Same checks as execute, so a passing dry run means something.
         $valid = BookingWriter::validateCreate($event, $params);
 
         if (is_wp_error($valid)) {
@@ -574,11 +538,8 @@ class BookingWriteTools
     }
 
     /**
-     * Whether the requested slot is free, for the preview only.
-     *
-     * Advisory: the slot is claimed and re-checked under a lock at execute
-     * time, so true means "free a moment ago", never a reservation. null when
-     * the engine could not answer.
+     * Whether the requested slot is free, for the preview only. Advisory: true
+     * means "free a moment ago", not a reservation. null when unknown.
      *
      * @return bool|null
      */
@@ -616,9 +577,8 @@ class BookingWriteTools
      */
     private static function previewAction(Booking $booking, $action, $params, $timezone)
     {
-        // The same state-machine check the execute runs. Without it a dry run
-        // previewed `no_show -> cancelled` and minted a confirm_token for a
-        // call the execute would refuse.
+        // Same state-machine check as execute, so we never mint a token for a
+        // transition execute would refuse.
         $transitions = BookingWriter::statusTransitions();
 
         if (isset($transitions[$action])) {
@@ -728,10 +688,8 @@ class BookingWriteTools
     }
 
     /**
-     * Who an action would email, described rather than enumerated — the exact
-     * template that fires depends on the event type's notification settings,
-     * and listing every address would leak contact details into a preview an
-     * agent may echo back verbatim.
+     * Who an action would email, as roles rather than addresses, so a preview
+     * the agent may echo back doesn't leak contact details.
      *
      * @return array
      */
@@ -755,10 +713,8 @@ class BookingWriteTools
     }
 
     /**
-     * A create has no prior state to go stale, but the event type's own
-     * configuration does — an event deactivated or re-timed between preview and
-     * execute should invalidate the token rather than silently book against the
-     * old shape.
+     * Fingerprint the event type, so deactivating or re-timing it between
+     * preview and execute invalidates the token.
      *
      * @return string
      */

@@ -3,12 +3,8 @@
 defined('ABSPATH') || exit;
 
 /**
- * All registered action's handlers should be in app\Hooks\Handlers,
- * addAction is similar to add_action and addCustomAction is just a
- * wrapper over add_action which will add a prefix to the hook name
- * using the plugin slug to make it unique in all wordpress plugins,
- * ex: $app->addCustomAction('foo', ['FooHandler', 'handleFoo']) is
- * equivalent to add_action('slug-foo', ['FooHandler', 'handleFoo']).
+ * Handlers live in app/Hooks/Handlers. addCustomAction('foo', ...) is
+ * add_action('slug-foo', ...), prefixed with the plugin slug.
  */
 
 /**
@@ -29,9 +25,8 @@ defined('ABSPATH') || exit;
 (new \FluentBooking\App\Services\LandingPage\LandingPageHandler())->boot();
 
 /*
- * MCP (Model Context Protocol) server for AI agents.
- * Ships off — boot() only registers the Toolkit discovery filters until an
- * operator enables it in Settings. See docs/mcp-server-spec.md.
+ * MCP server for AI agents. Off by default: until enabled in Settings, boot()
+ * only registers the Toolkit discovery filters. See docs/mcp-server-spec.md.
  */
 \FluentBooking\App\Modules\MCP\MCPInit::boot();
 

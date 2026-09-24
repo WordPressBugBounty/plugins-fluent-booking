@@ -10,51 +10,39 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * Maps MCP abilities onto FluentBooking's existing capability model.
+ * Maps MCP abilities onto FluentBooking's capability model. The caller is a
+ * WordPress user on an application password, so every check delegates to
+ * PermissionManager, the same layer the admin REST policies use.
  *
- * The MCP caller IS a WordPress user authenticating with an application
- * password, so there is no parallel permission system here — every check
- * delegates to PermissionManager, the same layer the admin REST policies use.
- * Its eight permission keys (allPermissionSets()) are the whole vocabulary.
+ * Three layers:
+ *   1. isEnabled()  the master switch, off by default. MCPInit only registers
+ *                   the server when it is on.
+ *   2. transport()  may this user reach the endpoint at all.
+ *   3. readGate() / bookingWriteGate() / scheduleWriteGate()  per-ability
+ *                   permission_callbacks, which keep write tools out of a
+ *                   read-only account's tools/list.
  *
- * Three layers, in order:
+ * Layer 3 only answers "may this account use this kind of tool". Per-record
+ * checks (BookingWriter::canWriteBooking(), PermissionManager::canWriteCalendar())
+ * run inside the tool, since the permission_callback doesn't have the record.
  *
- *   1. isEnabled()   — the master switch. Ships off; MCPInit only registers the
- *                      server when it is on, so a site that never turns it on
- *                      pays nothing.
- *   2. transport()   — can this user reach the endpoint at all? Every ability's
- *                      permission_callback starts here.
- *   3. readGate() / bookingWriteGate() / scheduleWriteGate() — the per-ability
- *                      permission_callbacks. These are what keep a write tool
- *                      out of a read-only account's tools/list in the first
- *                      place, rather than letting it be advertised and then
- *                      refused at execute time.
- *
- * Layer 3 is a gate, not the whole check. It answers "may this account use this
- * KIND of tool at all"; the per-record question ("this booking, this calendar")
- * is answered inside the tool by BookingWriter::canWriteBooking(),
- * PermissionManager::canWriteCalendar() and friends, because it needs the record
- * and the permission_callback does not have it.
- *
- * MCP tool annotations (readonly / destructive) are UX hints for the client.
- * THIS is the enforcement boundary.
+ * Tool annotations (readonly / destructive) are client hints; this is the
+ * enforcement boundary.
  */
 class PermissionGate
 {
     /**
-     * Dedicated option rather than a key in the `_fluent_booking_enabled_modules`
-     * blob: SettingsController::updateGlobalModules() coerces every value in
-     * that blob to the scalar 'yes'/'no', so it cannot carry the toolsets array
-     * without changing a writer that pro and the admin UI both depend on.
-     * Autoloaded, so the boot-time isEnabled() check costs no extra query.
+     * Own option, not a key in `_fluent_booking_enabled_modules`:
+     * SettingsController::updateGlobalModules() coerces every value there to
+     * 'yes'/'no', so it can't hold the toolsets array. Autoloaded, so the
+     * boot-time isEnabled() check costs no query.
      */
     const OPTION_KEY = '_fluent_booking_mcp_settings';
 
     /**
-     * Toolsets, and which ship on. See docs/mcp-server-spec.md §3.2 — every tool
-     * definition stays resident in the client's context for the whole session
-     * (~500 tokens each, measured), so exposure is a setting rather than a fixed
-     * decision. `core` is not switchable: a server with no tools is not a server.
+     * Toolsets are a setting because every tool definition stays in the
+     * client's context all session (~500 tokens each; docs/mcp-server-spec.md
+     * §3.2). `core` can't be switched off.
      */
     const TOOLSET_CORE = 'core';
 
@@ -63,10 +51,9 @@ class PermissionGate
     const TOOLSET_PAYMENTS = 'payments';
 
     /**
-     * Permission sets that may change bookings. `manage_own_calendar` is here
-     * because it is the base host grant: a host can always act on their own
-     * bookings, and the per-record check inside the tool is what stops them
-     * acting on anybody else's.
+     * Permission sets that may change bookings. `manage_own_calendar` is the
+     * base host grant; the per-record check in the tool keeps a host to their
+     * own bookings.
      */
     const BOOKING_WRITE_CAPS = [
         'manage_own_calendar',
@@ -75,8 +62,7 @@ class PermissionGate
     ];
 
     /**
-     * Permission sets that may change scheduling configuration — event types
-     * and availability schedules.
+     * Permission sets that may change event types and availability schedules.
      */
     const SCHEDULE_WRITE_CAPS = [
         'manage_own_calendar',
@@ -86,10 +72,8 @@ class PermissionGate
     ];
 
     /**
-     * permission_callback for every read-only ability: reaching the endpoint is
-     * the whole bar, because holding any FluentBooking permission implies being
-     * allowed to see *something*, and each tool scopes its own query to
-     * whatever that something is.
+     * permission_callback for read-only abilities. Reaching the endpoint is
+     * enough; each tool scopes its own query to what the caller may see.
      *
      * @param mixed $request
      * @return true|\WP_Error
@@ -143,18 +127,8 @@ class PermissionGate
 
     /**
      * Calendar ids this caller may read, or false when they may read all of
-     * them.
-     *
-     * The one answer to "which calendars can this account see", so the context
-     * payload, the event-type list, the reference lists and the availability
-     * tools cannot drift into showing each other's users different sites. Before
-     * this there were three spellings of the question — `user_id = me`,
-     * `hasAllCalendarAccess()` and `canReadCalendar()` — and the last is
-     * strictly the widest, so a list built on the first would hide an event type
-     * that the detail read would happily return.
-     *
-     * Resolved once per request: it walks every calendar, and the tools that
-     * need it call it several times.
+     * them. Every tool uses this so lists and detail reads agree on scope.
+     * Cached per request.
      *
      * @return array|false false means "no restriction"
      */
@@ -164,13 +138,9 @@ class PermissionGate
 
         $userId = get_current_user_id();
 
-        // Keyed by the permission SET, not just the user id. A user's grants can
-        // change inside one request — the permission-matrix gate does exactly
-        // that, granting one set at a time to a single probe account — and a
-        // cache keyed on the id alone would answer every later set with the
-        // first set's calendars.
-        // Blog id included as well: a request that switches site mid-flight on
-        // multisite would otherwise reuse the first site's calendar ids.
+        // Keyed by permission set and blog too: grants can change within one
+        // request (the permission-matrix gate does this), and a multisite
+        // request can switch blogs.
         $blogId = function_exists('get_current_blog_id') ? get_current_blog_id() : 0;
 
         $key = $blogId . '|' . $userId . '|' . md5((string) wp_json_encode(PermissionManager::getUserPermissions()));
@@ -188,16 +158,11 @@ class PermissionGate
 
     /**
      * The calendars a restricted user may read: the ones they own, plus the
-     * ones CalendarService::isSharedCalendar() would admit them to.
+     * ones CalendarService::isSharedCalendar() would admit them to. Three
+     * narrow queries instead of hydrating every calendar with its events.
      *
-     * Three narrow reads rather than hydrating every Calendar with its events.
-     * The old loop pulled the site's whole calendar and event set into PHP to
-     * produce a handful of ids, on every MCP request, because each tool call is
-     * its own request.
-     *
-     * team_members cannot be filtered in SQL: `settings` is PHP-serialized, not
-     * JSON, so JSON_EXTRACT errors on it. The LIKE narrows the rows worth
-     * unserializing; the in_array below is what decides.
+     * `settings` is PHP-serialized, so team_members can't be filtered in SQL.
+     * The LIKE only narrows the rows; the in_array below decides.
      *
      * @param int $userId
      *
@@ -269,10 +234,8 @@ class PermissionGate
     }
 
     /**
-     * True when the caller may read bookings beyond their own calendars.
-     * Wrapped rather than inlined because list + report tools all branch on it
-     * and must branch identically — a scope check that drifts between two tools
-     * is a data leak, not a style issue.
+     * True when the caller may read bookings beyond their own calendars. One
+     * helper so list and report tools can't drift apart on scope.
      *
      * @return bool
      */
@@ -282,8 +245,7 @@ class PermissionGate
     }
 
     /**
-     * The scope marker for `meta.scope`, derived from the same check the query
-     * uses so the two can never disagree.
+     * The `meta.scope` marker, from the same check the query uses.
      *
      * @return string
      */
@@ -293,14 +255,9 @@ class PermissionGate
     }
 
     /**
-     * Transport gate for the `fluent-booking` server: may this request reach the
-     * endpoint at all?
-     *
-     * The adapter's default gate is `current_user_can('read')`, which every
-     * subscriber on the site passes — far too loose for a surface that returns
-     * attendee names, emails and phone numbers. Per-ability permission_callbacks
-     * still run on top; a host who gets through here still cannot cancel someone
-     * else's booking.
+     * Transport gate for the `fluent-booking` server. Replaces the adapter's
+     * default `current_user_can('read')`, which every subscriber passes and is
+     * too loose for attendee contact data. Per-ability checks still run on top.
      *
      * @param mixed $request unused; the adapter passes the REST request
      * @return true|\WP_Error
@@ -342,8 +299,7 @@ class PermissionGate
         static $settings = null;
         static $forBlog = null;
 
-        // Keyed by blog: a mid-request site switch on multisite would otherwise
-        // hand the second site the first site's toolset selection.
+        // Keyed by blog, in case a multisite request switches sites.
         $blogId = function_exists('get_current_blog_id') ? get_current_blog_id() : 0;
 
         if ($cached && $settings !== null && $forBlog === $blogId) {
@@ -367,7 +323,7 @@ class PermissionGate
     }
 
     /**
-     * The master switch. Ships off.
+     * The master switch. Off by default.
      *
      * @return bool
      */
@@ -381,12 +337,9 @@ class PermissionGate
     /**
      * Persist the master switch.
      *
-     * Enabling MCP opens the whole tool surface, so the capability is
-     * re-checked here even though every caller is already behind
-     * SettingsPolicy: the FluentToolkit toggle path delegates authorization to
-     * an external plugin, and defence in depth at the write is cheaper than
-     * trusting that. `manage_options` (not is_super_admin) is correct — this is
-     * a per-site plugin setting stored in a per-site option.
+     * The capability is re-checked here even though callers sit behind
+     * SettingsPolicy, because the FluentToolkit toggle path delegates auth to
+     * another plugin. `manage_options`, not is_super_admin: it's a per-site option.
      *
      * @param bool $enabled
      * @return bool the persisted state
@@ -401,8 +354,7 @@ class PermissionGate
     }
 
     /**
-     * Toolsets currently exposed. `core` is always present even if a stored
-     * value somehow omits it.
+     * Toolsets currently exposed. Always includes `core`.
      *
      * @return array
      */
@@ -440,9 +392,8 @@ class PermissionGate
     }
 
     /**
-     * Every toolset the server knows about, with its label. `payments` is
-     * advertised only when Pro is active — offering a switch that cannot do
-     * anything is worse than not offering it.
+     * Every toolset the server knows about, with its label. `payments` is only
+     * offered when Pro is active.
      *
      * @return array keyed by toolset slug
      */
@@ -473,8 +424,7 @@ class PermissionGate
     }
 
     /**
-     * Coerce a stored / submitted toolset list to known slugs, always including
-     * `core`.
+     * Coerce a toolset list to known slugs, always including `core`.
      *
      * @param mixed $toolsets
      * @return array

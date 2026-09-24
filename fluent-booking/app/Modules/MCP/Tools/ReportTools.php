@@ -11,16 +11,11 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * One aggregation tool where the 34-tool draft had four.
+ * One aggregation tool: "group by X, measure Y" covers stats, trends, top
+ * events and host utilization with a single schema.
  *
- * `get-booking-stats`, `get-booking-trend`, `get-top-events` and
- * `get-host-utilization` are all the same query with a different GROUP BY, and
- * shipping them separately would have cost four schemas of resident context to
- * express one idea. A model that understands "group by X, measure Y" can
- * produce all four and the ones nobody thought to name.
- *
- * The response is aggregates only. It never returns booking rows — an agent
- * that wants rows has list-bookings, which is paginated and masks PII.
+ * Returns aggregates only, never booking rows. Rows come from list-bookings,
+ * which paginates and masks PII.
  */
 class ReportTools
 {
@@ -147,8 +142,7 @@ class ReportTools
             );
         }
 
-        // Time buckets were shifted by a fixed offset, so say which one. An
-        // agent reporting "most bookings at 9am" needs to know whose 9am.
+        // Time buckets are shifted by a fixed offset, so report which one.
         if (self::hasTimeDimension($result['group_by'])) {
             $offset = BookingReportService::offsetSeconds($timezone, $result['range']['from']);
             $meta['bucket_offset'] = sprintf('%s%02d:%02d', $offset < 0 ? '-' : '+', abs($offset) / 3600, (abs($offset) % 3600) / 60);
@@ -166,15 +160,7 @@ class ReportTools
     }
 
     /**
-     * Ids are not answers. A report grouped by host or event type resolves them
-     * to names here, in one query per dimension, so the agent does not have to
-     * spend a round-trip per row working out what "event 7" is.
-     *
-     * @return array
-     */
-    /**
-     * Human names for the dimensions grouped on, so an agent rendering a table
-     * does not have to invent a header for `event_type`.
+     * Human names for the grouped dimensions, for table headers.
      *
      * @return array
      */
@@ -192,6 +178,11 @@ class ReportTools
         return $labels;
     }
 
+    /**
+     * Resolve host and event ids to names, one query per dimension.
+     *
+     * @return array
+     */
     private static function labelRows($rows, $groupBy)
     {
         if (!$rows) {
@@ -253,10 +244,8 @@ class ReportTools
     }
 
     /**
-     * Column totals, so an agent does not have to sum the rows itself and get
-     * it wrong. Rates are omitted: averaging per-group rates is not the rate
-     * over the whole set, and computing the real one would need the numerators
-     * this response does not carry.
+     * Column totals. Rates are omitted: averaging per-group rates isn't the
+     * overall rate, and the numerators aren't in the response.
      *
      * @return array
      */
@@ -270,8 +259,7 @@ class ReportTools
             }
         }
 
-        // distinct_attendees cannot be summed across groups without
-        // double-counting anyone who appears in two of them.
+        // distinct_attendees can't be summed without double-counting.
         if (isset($totals['distinct_attendees'])) {
             $totals['distinct_attendees_note'] = __('Summed across groups, so an attendee in two groups is counted twice.', 'fluent-booking');
         }

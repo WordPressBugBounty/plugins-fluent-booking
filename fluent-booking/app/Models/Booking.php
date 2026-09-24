@@ -2,6 +2,7 @@
 
 namespace FluentBooking\App\Models;
 
+use FluentBooking\App\App;
 use FluentBooking\App\Models\Model;
 use FluentBooking\App\Services\BookingFieldService;
 use FluentBooking\App\Services\LocationService;
@@ -138,7 +139,9 @@ class Booking extends Model
 
     public static function assignNextGroupId()
     {
-        $lastEvent = static::orderBy('group_id', 'desc')->first(['group_id']);
+        // Queue on one row the insert never touches; locking the max row alone deadlocks.
+        App::getInstance('db')->table('options')->where('option_name', 'fcal_booking_group_lock')->lockForUpdate()->first();
+        $lastEvent = static::orderBy('group_id', 'desc')->lockForUpdate()->first(['group_id']);
 
         return $lastEvent ? $lastEvent->group_id + 1 : 1;
     }
@@ -169,7 +172,7 @@ class Booking extends Model
         }
 
         if ($isHtml) {
-            return wpautop(implode('<br>', $additionalGuests));
+            return wpautop(implode('<br>', array_map('esc_html', $additionalGuests)));
         }
 
         return $additionalGuests;
@@ -401,7 +404,7 @@ class Booking extends Model
 
     public function getAllBookingShortTimes($timeZone = 'UTC', $withTimeZone = false)
     {
-        $otherBookings = self::where('parent_id', $this->id)->get();
+        $otherBookings = $this->getOwnChildBookings();
 
         $otherTimes = $otherBookings->map(function ($otherBooking) use ($timeZone, $withTimeZone) {
             return $otherBooking->formatBookingDateTime($otherBooking->start_time, $timeZone) . ($withTimeZone ? ' (' . $timeZone . ')' : '');
@@ -414,7 +417,7 @@ class Booking extends Model
 
     public function getAllBookingFullTimes($timeZone = 'UTC', $withTimeZone = false)
     {
-        $otherBookings = self::where('parent_id', $this->id)->get();
+        $otherBookings = $this->getOwnChildBookings();
 
         $otherTimes = $otherBookings->map(function ($otherBooking) use ($timeZone, $withTimeZone) {
             return $otherBooking->getFullBookingDateTimeText($timeZone) . ($withTimeZone ? ' (' . $timeZone . ')' : '');
@@ -423,6 +426,15 @@ class Booking extends Model
         return array_merge($otherTimes, [
             $this->getFullBookingDateTimeText($timeZone) . ($withTimeZone ? ' (' . $timeZone . ')' : '')
         ]);
+    }
+
+    /**
+     * Additional guests on a group booking share the parent link too, each
+     * with their own email, so only this guest's other times are theirs.
+     */
+    private function getOwnChildBookings()
+    {
+        return self::where('parent_id', $this->id)->where('email', $this->email)->get();
     }
 
     public function getHostAndGuestDetailsHtml()
@@ -444,11 +456,11 @@ class Booking extends Model
 
         foreach ($authors as $author) {
             $authorBadge = ($author['id'] == $hostUserId) ? '<span class="fcal_host_badge">' . __('Host', 'fluent-booking') . '</span>' : '';
-            $authorListHtml .= '<li class="fcal_host_name">' . $author['name'] . $authorBadge . '</li>';
+            $authorListHtml .= '<li class="fcal_host_name">' . esc_html($author['name']) . $authorBadge . '</li>';
         }
 
         foreach ($guestNames as $guestName) {
-            $authorListHtml .= '<li class="fcal_guest_name">' . $guestName . '</li>';
+            $authorListHtml .= '<li class="fcal_guest_name">' . esc_html($guestName) . '</li>';
         }
         $authorListHtml .= '</ul>';
     
@@ -643,7 +655,7 @@ class Booking extends Model
                 return $row->description;
             }
             if ($isHtml) {
-                return wp_unslash($row->description);
+                return esc_html(wp_unslash($row->description));
             }
         }
 
@@ -661,7 +673,7 @@ class Booking extends Model
                 return $row->description;
             }
             if ($isHtml) {
-                return wp_unslash($row->description);
+                return esc_html(wp_unslash($row->description));
             }
         }
 
@@ -804,8 +816,13 @@ class Booking extends Model
 
         $bookingTitle = $bookingTitle ?: $this->generateBookingTitle($eventTitle, $authorName, $guestName);
 
-        if ($html && strpos($bookingTitle, $eventTitle) !== false) {
-            $bookingTitle = str_replace($eventTitle, "<strong>{$eventTitle}</strong>", $bookingTitle);
+        if ($html) {
+            $bookingTitle = esc_html($bookingTitle);
+            $eventTitle = esc_html($eventTitle);
+
+            if (strpos($bookingTitle, $eventTitle) !== false) {
+                $bookingTitle = str_replace($eventTitle, "<strong>{$eventTitle}</strong>", $bookingTitle);
+            }
         }
 
         return apply_filters('fluent_booking/booking_meeting_title', $bookingTitle, $authorName, $guestName, $calendarEvent, $this);
@@ -1118,7 +1135,7 @@ class Booking extends Model
             return $message;
         }
 
-        return __('Sorry! you can not cancel this', 'fluent-booking');
+        return __('Sorry! you cannot cancel this', 'fluent-booking');
     }
 
     public function getRescheduleMessage()
@@ -1131,7 +1148,7 @@ class Booking extends Model
             return $message;
         }
 
-        return __('Sorry! you can not reschedule this', 'fluent-booking');
+        return __('Sorry! you cannot reschedule this', 'fluent-booking');
     }
 
     public function getHostDetails($isPublic = true, $hostId = null)
@@ -1251,7 +1268,7 @@ class Booking extends Model
                 continue;
             }
             $html .= '<tr>';
-            $html .= '<td><b>' . $data['label'] . '</b></td>';
+            $html .= '<td><b>' . esc_html($data['label']) . '</b></td>';
             $html .= '<td>' . $data['value'] . '</td>';
             $html .= '</tr>';
         }

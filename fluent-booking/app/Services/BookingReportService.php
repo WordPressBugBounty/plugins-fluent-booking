@@ -6,48 +6,29 @@ use FluentBooking\App\Models\Booking;
 use FluentBooking\Framework\Support\Arr;
 
 /**
- * Aggregate queries over bookings, and the one definition of "bookings this
- * user is allowed to count".
+ * Aggregate queries over bookings, and the one definition of which bookings a
+ * user may count: scoped(), i.e. calendar ownership plus host membership.
  *
- * That second job is why this class exists. The dashboard held two different
- * answers to the same question: the widget numbers scoped on the
- * `fcal_booking_hosts` pivot, and the graph beneath them scoped on the
- * `host_user_id` column — so a limited host could read a smaller number from
- * the graph than from the widget directly above it. `scoped()` is now the
- * single answer for both, and it is the union of calendar ownership and host
- * membership (`Booking::whereHostAccess()`).
+ * The schedules list does not use it yet. SchedulesController still filters on
+ * host_user_id alone, so a calendar owner who is not the named host sees fewer
+ * rows there. Changing that would alter a shipped list, so it is left as is.
  *
- * The schedules list is NOT on it. `SchedulesController::buildSchedulesQuery()`
- * and `addCountsForFirstPage()` still filter on `host_user_id` alone, so a host
- * who owns a calendar but is not the named host on its bookings sees fewer rows
- * there than the widgets above now count. Moving that screen onto `scoped()`
- * would change a shipped list's contents, so it is left as a deliberate,
- * recorded divergence rather than folded in here.
- *
- * Aggregation is dimension-and-metric based rather than free-form: callers pick
- * from a fixed set of group-by dimensions and metrics, both of which map to
- * literal SQL fragments held in this file. No caller-supplied string ever
- * reaches the query.
+ * Dimensions and metrics come from fixed maps of literal SQL in this file; no
+ * caller-supplied string reaches the query.
  *
  * @since 2.2.6
  */
 class BookingReportService
 {
-    /**
-     * A year plus a day, so "the last 12 months" and "this calendar year"
-     * both fit without the caller having to think about it.
-     */
+    // A year plus a day, so any 12-month or calendar-year range fits.
     const MAX_RANGE_DAYS = 366;
 
-    /**
-     * Ceiling on returned groups. A report is a summary; a caller that needs
-     * every row wants the bookings list, not this.
-     */
+    // A report is a summary; callers needing every row want the bookings list.
     const MAX_GROUPS = 200;
 
     /**
-     * Group-by dimension => [SQL expression, result key]. `%offset%` is
-     * replaced with an integer offset in seconds; see shiftedColumn().
+     * Group-by dimension => [SQL expression, label]. `%shifted%` is replaced
+     * with the timezone-shifted date column; see shiftedColumn().
      *
      * @return array
      */
@@ -87,8 +68,8 @@ class BookingReportService
     }
 
     /**
-     * Bookings the given user is allowed to see, or all of them when they hold
-     * read-all-bookings. The canonical scope — do not reimplement it.
+     * Bookings the given user may see, or all of them with read-all-bookings.
+     * The canonical scope; do not reimplement it.
      *
      * @param int|null $userId Defaults to the current user.
      *
@@ -163,8 +144,7 @@ class BookingReportService
             ));
         }
 
-        // Two dimensions already produce a cross-product; a third turns a
-        // summary back into a row dump, which is what this tool exists to avoid.
+        // A third dimension turns a summary back into a row dump.
         if (count($groupBy) > 2) {
             return new \WP_Error('too_many_dimensions', __('Group by at most two dimensions.', 'fluent-booking'));
         }
@@ -190,14 +170,8 @@ class BookingReportService
 
         $query = self::scoped();
 
-        // Both bounds describe a LOCAL window, so both are converted from local
-        // to UTC — and each with its OWN offset, not the range's opening one.
-        // Filtering on unshifted UTC while grouping on shifted local made the
-        // first and last bucket of every report partial by the size of the
-        // offset; using one offset for both bounds then reintroduces the same
-        // error, an hour wide, on any range that crosses a DST change (a March
-        // report for America/New_York would read its final day at -05:00 when
-        // that day is actually -04:00, and swallow the first hour of April).
+        // The bounds are local, so convert each to UTC with its own offset.
+        // One shared offset would be an hour off on a range crossing DST.
         $query->whereBetween($dateField, [
             self::localToUtc($range['from'] . ' 00:00:00', $timezone),
             self::localToUtc($range['to'] . ' 23:59:59', $timezone),
@@ -223,7 +197,7 @@ class BookingReportService
         // each SUM adds per-row work, so a count-only report selects neither.
         $orderMetric = (string) Arr::get($args, 'order_by', '');
 
-        // Always: resolveOrder falls back to it when no order is named.
+        // Always selected: resolveOrder falls back to it.
         $selects[] = 'COUNT(*) as m_count';
 
         if (in_array('distinct_attendees', $metrics, true) || $orderMetric === 'distinct_attendees') {
@@ -243,9 +217,8 @@ class BookingReportService
         }
 
         if (self::wantsRate($metrics)) {
-            // Rate denominator. `reserved` rows are checkout placeholders for
-            // payments that were never completed — counting them as bookings
-            // deflates every rate by however many people abandoned a payment form.
+            // Rate denominator. `reserved` rows are abandoned checkout
+            // placeholders and would deflate every rate.
             $selects[] = "SUM(CASE WHEN status != 'reserved' THEN 1 ELSE 0 END) as m_real";
         }
 
@@ -270,8 +243,7 @@ class BookingReportService
         $limit = (int) Arr::get($args, 'limit', 50);
         $limit = max(1, min($limit, self::MAX_GROUPS));
 
-        // Fetch one past the limit so the caller can be told the list was cut
-        // rather than reading a truncated report as a complete one.
+        // Fetch one extra row to detect truncation.
         $rows = $query->limit($limit + 1)->get();
 
         $truncated = count($rows) > $limit;
@@ -293,9 +265,6 @@ class BookingReportService
     }
 
     /**
-     * @return array
-     */
-    /**
      * @return bool
      */
     private static function wantsRate($metrics)
@@ -314,9 +283,8 @@ class BookingReportService
             foreach ($groupBy as $i => $key) {
                 $value = $row->{'dim_' . $i};
 
-                // Never drop a null bucket silently. `country` is only
-                // populated behind Cloudflare, so a report that omitted the
-                // blanks would read as "everyone is in Germany".
+                // Keep null buckets. `country` is only set behind Cloudflare,
+                // so dropping blanks would skew the report.
                 $entry[$key] = $value === null || $value === '' ? '(unknown)' : $value;
             }
 
@@ -367,9 +335,7 @@ class BookingReportService
             $query->whereIn('status', array_map('sanitize_text_field', $statuses));
         }
 
-        // array_key_exists, not truthiness: `host_id: 0` and `source: "0"` are
-        // filters the caller asked for, and silently dropping them returns the
-        // whole unfiltered set under a heading that says otherwise.
+        // array_key_exists, not truthiness: `host_id: 0` is still a filter.
         foreach (['event_id' => 'event_id', 'calendar_id' => 'calendar_id', 'host_id' => 'host_user_id'] as $key => $column) {
             if (array_key_exists($key, $filters) && $filters[$key] !== null && $filters[$key] !== '') {
                 $query->where($column, (int) $filters[$key]);
@@ -417,14 +383,12 @@ class BookingReportService
             return new \WP_Error('invalid_having', __('having.op must be one of: >=, >, <=, <, =.', 'fluent-booking'));
         }
 
-        // Required, not defaulted to 0: that builds `COUNT(*) >= 0`, so a
-        // wrong-shaped having returns everything as though it had filtered.
+        // Required: defaulting to 0 builds `COUNT(*) >= 0`, which filters nothing.
         if (!is_numeric(Arr::get($having, 'value'))) {
             return new \WP_Error('invalid_having', __('having.value is required and must be a number, e.g. {"metric":"count","op":">=","value":5}.', 'fluent-booking'));
         }
 
-        // Every part of this string is a literal from the maps above except the
-        // value, which is cast to an integer.
+        // Only literals from the maps above plus an integer-cast value.
         return $columns[$metric] . ' ' . $operators[$op] . ' ' . (int) Arr::get($having, 'value', 0);
     }
 
@@ -495,13 +459,8 @@ class BookingReportService
     }
 
     /**
-     * One local wall-clock instant expressed in UTC, using the offset in force
-     * at that instant rather than a fixed one.
-     *
-     * The range bounds get this treatment individually because a range can cross
-     * a daylight-saving change: applying the offset from the range's opening day
-     * to its closing day reads a March 31st in America/New_York at -05:00 when
-     * it is actually -04:00, and quietly pulls in the first hour of April.
+     * Convert a local wall-clock time to UTC using the offset in force at that
+     * instant, which matters when a range crosses a DST change.
      *
      * @param string $localDateTime 'Y-m-d H:i:s'
      * @param string $timezone
@@ -521,11 +480,9 @@ class BookingReportService
     }
 
     /**
-     * Times are stored in UTC. Grouping them by day or hour without shifting
-     * would put an 11pm booking in Berlin on the wrong date — the exact class
-     * of error this project keeps guarding against. CONVERT_TZ is not usable
-     * because it needs MySQL's timezone tables loaded, which most hosts do not
-     * do, so the offset is computed in PHP and applied as a fixed interval.
+     * Shift the UTC column into the report timezone before grouping by day or
+     * hour. CONVERT_TZ needs MySQL's timezone tables, which most hosts lack, so
+     * the offset is computed in PHP and applied as a fixed interval.
      *
      * @param string $dateField Whitelisted column name.
      * @param int    $offset    Seconds, already cast.
@@ -542,9 +499,8 @@ class BookingReportService
     }
 
     /**
-     * The zone's offset at the start of the range. A range that crosses a DST
-     * boundary uses one offset throughout, so bookings on the far side can land
-     * an hour out; the caller is told which offset was applied.
+     * The zone's offset at the start of the range. Grouping uses this one
+     * offset throughout, so buckets past a DST change can be an hour out.
      *
      * @return int
      */
@@ -569,8 +525,7 @@ class BookingReportService
         $from = $from ? sanitize_text_field($from) : gmdate('Y-m-d', strtotime($to . ' -29 days'));
 
         foreach ([$from, $to] as $date) {
-            // checkdate() as well as the shape: 2026-02-30 matches the pattern
-            // and strtotime() then rolls it forward to March 2 silently.
+            // checkdate(): strtotime() silently rolls 2026-02-30 into March.
             if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $parts)
                 || !checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])) {
                 return new \WP_Error(

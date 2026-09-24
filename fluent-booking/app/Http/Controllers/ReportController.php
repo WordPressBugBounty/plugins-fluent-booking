@@ -406,7 +406,7 @@ class ReportController extends Controller
 
     public function getActivities()
     {
-        $activityQuery = BookingActivity::query();
+        $activityQuery = BookingActivity::where('type', '!=', BookingActivity::TYPE_NOTE);
 
         if (!PermissionManager::userCanSeeAllBookings()) {
             $activityQuery->whereHas('booking.calendar', function ($q) {

@@ -13,12 +13,8 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * Availability — the highest-value read in the whole surface, and the one with
- * the tightest response budget.
- *
- * One tool, not two. A single-slot check ("is 2pm Tuesday free?") is the same
- * question with a narrower answer, so it is a `start_time` parameter here
- * rather than a second permanently-resident schema.
+ * Availability tools. A single-slot check is a `start_time` parameter on
+ * get-available-slots rather than a separate tool, to save schema budget.
  */
 class SlotTools
 {
@@ -185,13 +181,9 @@ class SlotTools
         $startTime = sanitize_text_field((string) Arr::get($params, 'start_time', ''));
 
         if ($startTime) {
-            // The same strict, DST-aware conversion create-booking uses. A bare
-            // strtotime() truthiness check accepted "2026-08-24" (silently
-            // meaning midnight, so the answer was "not available" and the agent
-            // concluded the day was closed) and "next tuesday" (resolved
-            // relative to now). Worse, it accepted strings create-booking then
-            // rejected, so an agent could be told a slot was free and be unable
-            // to book it with the same value.
+            // Same strict conversion create-booking uses, so a value reported
+            // as free can always be booked. strtotime() would accept a bare
+            // date or "next tuesday".
             $startUtc = MCPHelper::toUtc($startTime, $timezone);
 
             if (is_wp_error($startUtc)) {
@@ -238,8 +230,7 @@ class SlotTools
             $result
         );
 
-        // Only worth stating when it actually constrains the answer; on an
-        // indefinite range it is false and would just be noise.
+        // False on an indefinite range, so only included when it constrains.
         $maxLookup = $event->getMaxLookUpDate();
 
         if ($maxLookup) {
@@ -258,9 +249,8 @@ class SlotTools
     /**
      * Load the event and confirm the caller may see it.
      *
-     * Slots are public information on the booking page, but reaching them
-     * through an authenticated operator tool implies acting on that calendar, so
-     * the same read gate the admin uses applies here.
+     * Slots are public, but this is an operator tool, so the admin read gate
+     * still applies.
      *
      * @param array $params
      * @return CalendarSlot|\WP_Error

@@ -92,13 +92,21 @@ class CalendarIntegrationController extends Controller
 
         $fromEventId = intval($this->request->get('from_event_id'));
 
-        if (!$fromEventId || !PermissionManager::canUpdateCalendarEvent($fromEventId)) {
+        $fromEvent = CalendarSlot::find($fromEventId);
+
+        if (!$fromEvent) {
+            return $this->sendError([
+                'message' => __('Source event not found', 'fluent-booking')
+            ], 422);
+        }
+
+        if (!PermissionManager::canUpdateCalendarEvent($fromEvent->id)) {
             return $this->sendError([
                 'message' => __('You do not have permission to clone from the selected event.', 'fluent-booking')
             ], 403);
         }
 
-        $fromEventIntegrations = Meta::where('object_id', $fromEventId)
+        $fromEventIntegrations = Meta::where('object_id', $fromEvent->id)
             ->where('object_type', 'integration')
             ->get();
         

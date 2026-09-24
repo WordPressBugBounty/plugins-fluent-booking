@@ -303,10 +303,44 @@ class EditorShortCodeParser
         }
 
         if ($key == 'form_data_html') {
-            return __('will be available soon', 'fluent-booking');
+            // isPublic: hidden fields stay out, the recipient may be the guest.
+            return self::renderFormData(
+                BookingFieldService::getFormattedCustomBookingData($guest, static::$requireHtml, true),
+                static::$requireHtml
+            );
         }
 
         return self::resolveScalarAttribute($guest, $key);
+    }
+
+    protected static function renderFormData($fields, $isHtml)
+    {
+        $rows = '';
+
+        foreach ($fields as $field) {
+            $value = Arr::get($field, 'value');
+
+            if ($value === '' || $value === null || $value === []) {
+                continue;
+            }
+
+            if (!$isHtml) {
+                $rows .= $field['label'] . ': ' . $value . PHP_EOL;
+                continue;
+            }
+
+            // File values are download anchors; everything else is raw guest input.
+            $value = Arr::get($field, 'type') == 'file' ? wp_kses_post($value) : nl2br(esc_html($value));
+
+            $rows .= '<tr><th style="padding:6px 12px;background-color:#f8f8f8;text-align:' . (is_rtl() ? 'right' : 'left') . ';">' . esc_html($field['label']) . '</th></tr>'
+                . '<tr><td style="padding:6px 12px 12px 12px;">' . $value . '</td></tr>';
+        }
+
+        if (!$isHtml || !$rows) {
+            return trim($rows);
+        }
+
+        return '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tbody>' . $rows . '</tbody></table>';
     }
 
     protected static function getBookingEventData($key)

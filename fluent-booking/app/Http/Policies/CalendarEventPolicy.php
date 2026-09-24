@@ -5,7 +5,9 @@ namespace FluentBooking\App\Http\Policies;
 use FluentBooking\App\Services\PermissionManager;
 use FluentBooking\Framework\Http\Request\Request;
 use FluentBooking\Framework\Foundation\Policy;
+use FluentBooking\App\Models\Booking;
 use FluentBooking\App\Models\CalendarSlot;
+use FluentBooking\Framework\Support\Arr;
 
 class CalendarEventPolicy extends Policy
 {
@@ -39,5 +41,38 @@ class CalendarEventPolicy extends Policy
         }
 
         return false;
+    }
+
+    public function rescheduleBooking(Request $request)
+    {
+        return $this->canRescheduleRouteBooking($request);
+    }
+
+    public function getRescheduleSlots(Request $request)
+    {
+        return $this->canRescheduleRouteBooking($request);
+    }
+
+    /**
+     * The manage_all_bookings bypass is scoped to the booking in the URL, so it
+     * never widens access to events that are not being rescheduled.
+     */
+    private function canRescheduleRouteBooking(Request $request)
+    {
+        $urlParams = (array) $request->get_url_params();
+        $bookingId = (int) Arr::get($urlParams, 'id');
+        $eventId = (int) Arr::get($urlParams, 'event_id');
+
+        $booking = $bookingId ? Booking::find($bookingId) : null;
+
+        if (!$booking || (int) $booking->event_id !== $eventId) {
+            return false;
+        }
+
+        if (PermissionManager::userCan(['manage_all_data', 'manage_all_bookings'])) {
+            return true;
+        }
+
+        return $this->verifyRequest($request);
     }
 }

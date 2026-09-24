@@ -9,18 +9,11 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * MCP prompts — worked procedures the operator can invoke by name.
+ * MCP prompts: step-by-step procedures the operator can run by name.
  *
- * Prompts are the right home for anything that would otherwise have been
- * crammed into a tool description, because a prompt costs almost nothing until
- * someone runs it: clients list its name, description and arguments, and fetch
- * the body only on invocation. That makes them cheap in exactly the currency
- * this design spends everywhere else — resident context.
- *
- * So each one here is a procedure rather than a paragraph: which tools to call,
- * in what order, and what to do when they disagree. The three shipped are the
- * three tasks that came up over and over while building the tools, and they
- * double as the eval fixtures in §15 of the spec.
+ * Clients fetch a prompt's body only when it runs, so long guidance lives here
+ * rather than in tool descriptions. These double as the eval fixtures in §15
+ * of the spec.
  *
  * @since 2.2.6
  */

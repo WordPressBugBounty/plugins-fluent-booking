@@ -17,33 +17,25 @@ use FluentBooking\Framework\Support\Arr;
 defined('ABSPATH') || exit;
 
 /**
- * Single source of truth for every FluentBooking MCP ability.
+ * Registers every FluentBooking MCP ability.
  *
- * Each tool class owns its own `definitions()` slice, so a tool's schema lives
- * next to the code that answers it. This class merges those slices, filters
- * them by the toolsets the operator has enabled, wraps every execute_callback,
- * and registers the survivors with the WordPress Abilities API.
- *
- * Pro tools are NOT listed here — FluentBooking Pro pushes its abilities via
- * the `fluent_booking/mcp_loaded` action and the
- * `fluent_booking/mcp_ability_names` filter, registering into this same
- * namespace and server.
+ * Each tool class owns its `definitions()`. This class merges them, keeps the
+ * enabled toolsets, wraps each execute_callback and registers the result with
+ * the Abilities API. Pro adds its own via `fluent_booking/mcp_loaded` and
+ * `fluent_booking/mcp_ability_names`.
  */
 class AbilitiesRegistrar
 {
     const CATEGORY = 'fluent-booking';
 
     /**
-     * Measured against this plugin's own definitions. It is a label on a
-     * toggle, not an invoice.
+     * Measured against this plugin's definitions. A rough label, not exact.
      */
     const BYTES_PER_TOKEN = 3.5;
 
     /**
-     * Tool classes per toolset. A class listed under a toolset is registered
-     * only when that toolset is on, which is the whole point: an operator who
-     * never asks an agent to edit event types should not pay for those schemas
-     * in every request's context window.
+     * Tool classes per toolset. A class registers only when its toolset is on,
+     * so unused schemas don't cost context.
      *
      * @return array toolset slug => tool class names
      */
@@ -69,15 +61,9 @@ class AbilitiesRegistrar
         /**
          * The tool classes each toolset exposes, keyed by toolset.
          *
-         * This is the extension point add-ons register through — Pro's payment
-         * tools arrive here. Adding a class to a toolset means it inherits that
-         * toolset's on/off switch and its context budget automatically, which
-         * is why the hook is on the class map rather than on the finished
-         * definitions.
-         *
-         * Every class listed must expose a static `definitions()` returning
-         * ability-name => definition, in the shape documented in
-         * docs/mcp-server-spec.md §8.
+         * Add-ons (e.g. Pro's payment tools) register here so they inherit the
+         * toolset's on/off switch. Each class needs a static `definitions()`
+         * returning ability-name => definition (docs/mcp-server-spec.md §8).
          *
          * @since 2.2.6
          *
@@ -116,12 +102,8 @@ class AbilitiesRegistrar
     }
 
     /**
-     * The ability names that are prompts rather than tools.
-     *
-     * The adapter takes tools and prompts as separate arguments to
-     * create_server(), and a prompt listed as a tool would appear in
-     * `tools/list` with a body that reads as instructions — which is both
-     * wrong and expensive.
+     * The ability names that are prompts rather than tools. create_server()
+     * takes them separately; a prompt passed as a tool would show in tools/list.
      *
      * @param array|null $toolsets
      * @return array
@@ -165,27 +147,18 @@ class AbilitiesRegistrar
     {
         foreach (self::getDefinitions() as $name => $definition) {
             try {
-                // wp_register_ability() returns null on every validation
-                // failure rather than throwing: WP_Abilities_Registry::register()
-                // catches its own InvalidArgumentException, calls
-                // _doing_it_wrong() and returns. So the return value is the ONLY
-                // signal that a definition was rejected — ignore it and a tool
-                // goes missing from tools/list with nothing recorded anywhere.
+                // Core catches its own validation errors and returns null, so
+                // the return value is the only sign a definition was rejected.
                 $registered = self::registerAbility($name, $definition);
 
                 if (!$registered) {
                     self::reportRegistrationFailure($name, 'wp_register_ability() rejected the definition; see the _doing_it_wrong notice for the reason.');
                 }
             } catch (\Throwable $e) {
-                // Belt and braces for the paths core does NOT guard: a TypeError
-                // raised while building $args, or a future core version that
-                // lets an exception escape. Registration runs on
-                // wp_abilities_api_init, which the adapter fires lazily from
-                // INSIDE our own create_server() call, so an uncaught throw here
-                // would not just drop this one ability — it aborts every later
-                // callback on that action, other plugins' abilities included,
-                // and takes the FluentBooking MCP server down with it. One
-                // malformed definition must never cost the whole surface.
+                // For what core doesn't catch, e.g. a TypeError building $args.
+                // This runs on wp_abilities_api_init inside create_server(), so
+                // an uncaught throw would abort every later ability, other
+                // plugins' included, and the whole server.
                 self::reportRegistrationFailure($name, $e);
             }
         }
@@ -200,8 +173,7 @@ class AbilitiesRegistrar
     private static function reportRegistrationFailure($name, $reason)
     {
         if (defined('FLUENT_BOOKING_DEBUG') && FLUENT_BOOKING_DEBUG) {
-            // No booking data or tokens here — just the ability name and the
-            // failure site.
+            // Ability name and failure site only, no booking data or tokens.
             $detail = $reason instanceof \Throwable
                 ? get_class($reason) . ': ' . $reason->getMessage() . ' at ' . basename($reason->getFile()) . ':' . $reason->getLine()
                 : (string) $reason;
@@ -210,9 +182,8 @@ class AbilitiesRegistrar
         }
 
         /**
-         * Fires when a single MCP ability fails to register. The remaining
-         * abilities still register; this lets a site alert on the gap rather
-         * than discover it through a missing tool.
+         * Fires when a single MCP ability fails to register. The rest still
+         * register; this lets a site alert on the missing tool.
          *
          * @since 2.3.0
          *
@@ -224,8 +195,7 @@ class AbilitiesRegistrar
     }
 
     /**
-     * Register one definition with the Abilities API. Kept separate from
-     * register() so that method's try/catch stays a thin skip-and-continue shell.
+     * Register one definition with the Abilities API.
      *
      * @param string $name
      * @param array  $definition
@@ -233,9 +203,8 @@ class AbilitiesRegistrar
      */
     private static function registerAbility($name, $definition)
     {
-        // Cast before array_keys(): a no-argument tool declares `properties` as
-        // an stdClass so the schema serialises as {} rather than [], and
-        // array_keys() rejects an object with a TypeError on PHP 8.
+        // No-argument tools declare `properties` as stdClass (to encode as {}),
+        // and array_keys() throws on an object in PHP 8.
         $properties = Arr::get($definition, 'input_schema.properties', []);
 
         $declaredParams = $properties ? array_keys((array) $properties) : [];
@@ -274,38 +243,8 @@ class AbilitiesRegistrar
     }
 
     /**
-     * Emit a tool's behaviour hints under BOTH vocabularies.
-     *
-     * There are two, and which one is read depends on who is reading:
-     *
-     *  - WordPress core owns `meta.annotations` and defines it in snake_case —
-     *    `readonly`, `destructive`, `idempotent` (see WP_Ability::
-     *    $default_annotations). Core merges its own nulls over whatever is
-     *    passed, so an ability that supplies only camelCase ends up recorded
-     *    with `destructive => null`: not destructive, as far as core and
-     *    anything reading core is concerned.
-     *  - The MCP wire format names them `readOnlyHint` / `destructiveHint` /
-     *    `idempotentHint` / `openWorldHint`, and an adapter that forwards
-     *    meta.annotations verbatim needs those spellings to reach the client.
-     *
-     * Emitting one spelling and hoping is how every destructive tool on this
-     * server silently loses its confirmation prompt. Emitting both costs a few
-     * bytes per tool and is correct under either reader, so that is what this
-     * does. Unknown keys are still dropped rather than passed through as noise.
-     *
-     * Public so scripts/check-mcp-budget.php can measure the annotations a
-     * client actually receives. Measuring the pre-mapping shape under-reports
-     * every tool by the size of the second vocabulary.
-     *
-     * @param array $annotations
-     * @return array
-     */
-    /**
-     * The wire size of one definition as a client receives it in tools/list.
-     *
-     * The MAPPED annotations, not the declared ones: tools declare `readonly`
-     * and this class emits both that and `readOnlyHint`, so measuring the
-     * declared shape under-reports every tool.
+     * The wire size of one definition as a client receives it in tools/list,
+     * measured with the mapped annotations, which carry both vocabularies.
      *
      * @param string $name
      * @param array  $definition
@@ -333,6 +272,16 @@ class AbilitiesRegistrar
         return (int) round($bytes / self::BYTES_PER_TOKEN);
     }
 
+    /**
+     * Emit a tool's behaviour hints in both vocabularies.
+     *
+     * Core reads snake_case (`readonly`, `destructive`, ...) and merges its own
+     * nulls over anything else, so camelCase alone reads as not destructive.
+     * MCP clients read `readOnlyHint`, `destructiveHint`, ... Unknown keys are dropped.
+     *
+     * @param array $annotations
+     * @return array
+     */
     public static function mapAnnotations($annotations)
     {
         $map = [
@@ -356,10 +305,8 @@ class AbilitiesRegistrar
             }
         }
 
-        // A read-only tool cannot be destructive. destructiveHint defaults to
-        // TRUE when absent per the MCP spec, so state it explicitly for read
-        // tools — otherwise a client gating on destructiveHint would prompt for
-        // confirmation before every report.
+        // MCP defaults destructiveHint to true when absent, so say false for
+        // read-only tools or clients would ask to confirm every report.
         if (!empty($out['readOnlyHint']) && !isset($out['destructiveHint'])) {
             $out['destructive']     = false;
             $out['destructiveHint'] = false;
@@ -369,19 +316,12 @@ class AbilitiesRegistrar
     }
 
     /**
-     * Wrap a tool callback so it (a) rejects input parameters the tool does not
-     * declare and (b) converts an unhandled exception into a structured error.
+     * Wrap a tool callback to reject undeclared parameters and turn an
+     * unhandled exception into a structured error.
      *
-     * The rejection matters more than it looks. `input_schema` sets no
-     * `additionalProperties`, so an undeclared key would otherwise pass
-     * validation and be silently dropped — and the agent would receive a full,
-     * plausible-looking result that is NOT filtered the way it asked. That is
-     * the worst failure mode available: a wrong number reads as a right one,
-     * whereas an error is recoverable. Sibling tools also name overlapping
-     * concepts differently, so a carried-over parameter name is a realistic slip
-     * rather than a rare typo. The error names the accepted parameters so the
-     * agent can self-correct in one step — richer than the schema validator's
-     * message, which is why this lives here rather than in the schema.
+     * The schema sets no additionalProperties, so an unknown key would be
+     * dropped and the agent would get an unfiltered result that looks right.
+     * The error lists the accepted parameters so the agent can correct itself.
      *
      * @param string   $toolName
      * @param callable $callback
@@ -418,8 +358,7 @@ class AbilitiesRegistrar
                     error_log('FluentBooking MCP tool failed: ' . $toolName . ' - ' . get_class($e) . ': ' . $e->getMessage() . ' at ' . basename($e->getFile()) . ':' . $e->getLine()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 }
 
-                // Deliberately not surfacing $e->getMessage(): it can carry SQL
-                // fragments or file paths, and the agent cannot act on either.
+                // Not $e->getMessage(): it can carry SQL or file paths.
                 return MCPHelper::error(
                     'tool_failed',
                     sprintf(
